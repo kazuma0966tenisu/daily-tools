@@ -1,1 +1,536 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ふたりの家計簿 - かずま & かなこ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            /* Google Material Design カラー（清潔感のあるティール/ミントグリーン系） */
+            --md-primary: #00796B; 
+            --md-primary-light: #B2DFDB;
+            --md-bg: #F5F5F6;
+            --md-surface: #FFFFFF;
+            --md-text: #212121;
+            --md-text-secondary: #757575;
+            --md-border: #E0E0E0;
+            --md-error: #D32F2F;
+        }
 
+        body {
+            margin: 0;
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--md-bg);
+            color: var(--md-text);
+        }
+
+        /* アプリケーションバー */
+        .app-bar {
+            background-color: var(--md-primary);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .app-bar h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        /* メインコンテナ */
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* カードデザイン */
+        .card {
+            background-color: var(--md-surface);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--md-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--md-primary-light);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-desc {
+            font-size: 0.85rem;
+            color: var(--md-text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* ダッシュボード（上部のサマリー） */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .dash-item {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            border-radius: 8px;
+            background-color: #FAFAFA;
+            border: 1px solid var(--md-border);
+        }
+        .dash-item.highlight {
+            background-color: #E0F2F1;
+            border-color: #B2DFDB;
+        }
+        .dash-item h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--md-text-secondary);
+        }
+        .dash-item.highlight h3 {
+            color: var(--md-primary);
+        }
+        .dash-item p {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--md-text);
+        }
+        .dash-item.highlight p {
+            color: var(--md-primary);
+        }
+
+        /* フォーム要素 */
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+        .form-group label {
+            font-size: 0.8rem;
+            color: var(--md-text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        .form-group input, .form-group select {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: none;
+            border-bottom: 1px solid var(--md-border);
+            background-color: transparent;
+            transition: border-bottom-color 0.2s;
+            font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-bottom: 2px solid var(--md-primary);
+        }
+
+        /* ボタン */
+        .btn {
+            background-color: var(--md-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: #00695C;
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: var(--md-primary);
+            border: 1px solid var(--md-primary);
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background-color: rgba(0, 150, 136, 0.04);
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--md-text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .btn-icon:hover {
+            background-color: #FFEBEE;
+            color: var(--md-error);
+        }
+
+        /* テーブル */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 1rem 0.5rem;
+            border-bottom: 1px solid var(--md-border);
+            text-align: left;
+        }
+        th {
+            color: var(--md-text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        .text-right {
+            text-align: right;
+        }
+
+        /* バッジ（負担者ラベル） */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-kazuma { background-color: #E3F2FD; color: #1976D2; }
+        .badge-kanako { background-color: #FCE4EC; color: #C2185B; }
+        .badge-common { background-color: #E8F5E9; color: #388E3C; }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-bar">
+        <span class="material-icons">favorite</span>
+        <h1>ふたりの家計簿</h1>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2 class="section-title"><span class="material-icons">analytics</span> 今月のダッシュボード</h2>
+            <div class="dashboard-grid">
+                <div class="dash-item">
+                    <h3>世帯収入合計</h3>
+                    <p id="total-income">¥0</p>
+                </div>
+                <div class="dash-item">
+                    <h3>世帯出費合計</h3>
+                    <p id="total-expense">¥0</p>
+                </div>
+                <div class="dash-item highlight">
+                    <h3>想定貯蓄可能額</h3>
+                    <p id="savable-amount">¥0</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title"><span class="material-icons">account_balance_wallet</span> 収入設定</h2>
+            <p class="section-desc">お二人の今月の手取り収入を入力してください。（入力内容は自動保存されます）</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>かずまの収入 (円)</label>
+                    <input type="number" id="kazuma-income" min="0" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>かなこの収入 (円)</label>
+                    <input type="number" id="kanako-income" min="0" step="1000">
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title"><span class="material-icons">event_repeat</span> 固定費</h2>
+            <p class="section-desc">家賃や通信費など、毎月固定でかかる支出です。<b>一度登録すれば翌月以降も入力不要です。</b></p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>負担者</th>
+                        <th class="text-right">金額</th>
+                        <th class="text-right">削除</th>
+                    </tr>
+                </thead>
+                <tbody id="fixed-list"></tbody>
+            </table>
+
+            <form id="form-fixed" class="form-row" style="margin-top: 1.5rem; background: #FAFAFA; padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border);">
+                <div class="form-group">
+                    <label>項目名</label>
+                    <input type="text" id="fixed-name" required placeholder="例: 家賃">
+                </div>
+                <div class="form-group">
+                    <label>金額 (円)</label>
+                    <input type="number" id="fixed-amount" required min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>負担者</label>
+                    <select id="fixed-payer">
+                        <option value="共通">共通</option>
+                        <option value="かずま">かずま</option>
+                        <option value="かなこ">かなこ</option>
+                    </select>
+                </div>
+                <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
+                    <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="action-bar">
+                <h2 class="section-title" style="margin: 0; border: none; padding: 0;"><span class="material-icons">shopping_cart</span> 変動費</h2>
+                <button type="button" class="btn btn-outline" id="btn-reset">
+                    <span class="material-icons">refresh</span> 月をリセット
+                </button>
+            </div>
+            <p class="section-desc" style="margin-top: 0.5rem;">食費や日用品、交際費など、日々発生する支出を記録します。「月をリセット」で変動費のみをクリアし、新しい月を始められます。</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>項目</th>
+                        <th>負担者</th>
+                        <th class="text-right">金額</th>
+                        <th class="text-right">削除</th>
+                    </tr>
+                </thead>
+                <tbody id="variable-list"></tbody>
+            </table>
+
+            <form id="form-variable" class="form-row" style="margin-top: 1.5rem; background: #FAFAFA; padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border);">
+                <div class="form-group">
+                    <label>日付</label>
+                    <input type="date" id="var-date" required>
+                </div>
+                <div class="form-group">
+                    <label>項目名</label>
+                    <input type="text" id="var-name" required placeholder="例: スーパーでの買い物">
+                </div>
+                <div class="form-group">
+                    <label>金額 (円)</label>
+                    <input type="number" id="var-amount" required min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>負担者</label>
+                    <select id="var-payer">
+                        <option value="共通">共通</option>
+                        <option value="かずま">かずま</option>
+                        <option value="かなこ">かなこ</option>
+                    </select>
+                </div>
+                <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
+                    <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        // --- 設定とステート管理 ---
+        const STORAGE_KEY = 'kakeibo_kazuma_kanako';
+
+        // 初期データの読み込み（ブラウザのLocalStorageを利用）
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            // 初回アクセス時のデフォルトサンプルデータ
+            return {
+                kazumaIncome: 250000,
+                kanakoIncome: 250000,
+                fixedExpenses: [
+                    { id: 1, name: '家賃', amount: 120000, payer: '共通' },
+                    { id: 2, name: '水道光熱費', amount: 20000, payer: '共通' },
+                    { id: 3, name: '通信費(スマホ・Wi-Fi)', amount: 12000, payer: '共通' }
+                ],
+                variableExpenses: []
+            };
+        }
+
+        let appData = loadData();
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            render(); // 保存後に画面を更新
+        }
+
+        // --- DOM要素の取得 ---
+        const kazumaIncomeEl = document.getElementById('kazuma-income');
+        const kanakoIncomeEl = document.getElementById('kanako-income');
+        const totalIncomeEl = document.getElementById('total-income');
+        const totalExpenseEl = document.getElementById('total-expense');
+        const savableAmountEl = document.getElementById('savable-amount');
+
+        const fixedListEl = document.getElementById('fixed-list');
+        const variableListEl = document.getElementById('variable-list');
+
+        // フォーマット用（日本円表示）
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(num);
+        }
+
+        // バッジ用HTML生成
+        function getPayerBadge(payer) {
+            let className = 'badge-common';
+            if(payer === 'かずま') className = 'badge-kazuma';
+            if(payer === 'かなこ') className = 'badge-kanako';
+            return `<span class="badge ${className}">${payer}</span>`;
+        }
+
+        // 削除機能
+        window.deleteFixed = function(id) {
+            if(confirm('この固定費を削除してもよろしいですか？')) {
+                appData.fixedExpenses = appData.fixedExpenses.filter(item => item.id !== id);
+                saveData();
+            }
+        };
+
+        window.deleteVariable = function(id) {
+            if(confirm('この支出を削除してもよろしいですか？')) {
+                appData.variableExpenses = appData.variableExpenses.filter(item => item.id !== id);
+                saveData();
+            }
+        };
+
+        // --- レンダリング処理（画面の更新） ---
+        function render() {
+            // 収入の入力欄にセット
+            kazumaIncomeEl.value = appData.kazumaIncome;
+            kanakoIncomeEl.value = appData.kanakoIncome;
+            
+            const totalIncome = appData.kazumaIncome + appData.kanakoIncome;
+            
+            // 固定費の描画と集計
+            let totalFixed = 0;
+            fixedListEl.innerHTML = '';
+            appData.fixedExpenses.forEach(item => {
+                totalFixed += item.amount;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${getPayerBadge(item.payer)}</td>
+                    <td class="text-right">${formatCurrency(item.amount)}</td>
+                    <td class="text-right"><button type="button" class="btn-icon" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td>
+                `;
+                fixedListEl.appendChild(tr);
+            });
+
+            // 変動費の描画と集計（日付の新しい順にソート）
+            let totalVariable = 0;
+            variableListEl.innerHTML = '';
+            const sortedVar = [...appData.variableExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+            sortedVar.forEach(item => {
+                totalVariable += item.amount;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.name}</td>
+                    <td>${getPayerBadge(item.payer)}</td>
+                    <td class="text-right">${formatCurrency(item.amount)}</td>
+                    <td class="text-right"><button type="button" class="btn-icon" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td>
+                `;
+                variableListEl.appendChild(tr);
+            });
+
+            // ダッシュボードの計算と更新
+            const totalExpense = totalFixed + totalVariable;
+            const savableAmount = totalIncome - totalExpense;
+
+            totalIncomeEl.textContent = formatCurrency(totalIncome);
+            totalExpenseEl.textContent = formatCurrency(totalExpense);
+            savableAmountEl.textContent = formatCurrency(savableAmount);
+        }
+
+        // --- 初期化とイベントリスナー設定 ---
+        function init() {
+            // 今日の日付をセット
+            document.getElementById('var-date').valueAsDate = new Date();
+            
+            // 収入の変更を検知して自動保存
+            kazumaIncomeEl.addEventListener('input', (e) => {
+                appData.kazumaIncome = Number(e.target.value) || 0;
+                saveData();
+            });
+            kanakoIncomeEl.addEventListener('input', (e) => {
+                appData.kanakoIncome = Number(e.target.value) || 0;
+                saveData();
+            });
+            
+            // 固定費の追加
+            document.getElementById('form-fixed').addEventListener('submit', (e) => {
+                e.preventDefault();
+                appData.fixedExpenses.push({
+                    id: Date.now(),
+                    name: document.getElementById('fixed-name').value,
+                    amount: Number(document.getElementById('fixed-amount').value),
+                    payer: document.getElementById('fixed-payer').value
+                });
+                document.getElementById('fixed-name').value = '';
+                document.getElementById('fixed-amount').value = '';
+                saveData();
+            });
+
+            // 変動費の追加
+            document.getElementById('form-variable').addEventListener('submit', (e) => {
+                e.preventDefault();
+                appData.variableExpenses.push({
+                    id: Date.now(),
+                    date: document.getElementById('var-date').value,
+                    name: document.getElementById('var-name').value,
+                    amount: Number(document.getElementById('var-amount').value),
+                    payer: document.getElementById('var-payer').value
+                });
+                document.getElementById('var-name').value = '';
+                document.getElementById('var-amount').value = '';
+                saveData();
+            });
+            
+            // 月次リセット処理（変動費のみクリアし、固定費と収入設定は残す）
+            document.getElementById('btn-reset').addEventListener('click', () => {
+                if(confirm('今月の変動費をリセットして、新しい月を始めますか？\n（毎月の固定費と収入設定はそのまま引き継がれます）')) {
+                    appData.variableExpenses = [];
+                    saveData();
+                }
+            });
+
+            render();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
