@@ -17,13 +17,8 @@
             --md-border: #E0E0E0;
             --md-error: #D32F2F;
             
-            /* 個人用カラー */
             --kazuma-color: #1976D2;
-            --kazuma-bg: #E3F2FD;
             --kanako-color: #C2185B;
-            --kanako-bg: #FCE4EC;
-            --shared-color: #388E3C;
-            --shared-bg: #E8F5E9;
         }
 
         body {
@@ -53,7 +48,6 @@
             font-weight: 500;
         }
         
-        /* 月選択 UI */
         .month-selector {
             background: rgba(255,255,255,0.2);
             padding: 4px 12px;
@@ -72,10 +66,7 @@
             font-family: inherit;
             cursor: pointer;
         }
-        .month-selector input::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-        }
+        .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
         .container {
             max-width: 1000px;
@@ -105,7 +96,6 @@
             margin-bottom: 1rem;
         }
 
-        /* ダッシュボード（グリッド） */
         .dash-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -147,7 +137,6 @@
             border-top: 1px dashed var(--md-border);
         }
 
-        /* 各個人のカラーテーマ適用 */
         .dash-kazuma { border-top: 4px solid var(--kazuma-color); }
         .dash-kazuma h3, .dash-kazuma .dash-main-value { color: var(--kazuma-color); }
         
@@ -157,7 +146,6 @@
         .dash-household { border-top: 4px solid var(--md-primary); background-color: #E0F2F1; border-color: #B2DFDB; }
         .dash-household h3, .dash-household .dash-main-value { color: var(--md-primary); }
 
-        /* 精算アラート */
         .settlement-alert {
             background-color: #FFF3E0;
             border-left: 4px solid #FF9800;
@@ -168,9 +156,9 @@
             gap: 12px;
             font-weight: 500;
             color: #E65100;
+            line-height: 1.5;
         }
 
-        /* フォーム */
         .form-row {
             display: flex;
             gap: 1rem;
@@ -204,7 +192,6 @@
             border-bottom: 2px solid var(--md-primary);
         }
 
-        /* ボタン */
         .btn {
             background-color: var(--md-primary);
             color: white;
@@ -219,24 +206,15 @@
             gap: 4px;
         }
         .btn:hover { background-color: #00695C; }
-        .btn-icon {
-            background: none; border: none; color: var(--md-text-secondary);
-            cursor: pointer; padding: 4px; border-radius: 50%;
-        }
+        .btn-icon { background: none; border: none; color: var(--md-text-secondary); cursor: pointer; padding: 4px; border-radius: 50%; }
         .btn-icon:hover { background-color: #FFEBEE; color: var(--md-error); }
 
-        /* テーブル */
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem;}
         th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem;}
         th { color: var(--md-text-secondary); font-weight: 500; font-size: 0.85rem; }
         .text-right { text-align: right; }
 
-        /* バッジ */
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block;}
-        .badge-kazuma { background-color: var(--kazuma-bg); color: var(--kazuma-color); }
-        .badge-kanako { background-color: var(--kanako-bg); color: var(--kanako-color); }
-        .badge-shared { background-color: var(--shared-bg); color: var(--shared-color); }
-        .badge-personal { background-color: #EEEEEE; color: #616161; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
 
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
@@ -317,14 +295,12 @@
 
         <section class="card">
             <h2 class="section-title"><span class="material-icons">event_repeat</span> 固定費（毎月自動適用）</h2>
-            <p style="font-size: 0.85rem; color: var(--md-text-secondary);">家賃など、毎月必ず発生する出費です。ここに登録したものは全ての月に適用されます。</p>
             
             <table>
                 <thead>
                     <tr>
                         <th>項目</th>
-                        <th>支払った人</th>
-                        <th>種類</th>
+                        <th>負担者</th>
                         <th class="text-right">金額</th>
                         <th class="text-right">削除</th>
                     </tr>
@@ -342,17 +318,13 @@
                     <input type="number" id="fixed-amount" required min="0">
                 </div>
                 <div class="form-group">
-                    <label>支払った人</label>
-                    <select id="fixed-payer">
-                        <option value="かずま">かずま</option>
-                        <option value="かなこ">かなこ</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>種類</label>
-                    <select id="fixed-type">
-                        <option value="共通">ふたりの共通出費</option>
-                        <option value="個人">個人の出費</option>
+                    <label>負担者</label>
+                    <select id="fixed-category">
+                        <option value="共通・かずま">共通・かずま（かずまが立替）</option>
+                        <option value="共通・かなこ">共通・かなこ（かなこが立替）</option>
+                        <option value="共通">共通（すでに折半済）</option>
+                        <option value="かずま">かずま（個人出費）</option>
+                        <option value="かなこ">かなこ（個人出費）</option>
                     </select>
                 </div>
                 <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
@@ -363,15 +335,13 @@
 
         <section class="card">
             <h2 class="section-title"><span class="material-icons">shopping_cart</span> 変動費（今月分）</h2>
-            <p style="font-size: 0.85rem; color: var(--md-text-secondary);">食費や交際費など、日々の出費です。「月」を切り替えると表示が切り替わります。</p>
             
             <table>
                 <thead>
                     <tr>
                         <th>日付</th>
                         <th>項目</th>
-                        <th>支払った人</th>
-                        <th>種類</th>
+                        <th>負担者</th>
                         <th class="text-right">金額</th>
                         <th class="text-right">削除</th>
                     </tr>
@@ -393,17 +363,13 @@
                     <input type="number" id="var-amount" required min="0">
                 </div>
                 <div class="form-group">
-                    <label>支払った人</label>
-                    <select id="var-payer">
-                        <option value="かずま">かずま</option>
-                        <option value="かなこ">かなこ</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>種類</label>
-                    <select id="var-type">
-                        <option value="共通">ふたりの共通出費</option>
-                        <option value="個人">個人の出費</option>
+                    <label>負担者</label>
+                    <select id="var-category">
+                        <option value="共通・かずま">共通・かずま（かずまが立替）</option>
+                        <option value="共通・かなこ">共通・かなこ（かなこが立替）</option>
+                        <option value="共通">共通（すでに折半済）</option>
+                        <option value="かずま">かずま（個人出費）</option>
+                        <option value="かなこ">かなこ（個人出費）</option>
                     </select>
                 </div>
                 <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
@@ -414,29 +380,17 @@
     </main>
 
     <script>
-        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v2';
-        let currentMonthStr = ""; // YYYY-MM形式
-
-        // --- データ構造 ---
-        // {
-        //   fixedExpenses: [{ id, name, amount, payer(支払人), type(共通/個人) }],
-        //   months: {
-        //     "2025-04": {
-        //       kazumaIncome: 250000,
-        //       kanakoIncome: 250000,
-        //       variableExpenses: [{ id, date, name, amount, payer, type }]
-        //     }
-        //   }
-        // }
+        // データ構造の変更に伴い、保存キーをv3に変更して初期化エラーを防ぐ
+        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v3';
+        let currentMonthStr = "";
 
         function loadData() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) return JSON.parse(saved);
             
-            // 初回データ
             return {
                 fixedExpenses: [
-                    { id: 1, name: '家賃', amount: 120000, payer: 'かずま', type: '共通' }
+                    { id: 1, name: '家賃', amount: 120000, category: '共通・かずま' }
                 ],
                 months: {}
             };
@@ -449,7 +403,6 @@
             render();
         }
 
-        // 現在の月のデータを取得（なければ作成）
         function getCurrentMonthData() {
             if (!appData.months[currentMonthStr]) {
                 appData.months[currentMonthStr] = {
@@ -461,10 +414,8 @@
             return appData.months[currentMonthStr];
         }
 
-        // --- UI要素 ---
         const monthInput = document.getElementById('month-input');
         const displayMonth = document.getElementById('display-month');
-        
         const kazumaIncomeEl = document.getElementById('kazuma-income');
         const kanakoIncomeEl = document.getElementById('kanako-income');
 
@@ -472,13 +423,15 @@
             return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(num);
         }
 
-        function getPayerBadge(payer) {
-            const cls = payer === 'かずま' ? 'badge-kazuma' : 'badge-kanako';
-            return `<span class="badge ${cls}">${payer}</span>`;
-        }
-        function getTypeBadge(type) {
-            const cls = type === '共通' ? 'badge-shared' : 'badge-personal';
-            return `<span class="badge ${cls}">${type}</span>`;
+        function getCategoryBadge(cat) {
+            switch(cat) {
+                case '共通・かずま': return `<span class="badge" style="background:#E3F2FD; color:#1976D2;">共通・かずま</span>`;
+                case '共通・かなこ': return `<span class="badge" style="background:#FCE4EC; color:#C2185B;">共通・かなこ</span>`;
+                case '共通': return `<span class="badge" style="background:#E8F5E9; color:#388E3C;">共通(折半済)</span>`;
+                case 'かずま': return `<span class="badge" style="background:#EEEEEE; color:#616161;">かずま個人</span>`;
+                case 'かなこ': return `<span class="badge" style="background:#EEEEEE; color:#616161;">かなこ個人</span>`;
+                default: return `<span class="badge" style="background:#EEEEEE; color:#616161;">${cat}</span>`;
+            }
         }
 
         window.deleteFixed = function(id) {
@@ -496,30 +449,26 @@
             }
         };
 
-        // --- レンダリング処理 ---
         function render() {
             const md = getCurrentMonthData();
 
-            // 1. ヘッダーと収入入力欄の更新
             const [y, m] = currentMonthStr.split('-');
             displayMonth.textContent = `${y}年${Number(m)}月`;
             kazumaIncomeEl.value = md.kazumaIncome;
             kanakoIncomeEl.value = md.kanakoIncome;
 
-            // 2. 固定費リスト描画
+            // リストの描画
             document.getElementById('fixed-list').innerHTML = '';
             appData.fixedExpenses.forEach(item => {
                 document.getElementById('fixed-list').innerHTML += `
                     <tr>
                         <td>${item.name}</td>
-                        <td>${getPayerBadge(item.payer)}</td>
-                        <td>${getTypeBadge(item.type)}</td>
+                        <td>${getCategoryBadge(item.category)}</td>
                         <td class="text-right">${formatCurrency(item.amount)}</td>
                         <td class="text-right"><button type="button" class="btn-icon" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td>
                     </tr>`;
             });
 
-            // 3. 変動費リスト描画
             document.getElementById('variable-list').innerHTML = '';
             const sortedVar = [...md.variableExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
             sortedVar.forEach(item => {
@@ -527,82 +476,78 @@
                     <tr>
                         <td>${item.date}</td>
                         <td>${item.name}</td>
-                        <td>${getPayerBadge(item.payer)}</td>
-                        <td>${getTypeBadge(item.type)}</td>
+                        <td>${getCategoryBadge(item.category)}</td>
                         <td class="text-right">${formatCurrency(item.amount)}</td>
                         <td class="text-right"><button type="button" class="btn-icon" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td>
                     </tr>`;
             });
 
-            // 4. 計算ロジック
-            let sharedTotal = 0;
+            // 集計処理
             let kazumaPersonal = 0;
             let kanakoPersonal = 0;
-            
-            let kazumaPaidShared = 0; // かずまが立て替えた共通費
-            let kanakoPaidShared = 0; // かなこが立て替えた共通費
+            let kazumaPaidShared = 0;
+            let kanakoPaidShared = 0;
+            let splitShared = 0; // すでに折半済みの共通費
 
-            // 出費を集計する関数
             const processExpense = (item) => {
-                if (item.type === '共通') {
-                    sharedTotal += item.amount;
-                    if (item.payer === 'かずま') kazumaPaidShared += item.amount;
-                    if (item.payer === 'かなこ') kanakoPaidShared += item.amount;
-                } else {
-                    if (item.payer === 'かずま') kazumaPersonal += item.amount;
-                    if (item.payer === 'かなこ') kanakoPersonal += item.amount;
-                }
+                if (item.category === '共通・かずま') kazumaPaidShared += item.amount;
+                else if (item.category === '共通・かなこ') kanakoPaidShared += item.amount;
+                else if (item.category === '共通') splitShared += item.amount;
+                else if (item.category === 'かずま') kazumaPersonal += item.amount;
+                else if (item.category === 'かなこ') kanakoPersonal += item.amount;
             };
 
             appData.fixedExpenses.forEach(processExpense);
             md.variableExpenses.forEach(processExpense);
 
+            // 共通費用の総額と、一人あたりの負担額
+            const sharedTotal = kazumaPaidShared + kanakoPaidShared + splitShared;
             const sharedHalf = sharedTotal / 2;
-            const kazumaExpenseTotal = kazumaPersonal + kazumaPaidShared;
-            const kanakoExpenseTotal = kanakoPersonal + kanakoPaidShared;
-            const householdExpense = kazumaExpenseTotal + kanakoExpenseTotal;
-            const householdIncome = md.kazumaIncome + md.kanakoIncome;
 
-            // ダッシュボード更新：かずま
+            const householdIncome = md.kazumaIncome + md.kanakoIncome;
+            const householdExpense = kazumaPersonal + kanakoPersonal + sharedTotal;
+
+            // 個人のダッシュボード反映
             document.getElementById('dash-kazuma-inc').textContent = formatCurrency(md.kazumaIncome);
             document.getElementById('dash-kazuma-exp').textContent = formatCurrency(kazumaPersonal);
             document.getElementById('dash-kazuma-share').textContent = formatCurrency(sharedHalf);
             document.getElementById('dash-kazuma-save').textContent = formatCurrency(md.kazumaIncome - kazumaPersonal - sharedHalf);
 
-            // ダッシュボード更新：かなこ
             document.getElementById('dash-kanako-inc').textContent = formatCurrency(md.kanakoIncome);
             document.getElementById('dash-kanako-exp').textContent = formatCurrency(kanakoPersonal);
             document.getElementById('dash-kanako-share').textContent = formatCurrency(sharedHalf);
             document.getElementById('dash-kanako-save').textContent = formatCurrency(md.kanakoIncome - kanakoPersonal - sharedHalf);
 
-            // ダッシュボード更新：世帯
+            // 世帯のダッシュボード反映
             document.getElementById('dash-total-inc').textContent = formatCurrency(householdIncome);
             document.getElementById('dash-total-exp').textContent = formatCurrency(householdExpense);
             document.getElementById('dash-total-save').textContent = formatCurrency(householdIncome - householdExpense);
 
-            // 5. 精算ロジック（割り勘計算）
-            // 自分が払った共通費 - 自分が負担すべき共通費(半額) = 正なら相手から貰う、負なら相手に払う
-            const kazumaBalance = kazumaPaidShared - sharedHalf;
+            // 精算ロジック
+            // 「すでに折半済み（共通）」の金額は互いの差額に影響しないため除外します。
+            // (かなこが立替えた金額 - かずまが立替えた金額) ÷ 2 = X
+            const diffX = (kanakoPaidShared - kazumaPaidShared) / 2;
+            
             const alertBox = document.getElementById('settlement-alert');
             const alertText = document.getElementById('settlement-text');
 
-            if (sharedTotal === 0) {
+            if (kazumaPaidShared === 0 && kanakoPaidShared === 0) {
                 alertBox.style.display = 'none';
             } else {
                 alertBox.style.display = 'flex';
-                if (kazumaBalance > 0) {
-                    alertText.innerHTML = `今月の共通費用の精算：<b>かなこ</b> さんが <b>かずま</b> さんに <b>${formatCurrency(Math.abs(kazumaBalance))}</b> 渡してね！`;
-                } else if (kazumaBalance < 0) {
-                    alertText.innerHTML = `今月の共通費用の精算：<b>かずま</b> さんが <b>かなこ</b> さんに <b>${formatCurrency(Math.abs(kazumaBalance))}</b> 渡してね！`;
+                if (diffX > 0) {
+                    // Xが正の数：かなこの方が多く立替えているので、かずまからかなこに支払う
+                    alertText.innerHTML = `今月の立替精算：<br><b>かずま</b> さんが <b>かなこ</b> さんに <b>${formatCurrency(diffX)}</b> 支払ってね！`;
+                } else if (diffX < 0) {
+                    // Xが負の数：かずまの方が多く立替えているので、かなこからかずまに支払う
+                    alertText.innerHTML = `今月の立替精算：<br><b>かなこ</b> さんが <b>かずま</b> さんに <b>${formatCurrency(Math.abs(diffX))}</b> 支払ってね！`;
                 } else {
-                    alertText.innerHTML = `今月の共通費用はピッタリ折半されています！精算の必要はありません。`;
+                    alertText.innerHTML = `今月の立替分はピッタリ折半されています！精算の必要はありません。`;
                 }
             }
         }
 
-        // --- 初期化 ---
         function init() {
-            // 今月をデフォルトセット
             const now = new Date();
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -611,7 +556,6 @@
             monthInput.value = currentMonthStr;
             document.getElementById('var-date').valueAsDate = now;
 
-            // 月変更イベント
             monthInput.addEventListener('change', (e) => {
                 if(e.target.value) {
                     currentMonthStr = e.target.value;
@@ -619,7 +563,6 @@
                 }
             });
 
-            // 収入変更イベント
             kazumaIncomeEl.addEventListener('input', (e) => {
                 getCurrentMonthData().kazumaIncome = Number(e.target.value) || 0;
                 saveData();
@@ -629,22 +572,19 @@
                 saveData();
             });
 
-            // 固定費追加
             document.getElementById('form-fixed').addEventListener('submit', (e) => {
                 e.preventDefault();
                 appData.fixedExpenses.push({
                     id: Date.now(),
                     name: document.getElementById('fixed-name').value,
                     amount: Number(document.getElementById('fixed-amount').value),
-                    payer: document.getElementById('fixed-payer').value,
-                    type: document.getElementById('fixed-type').value
+                    category: document.getElementById('fixed-category').value
                 });
                 document.getElementById('fixed-name').value = '';
                 document.getElementById('fixed-amount').value = '';
                 saveData();
             });
 
-            // 変動費追加
             document.getElementById('form-variable').addEventListener('submit', (e) => {
                 e.preventDefault();
                 getCurrentMonthData().variableExpenses.push({
@@ -652,8 +592,7 @@
                     date: document.getElementById('var-date').value,
                     name: document.getElementById('var-name').value,
                     amount: Number(document.getElementById('var-amount').value),
-                    payer: document.getElementById('var-payer').value,
-                    type: document.getElementById('var-type').value
+                    category: document.getElementById('var-category').value
                 });
                 document.getElementById('var-name').value = '';
                 document.getElementById('var-amount').value = '';
