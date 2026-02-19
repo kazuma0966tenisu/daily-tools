@@ -206,11 +206,41 @@
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
+        /* PCやタブレットなどの画面幅が少し狭くなった時の汎用レイアウト調整 */
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
             .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem;}
             .tabs { margin: 0 auto; width: 100%; justify-content: center; }
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+
+        /* ＝＝＝ 今回追加：スマホの縦画面（Portrait）専用のレイアウト調整 ＝＝＝ */
+        @media (max-width: 600px) and (orientation: portrait) {
+            /* ① モーダルの「＋追加」ボタンの見切れ対策 */
+            .category-add-form input {
+                min-width: 0; /* 入力欄が広がりすぎてボタンを押し出すのを防ぐ */
+            }
+            .category-add-form button {
+                padding: 0.5rem 1rem !important; /* ボタンの横幅を少しスリムにする */
+                flex-shrink: 0; /* 画面が狭くてもボタンが縮まないように固定する */
+            }
+            
+            /* ② グラフの表示範囲のレイアウト調整 */
+            .graph-range-container {
+                flex-direction: column !important; /* 表示範囲とプルダウンを縦並びに */
+                align-items: flex-start !important;
+                gap: 4px !important;
+                width: 100%;
+            }
+            .graph-range-inputs {
+                width: 100%;
+                justify-content: space-between; /* ２つのプルダウンを均等に配置 */
+            }
+            .graph-month-input {
+                padding: 0.4rem !important;
+                font-size: 0.85rem !important;
+                width: 45%; /* 入力欄の幅を少し小さくし、▽との隙間を詰める */
+            }
         }
     </style>
 </head>
@@ -278,7 +308,9 @@
 
             <section class="card">
                 <div class="action-bar">
-                    <h2 class="section-title"><span class="material-icons">account_balance_wallet</span> 今月の収入設定</h2>
+                    <h2 class="section-title" style="margin: 0; border: none; padding: 0;">
+                        <span class="material-icons">account_balance_wallet</span> 今月の収入設定
+                    </h2>
                     <button type="button" class="btn btn-outline" onclick="openCategoryModal('income')">
                         <span class="material-icons">settings</span> 項目リストの編集
                     </button>
@@ -375,11 +407,14 @@
             <section class="card">
                 <div class="action-bar" style="background: #FAFAFA; padding: 1rem; border-radius: 8px; border: 1px solid var(--md-border);">
                     <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">query_stats</span> 支出分析グラフ</h2>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 0.9rem; font-weight: bold; color: var(--md-text-secondary);">表示範囲：</span>
-                        <input type="month" id="graph-start-month" style="padding: 0.5rem; border: 1px solid var(--md-border); border-radius: 4px; font-family: inherit;">
-                        <span style="font-weight: bold;">〜</span>
-                        <input type="month" id="graph-end-month" style="padding: 0.5rem; border: 1px solid var(--md-border); border-radius: 4px; font-family: inherit;">
+                    
+                    <div class="graph-range-container" style="display: flex; align-items: center; gap: 8px;">
+                        <span class="graph-range-label" style="font-size: 0.9rem; font-weight: bold; color: var(--md-text-secondary);">表示範囲：</span>
+                        <div class="graph-range-inputs" style="display: flex; align-items: center; gap: 8px;">
+                            <input type="month" id="graph-start-month" class="graph-month-input" style="padding: 0.5rem; border: 1px solid var(--md-border); border-radius: 4px; font-family: inherit;">
+                            <span style="font-weight: bold;">〜</span>
+                            <input type="month" id="graph-end-month" class="graph-month-input" style="padding: 0.5rem; border: 1px solid var(--md-border); border-radius: 4px; font-family: inherit;">
+                        </div>
                     </div>
                 </div>
 
@@ -429,7 +464,7 @@
                 <ul id="modal-category-list" class="category-list"></ul>
                 <div class="category-add-form">
                     <input type="text" id="new-category-name" placeholder="ここに入力">
-                    <button class="btn" onclick="addCategory()" style="background: var(--md-primary); border-radius: 20px; padding: 0.5rem 1.5rem;"><span class="material-icons" style="font-size: 1rem;">add</span> 追加</button>
+                    <button class="btn" onclick="addCategory()" style="background: var(--md-primary); border-radius: 20px; padding: 0.5rem 1.5rem; flex-shrink: 0;"><span class="material-icons" style="font-size: 1rem;">add</span> 追加</button>
                 </div>
             </div>
         </div>
@@ -449,7 +484,6 @@
             "自己投資", "奨学金返済", "特別な支出"
         ];
 
-        // グラフカラーの固定用マップ（標準項目）
         const chartColorMap = {
             "家賃": "#4CAF50", "水道光熱費": "#9C27B0", "食費": "#FF9800", "外食費": "#FF5722",
             "ネット代": "#2196F3", "携帯代": "#03A9F4", "保険": "#F44336", "サブスク費": "#E91E63",
@@ -458,7 +492,6 @@
             "金融投資": "#607D8B", "自己投資": "#795548", "奨学金返済": "#9E9E9E", "特別な支出": "#607D8B"
         };
 
-        // 項目名から一意の色を生成・取得する関数
         function getChartColor(label, isBackground = false) {
             let hex = chartColorMap[label];
             if (!hex) {
@@ -533,7 +566,6 @@
         window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); saveData(); } };
         window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); saveData(); } };
 
-        // --- シート切り替え ---
         window.switchSheet = function(sheetId) {
             document.querySelectorAll('.sheet').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -551,7 +583,6 @@
             }
         };
 
-        // --- モーダル管理 ---
         let editingCategoryType = 'variable';
 
         window.openCategoryModal = function(type) {
@@ -609,7 +640,6 @@
             renderCategoryModal();
         };
 
-        // --- グラフ描画 ---
         window.renderGraphs = function() {
             const startStr = document.getElementById('graph-start-month').value;
             const endStr = document.getElementById('graph-end-month').value;
@@ -733,13 +763,11 @@
             drawLineChart('chart-kanako', kanakoData);
         };
 
-        // --- レンダリング処理 ---
         function render() {
             const md = getCurrentMonthData();
             const [y, m] = currentMonthStr.split('-');
             displayMonth.textContent = `${y}年${Number(m)}月`;
 
-            // プルダウン一括更新
             kazumaIncSelect.innerHTML = '';
             kanakoIncSelect.innerHTML = '';
             appData.incomeCategories.forEach(cat => {
@@ -803,7 +831,7 @@
             document.getElementById('dash-kanako-inc').textContent = formatCurrency(kanakoTotalIncome);
             document.getElementById('dash-kanako-exp').textContent = formatCurrency(kanakoPersonal);
             document.getElementById('dash-kanako-share').textContent = formatCurrency(sharedHalf);
-            document.getElementById('dash-kanako-save').textContent = formatCurrency(kanakoTotalIncome - Personal - sharedHalf);
+            document.getElementById('dash-kanako-save').textContent = formatCurrency(kanakoTotalIncome - kanakoPersonal - sharedHalf);
 
             document.getElementById('dash-total-inc').textContent = formatCurrency(householdIncome);
             document.getElementById('dash-total-exp').textContent = formatCurrency(householdExpense);
