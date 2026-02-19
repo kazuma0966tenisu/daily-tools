@@ -85,18 +85,25 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            /* 非アクティブ時は薄く表示 */
+            opacity: 0.4;
+        }
+        .tab-btn:hover {
+            opacity: 0.8;
         }
         .tab-btn.active {
             background: var(--md-primary);
             color: white;
             box-shadow: 0 2px 6px rgba(0,121,107,0.4);
+            /* アクティブ時はくっきり表示 */
+            opacity: 1;
         }
         .sheet {
-            display: none; /* デフォルトは非表示 */
+            display: none;
             animation: fadeIn 0.3s ease;
         }
         .sheet.active {
-            display: block; /* activeが付いたら表示 */
+            display: block;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
@@ -205,7 +212,6 @@
         .category-add-form input { flex: 1; padding: 0.75rem; border: 1px solid #BDBDBD; border-radius: 4px; background-color: white; font-size: 0.95rem;}
         .category-add-form input::placeholder { color: #9E9E9E; }
 
-        /* グラフ用キャンバスの調整 */
         canvas { max-height: 350px; width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
@@ -237,7 +243,6 @@
     </header>
 
     <main class="container">
-        
         <div id="sheet-input" class="sheet active">
             <section class="card">
                 <h2 class="section-title"><span class="material-icons">analytics</span> <span id="display-month"></span> のダッシュボード</h2>
@@ -252,7 +257,6 @@
                             <span id="dash-kazuma-save">¥0</span>
                         </p>
                     </div>
-
                     <div class="dash-box dash-kanako">
                         <h3><span class="material-icons">person_3</span> かなこ</h3>
                         <div class="dash-row"><span>収入</span><span id="dash-kanako-inc">¥0</span></div>
@@ -263,7 +267,6 @@
                             <span id="dash-kanako-save">¥0</span>
                         </p>
                     </div>
-
                     <div class="dash-box dash-household">
                         <h3><span class="material-icons">home</span> 世帯全体</h3>
                         <div class="dash-row"><span>世帯収入合計</span><span id="dash-total-inc">¥0</span></div>
@@ -275,7 +278,6 @@
                         </p>
                     </div>
                 </div>
-
                 <div class="settlement-alert" id="settlement-alert">
                     <span class="material-icons" style="font-size: 1.5rem;">currency_exchange</span>
                     <span id="settlement-text" style="font-size: 0.95rem;">計算中...</span>
@@ -285,32 +287,42 @@
             <section class="card">
                 <h2 class="section-title"><span class="material-icons">account_balance_wallet</span> 今月の収入設定</h2>
                 <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    
                     <div style="flex: 1; min-width: 300px;">
                         <h3 style="font-size: 1rem; color: var(--kazuma-color); margin-top: 0;">かずまの収入</h3>
                         <table><tbody id="kazuma-income-list"></tbody></table>
-                        <form id="form-kazuma-income" class="form-row" style="padding: 0.5rem;">
-                            <div class="form-group"><label>項目名</label>
-                                <select id="kazuma-inc-category" required>
-                                    <option value="給与">給与</option><option value="賞与">賞与</option>
-                                    <option value="臨時収入">臨時収入</option><option value="副業収入">副業収入</option>
-                                </select>
+                        <form id="form-kazuma-income" class="form-row">
+                            <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+                                <div class="form-group"><label>項目名</label>
+                                    <select id="kazuma-inc-category" required>
+                                        <option value="給与">給与</option><option value="賞与">賞与</option>
+                                        <option value="臨時収入">臨時収入</option><option value="副業収入">副業収入</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>金額 (円)</label><input type="number" id="kazuma-inc-amount" required min="0"></div>
                             </div>
-                            <div class="form-group"><label>金額 (円)</label><input type="number" id="kazuma-inc-amount" required min="0"></div>
-                            <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">add</span></button></div>
+                            <div style="width: 100%; display: flex; justify-content: flex-start; margin-top: 0.5rem;">
+                                <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
+                            </div>
                         </form>
                     </div>
+
                     <div style="flex: 1; min-width: 300px;">
                         <h3 style="font-size: 1rem; color: var(--kanako-color); margin-top: 0;">かなこの収入</h3>
                         <table><tbody id="kanako-income-list"></tbody></table>
-                        <form id="form-kanako-income" class="form-row" style="padding: 0.5rem;">
-                            <div class="form-group"><label>項目名</label>
-                                <select id="kanako-inc-category" required>
-                                    <option value="給与">給与</option><option value="賞与">賞与</option>
-                                    <option value="臨時収入">臨時収入</option><option value="副業収入">副業収入</option>
-                                </select>
+                        <form id="form-kanako-income" class="form-row">
+                            <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+                                <div class="form-group"><label>項目名</label>
+                                    <select id="kanako-inc-category" required>
+                                        <option value="給与">給与</option><option value="賞与">賞与</option>
+                                        <option value="臨時収入">臨時収入</option><option value="副業収入">副業収入</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>金額 (円)</label><input type="number" id="kanako-inc-amount" required min="0"></div>
                             </div>
-                            <div class="form-group"><label>金額 (円)</label><input type="number" id="kanako-inc-amount" required min="0"></div>
-                            <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">add</span></button></div>
+                            <div style="width: 100%; display: flex; justify-content: flex-start; margin-top: 0.5rem;">
+                                <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -328,14 +340,8 @@
                     <tbody id="fixed-list"></tbody>
                 </table>
                 <form id="form-fixed" class="form-row">
-                    <div class="form-group">
-                        <label>項目名</label>
-                        <select id="fixed-name" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label>金額 (円)</label>
-                        <input type="number" id="fixed-amount" required min="0">
-                    </div>
+                    <div class="form-group"><label>項目名</label><select id="fixed-name" required></select></div>
+                    <div class="form-group"><label>金額 (円)</label><input type="number" id="fixed-amount" required min="0"></div>
                     <div class="form-group">
                         <label>負担者</label>
                         <select id="fixed-category">
@@ -428,9 +434,10 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v5'; // バージョンアップ
+        // バージョンはそのままに維持（データ引き継ぎのため）
+        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v5'; 
         let currentMonthStr = "";
-        let charts = {}; // グラフのインスタンス保存用
+        let charts = {}; 
 
         const defaultFixedCategories = ["家賃", "ネット代", "保険", "水道光熱費", "サブスク費"];
         const defaultVariableCategories = [
@@ -445,7 +452,6 @@
             let data;
             if (saved) {
                 data = JSON.parse(saved);
-                // 過去バージョンからのデータ移行
                 if (!data.variableCategories) {
                     data.variableCategories = data.customCategories || defaultVariableCategories;
                     data.fixedCategories = defaultFixedCategories;
@@ -466,7 +472,6 @@
         function saveData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
             render();
-            // グラフシート表示中ならグラフも更新
             if(document.getElementById('sheet-graph').classList.contains('active')) {
                 renderGraphs();
             }
@@ -510,7 +515,6 @@
             document.getElementById(`tab-${sheetId}`).classList.add('active');
 
             if (sheetId === 'graph') {
-                // デフォルトは現在の年の1月〜12月
                 const now = new Date();
                 const yyyy = now.getFullYear();
                 if(!document.getElementById('graph-start-month').value) {
@@ -533,10 +537,9 @@
 
         window.closeModal = function() {
             document.getElementById('category-modal').classList.remove('show');
-            saveData(); // プルダウンを再描画
+            saveData();
         };
 
-        // 背景クリックでモーダルを閉じる
         window.onclick = function(event) {
             if (event.target == document.getElementById('category-modal')) closeModal();
         };
@@ -598,7 +601,6 @@
             const kanakoData = {};
 
             monthKeys.forEach((mKey, index) => {
-                // 固定費の集計
                 appData.fixedExpenses.forEach(item => {
                     const isHouse = item.category.startsWith('共通');
                     const isKazuma = item.category === 'かずま';
@@ -611,7 +613,6 @@
                     }
                 });
 
-                // 変動費の集計
                 if (appData.months[mKey]) {
                     appData.months[mKey].variableExpenses.forEach(item => {
                         const isHouse = item.category.startsWith('共通');
@@ -632,13 +633,13 @@
                 if (charts[canvasId]) charts[canvasId].destroy();
                 
                 const datasets = Object.keys(targetData).map((name, i) => {
-                    const hue = (i * 137.5) % 360; // 黄金角で色を散らす
+                    const hue = (i * 137.5) % 360;
                     return {
                         label: name,
                         data: targetData[name],
                         borderColor: `hsl(${hue}, 70%, 50%)`,
                         backgroundColor: `hsl(${hue}, 70%, 50%, 0.1)`,
-                        tension: 0.2, // 少し丸みを持たせる
+                        tension: 0.2,
                         fill: false,
                         borderWidth: 2
                     };
@@ -661,20 +662,18 @@
             drawChart('chart-kanako', kanakoData);
         };
 
-        // --- レンダリング処理（入力シート） ---
+        // --- レンダリング処理 ---
         function render() {
             const md = getCurrentMonthData();
             const [y, m] = currentMonthStr.split('-');
             displayMonth.textContent = `${y}年${Number(m)}月`;
 
-            // プルダウン更新
             varNameSelect.innerHTML = '';
             appData.variableCategories.forEach(cat => varNameSelect.appendChild(new Option(cat, cat)));
             fixedNameSelect.innerHTML = '';
             appData.fixedCategories.forEach(cat => fixedNameSelect.appendChild(new Option(cat, cat)));
 
-            let kazumaTotalIncome = 0;
-            let kanakoTotalIncome = 0;
+            let kazumaTotalIncome = 0, kanakoTotalIncome = 0;
 
             document.getElementById('kazuma-income-list').innerHTML = '';
             md.incomes.kazuma.forEach(item => {
@@ -754,13 +753,9 @@
             document.getElementById('var-date').valueAsDate = now;
 
             monthInput.addEventListener('change', (e) => {
-                if(e.target.value) {
-                    currentMonthStr = e.target.value;
-                    render();
-                }
+                if(e.target.value) { currentMonthStr = e.target.value; render(); }
             });
 
-            // グラフ期間の変更イベント
             document.getElementById('graph-start-month').addEventListener('change', renderGraphs);
             document.getElementById('graph-end-month').addEventListener('change', renderGraphs);
 
