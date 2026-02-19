@@ -65,46 +65,47 @@
             gap: 1.5rem;
         }
 
-        /* タブ切り替えデザイン */
+        /* 修正：タブ切り替えデザイン */
         .tabs {
             display: flex;
             justify-content: center;
             gap: 1rem;
-            padding: 1.5rem 0 0 0;
+            padding: 0;
+            margin-left: auto;
+            margin-right: 1.5rem;
         }
         .tab-btn {
-            padding: 0.75rem 2rem;
+            padding: 0.5rem 1.5rem;
             border-radius: 24px;
-            border: 2px solid var(--md-primary);
-            background: transparent;
-            color: var(--md-primary);
-            font-size: 1rem;
-            font-weight: 700;
+            /* 非アクティブ時は白枠＋白文字で半透明に */
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
-            /* 非アクティブ時は薄く表示 */
-            opacity: 0.4;
+            gap: 6px;
         }
         .tab-btn:hover {
-            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.25);
         }
         .tab-btn.active {
-            background: var(--md-primary);
-            color: white;
-            box-shadow: 0 2px 6px rgba(0,121,107,0.4);
-            /* アクティブ時はくっきり表示 */
-            opacity: 1;
+            /* アクティブ時は白背景＋緑文字でくっきり目立たせる */
+            background: white;
+            color: var(--md-primary);
+            border-color: white;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
+
         .sheet {
             display: none;
             animation: fadeIn 0.3s ease;
         }
-        .sheet.active {
-            display: block;
-        }
+        .sheet.active { display: block; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
@@ -125,7 +126,6 @@
             padding-bottom: 0.5rem; margin-bottom: 1rem;
         }
 
-        /* ダッシュボード周り */
         .dash-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
         .dash-box { padding: 1.25rem; border-radius: 8px; border: 1px solid var(--md-border); text-align: center; background: #FAFAFA; }
         .dash-box h3 { margin: 0 0 10px 0; font-size: 0.95rem; color: var(--md-text-secondary); display: flex; justify-content: center; align-items: center; gap: 4px; }
@@ -150,7 +150,6 @@
             text-decoration-thickness: 2px; text-underline-offset: 3px; font-size: 1.05rem;
         }
 
-        /* フォーム周り */
         .form-row {
             display: flex; gap: 1rem; flex-wrap: wrap; background: #FAFAFA;
             padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border);
@@ -183,7 +182,6 @@
         .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .action-bar h2 { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
-        /* モーダル（ポップアップ）デザイン */
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
@@ -212,12 +210,13 @@
         .category-add-form input { flex: 1; padding: 0.75rem; border: 1px solid #BDBDBD; border-radius: 4px; background-color: white; font-size: 0.95rem;}
         .category-add-form input::placeholder { color: #9E9E9E; }
 
-        canvas { max-height: 350px; width: 100%; }
+        canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
-            .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem;}
+            .tabs { margin: 0 auto; width: 100%; justify-content: center; }
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
         }
     </style>
@@ -228,7 +227,7 @@
             <span class="material-icons">favorite</span>
             <h1>ふたりの家計簿</h1>
         </div>
-        <div class="tabs" style="padding: 0; margin-left: auto; margin-right: 1rem;">
+        <div class="tabs">
             <button id="tab-input" class="tab-btn active" onclick="switchSheet('input')">
                 <span class="material-icons">edit_note</span> 入力シート
             </button>
@@ -301,7 +300,7 @@
                                 </div>
                                 <div class="form-group"><label>金額 (円)</label><input type="number" id="kazuma-inc-amount" required min="0"></div>
                             </div>
-                            <div style="width: 100%; display: flex; justify-content: flex-start; margin-top: 0.5rem;">
+                            <div style="width: 100%; display: flex; justify-content: flex-end; margin-top: 0.5rem;">
                                 <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
                             </div>
                         </form>
@@ -320,7 +319,7 @@
                                 </div>
                                 <div class="form-group"><label>金額 (円)</label><input type="number" id="kanako-inc-amount" required min="0"></div>
                             </div>
-                            <div style="width: 100%; display: flex; justify-content: flex-start; margin-top: 0.5rem;">
+                            <div style="width: 100%; display: flex; justify-content: flex-end; margin-top: 0.5rem;">
                                 <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
                             </div>
                         </form>
@@ -389,7 +388,7 @@
         <div id="sheet-graph" class="sheet">
             <section class="card">
                 <div class="action-bar" style="background: #FAFAFA; padding: 1rem; border-radius: 8px; border: 1px solid var(--md-border);">
-                    <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">show_chart</span> 年間推移グラフ</h2>
+                    <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">query_stats</span> 支出分析グラフ</h2>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 0.9rem; font-weight: bold; color: var(--md-text-secondary);">表示範囲：</span>
                         <input type="month" id="graph-start-month" style="padding: 0.5rem; border: 1px solid var(--md-border); border-radius: 4px; font-family: inherit;">
@@ -399,19 +398,36 @@
                 </div>
 
                 <h3 class="graph-title" style="color: var(--md-primary); border-color: var(--md-primary-light);">
-                    <span class="material-icons">home</span> 世帯全体（共通出費）
+                    <span class="material-icons">donut_large</span> 項目別の支出割合（円グラフ）
                 </h3>
-                <canvas id="chart-household"></canvas>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 3rem;">
+                    <div class="dash-box" style="background: white;">
+                        <h4 style="margin-top:0; color: var(--md-primary);">世帯全体（共通出費）</h4>
+                        <div style="position: relative; height: 220px;"><canvas id="pie-household"></canvas></div>
+                    </div>
+                    <div class="dash-box" style="background: white;">
+                        <h4 style="margin-top:0; color: var(--kazuma-color);">かずま（個人出費）</h4>
+                        <div style="position: relative; height: 220px;"><canvas id="pie-kazuma"></canvas></div>
+                    </div>
+                    <div class="dash-box" style="background: white;">
+                        <h4 style="margin-top:0; color: var(--kanako-color);">かなこ（個人出費）</h4>
+                        <div style="position: relative; height: 220px;"><canvas id="pie-kanako"></canvas></div>
+                    </div>
+                </div>
 
-                <h3 class="graph-title" style="color: var(--kazuma-color); border-color: #BBDEFB;">
-                    <span class="material-icons">person</span> かずま（個人出費）
+                <h3 class="graph-title" style="color: var(--md-primary); border-color: var(--md-primary-light);">
+                    <span class="material-icons">show_chart</span> 月別の推移（折れ線グラフ）
                 </h3>
-                <canvas id="chart-kazuma"></canvas>
 
-                <h3 class="graph-title" style="color: var(--kanako-color); border-color: #F8BBD0;">
-                    <span class="material-icons">person_3</span> かなこ（個人出費）
-                </h3>
-                <canvas id="chart-kanako"></canvas>
+                <h4 style="color: var(--md-primary); margin-bottom: 0;">世帯全体（共通出費）</h4>
+                <div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="chart-household"></canvas></div>
+
+                <h4 style="color: var(--kazuma-color); margin-bottom: 0;">かずま（個人出費）</h4>
+                <div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="chart-kazuma"></canvas></div>
+
+                <h4 style="color: var(--kanako-color); margin-bottom: 0;">かなこ（個人出費）</h4>
+                <div style="position: relative; height: 300px;"><canvas id="chart-kanako"></canvas></div>
+
             </section>
         </div>
     </main>
@@ -434,10 +450,9 @@
     </div>
 
     <script>
-        // バージョンはそのままに維持（データ引き継ぎのため）
         const STORAGE_KEY = 'kakeibo_kazuma_kanako_v5'; 
         let currentMonthStr = "";
-        let charts = {}; 
+        let charts = {}; // 円グラフと折れ線グラフの両方を管理
 
         const defaultFixedCategories = ["家賃", "ネット代", "保険", "水道光熱費", "サブスク費"];
         const defaultVariableCategories = [
@@ -596,39 +611,64 @@
                 d.setMonth(d.getMonth() + 1);
             }
 
+            // 折れ線グラフ用データ
             const houseData = {};
             const kazumaData = {};
             const kanakoData = {};
 
+            // 円グラフ用データ（期間内の合計値）
+            const housePie = {};
+            const kazumaPie = {};
+            const kanakoPie = {};
+
             monthKeys.forEach((mKey, index) => {
+                // 固定費
                 appData.fixedExpenses.forEach(item => {
                     const isHouse = item.category.startsWith('共通');
                     const isKazuma = item.category === 'かずま';
                     const isKanako = item.category === 'かなこ';
                     
-                    let targetData = isHouse ? houseData : (isKazuma ? kazumaData : (isKanako ? kanakoData : null));
-                    if (targetData) {
-                        if (!targetData[item.name]) targetData[item.name] = new Array(monthKeys.length).fill(0);
-                        targetData[item.name][index] += item.amount;
+                    if (isHouse) {
+                        if (!houseData[item.name]) houseData[item.name] = new Array(monthKeys.length).fill(0);
+                        houseData[item.name][index] += item.amount;
+                        housePie[item.name] = (housePie[item.name] || 0) + item.amount;
+                    } else if (isKazuma) {
+                        if (!kazumaData[item.name]) kazumaData[item.name] = new Array(monthKeys.length).fill(0);
+                        kazumaData[item.name][index] += item.amount;
+                        kazumaPie[item.name] = (kazumaPie[item.name] || 0) + item.amount;
+                    } else if (isKanako) {
+                        if (!kanakoData[item.name]) kanakoData[item.name] = new Array(monthKeys.length).fill(0);
+                        kanakoData[item.name][index] += item.amount;
+                        kanakoPie[item.name] = (kanakoPie[item.name] || 0) + item.amount;
                     }
                 });
 
+                // 変動費
                 if (appData.months[mKey]) {
                     appData.months[mKey].variableExpenses.forEach(item => {
                         const isHouse = item.category.startsWith('共通');
                         const isKazuma = item.category === 'かずま';
                         const isKanako = item.category === 'かなこ';
                         
-                        let targetData = isHouse ? houseData : (isKazuma ? kazumaData : (isKanako ? kanakoData : null));
-                        if (targetData) {
-                            if (!targetData[item.name]) targetData[item.name] = new Array(monthKeys.length).fill(0);
-                            targetData[item.name][index] += item.amount;
+                        if (isHouse) {
+                            if (!houseData[item.name]) houseData[item.name] = new Array(monthKeys.length).fill(0);
+                            houseData[item.name][index] += item.amount;
+                            housePie[item.name] = (housePie[item.name] || 0) + item.amount;
+                        } else if (isKazuma) {
+                            if (!kazumaData[item.name]) kazumaData[item.name] = new Array(monthKeys.length).fill(0);
+                            kazumaData[item.name][index] += item.amount;
+                            kazumaPie[item.name] = (kazumaPie[item.name] || 0) + item.amount;
+                        } else if (isKanako) {
+                            if (!kanakoData[item.name]) kanakoData[item.name] = new Array(monthKeys.length).fill(0);
+                            kanakoData[item.name][index] += item.amount;
+                            kanakoPie[item.name] = (kanakoPie[item.name] || 0) + item.amount;
                         }
                     });
                 }
             });
 
-            function drawChart(canvasId, targetData) {
+            // 折れ線グラフ描画関数
+            function drawLineChart(canvasId, targetData) {
                 const ctx = document.getElementById(canvasId).getContext('2d');
                 if (charts[canvasId]) charts[canvasId].destroy();
                 
@@ -657,9 +697,44 @@
                 });
             }
 
-            drawChart('chart-household', houseData);
-            drawChart('chart-kazuma', kazumaData);
-            drawChart('chart-kanako', kanakoData);
+            // 円グラフ描画関数
+            function drawPieChart(canvasId, pieData) {
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                if (charts[canvasId]) charts[canvasId].destroy();
+
+                const itemLabels = Object.keys(pieData);
+                const itemData = Object.values(pieData);
+                const bgColors = itemLabels.map((_, i) => `hsl(${((i+1) * 137.5) % 360}, 65%, 55%)`);
+
+                charts[canvasId] = new Chart(ctx, {
+                    type: 'pie', // または 'doughnut'（ドーナツ型）
+                    data: {
+                        labels: itemLabels,
+                        datasets: [{
+                            data: itemData,
+                            backgroundColor: bgColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right' },
+                            tooltip: { callbacks: { label: function(context) { return context.label + ': ¥' + context.parsed.toLocaleString(); } } }
+                        }
+                    }
+                });
+            }
+
+            // グラフの描画実行
+            drawPieChart('pie-household', housePie);
+            drawPieChart('pie-kazuma', kazumaPie);
+            drawPieChart('pie-kanako', kanakoPie);
+
+            drawLineChart('chart-household', houseData);
+            drawLineChart('chart-kazuma', kazumaData);
+            drawLineChart('chart-kanako', kanakoData);
         };
 
         // --- レンダリング処理 ---
