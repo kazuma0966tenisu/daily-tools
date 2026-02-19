@@ -65,7 +65,6 @@
             gap: 1.5rem;
         }
 
-        /* 修正：タブ切り替えデザイン */
         .tabs {
             display: flex;
             justify-content: center;
@@ -77,7 +76,6 @@
         .tab-btn {
             padding: 0.5rem 1.5rem;
             border-radius: 24px;
-            /* 非アクティブ時は白枠＋白文字で半透明に */
             border: 1px solid rgba(255, 255, 255, 0.6);
             background: rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.9);
@@ -89,22 +87,14 @@
             align-items: center;
             gap: 6px;
         }
-        .tab-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.25); }
         .tab-btn.active {
-            /* アクティブ時は白背景＋緑文字でくっきり目立たせる */
-            background: white;
-            color: var(--md-primary);
-            border-color: white;
-            font-weight: 700;
+            background: white; color: var(--md-primary);
+            border-color: white; font-weight: 700;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
-        .sheet {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
+        .sheet { display: none; animation: fadeIn 0.3s ease; }
         .sheet.active { display: block; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
@@ -170,8 +160,13 @@
         .btn:hover { background-color: #00695C; }
         .btn-outline { background-color: transparent; color: var(--md-text); border: 1px solid var(--md-border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .btn-outline:hover { background-color: #f0f0f0; }
-        .btn-icon { background: none; border: none; color: var(--md-text-secondary); cursor: pointer; padding: 4px; border-radius: 50%; }
-        .btn-icon:hover { background-color: #FFEBEE; color: var(--md-error); }
+        
+        .btn-icon { background: none; border: none; color: var(--md-text-secondary); cursor: pointer; padding: 4px; border-radius: 50%; transition: 0.2s;}
+        
+        /* 修正：モーダルのバツボタンのホバー時の色変更 */
+        .modal-header .btn-icon:hover { background-color: #E0F2F1; color: var(--md-primary); }
+        /* リストなどの削除ボタン用 */
+        .btn-icon-danger:hover { background-color: #FFEBEE; color: var(--md-error); }
 
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem;}
         th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem;}
@@ -284,20 +279,21 @@
             </section>
 
             <section class="card">
-                <h2 class="section-title"><span class="material-icons">account_balance_wallet</span> 今月の収入設定</h2>
+                <div class="action-bar" style="justify-content: flex-start; gap: 1rem; border-bottom: 2px solid var(--md-primary-light); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                    <button type="button" class="btn btn-outline" onclick="openCategoryModal('income')">
+                        <span class="material-icons">settings</span> 項目リストの編集
+                    </button>
+                    <h2 class="section-title" style="margin: 0; border: none; padding: 0;">
+                        <span class="material-icons">account_balance_wallet</span> 今月の収入設定
+                    </h2>
+                </div>
                 <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-                    
                     <div style="flex: 1; min-width: 300px;">
                         <h3 style="font-size: 1rem; color: var(--kazuma-color); margin-top: 0;">かずまの収入</h3>
                         <table><tbody id="kazuma-income-list"></tbody></table>
                         <form id="form-kazuma-income" class="form-row">
                             <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
-                                <div class="form-group"><label>項目名</label>
-                                    <select id="kazuma-inc-category" required>
-                                        <option value="給与">給与</option><option value="賞与">賞与</option>
-                                        <option value="臨時収入">臨時収入</option><option value="副業収入">副業収入</option>
-                                    </select>
-                                </div>
+                                <div class="form-group"><label>項目名</label><select id="kazuma-inc-category" required></select></div>
                                 <div class="form-group"><label>金額 (円)</label><input type="number" id="kazuma-inc-amount" required min="0"></div>
                             </div>
                             <div style="width: 100%; display: flex; justify-content: flex-end; margin-top: 0.5rem;">
@@ -305,18 +301,12 @@
                             </div>
                         </form>
                     </div>
-
                     <div style="flex: 1; min-width: 300px;">
                         <h3 style="font-size: 1rem; color: var(--kanako-color); margin-top: 0;">かなこの収入</h3>
                         <table><tbody id="kanako-income-list"></tbody></table>
                         <form id="form-kanako-income" class="form-row">
                             <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
-                                <div class="form-group"><label>項目名</label>
-                                    <select id="kanako-inc-category" required>
-                                        <option value="給与">給与</option><option value="賞与">賞与</option>
-                                        <option value="臨時収入">臨時収入</option><option value="副業収入">副業収入</option>
-                                    </select>
-                                </div>
+                                <div class="form-group"><label>項目名</label><select id="kanako-inc-category" required></select></div>
                                 <div class="form-group"><label>金額 (円)</label><input type="number" id="kanako-inc-amount" required min="0"></div>
                             </div>
                             <div style="width: 100%; display: flex; justify-content: flex-end; margin-top: 0.5rem;">
@@ -443,7 +433,7 @@
                 <ul id="modal-category-list" class="category-list"></ul>
                 <div class="category-add-form">
                     <input type="text" id="new-category-name" placeholder="ここに入力">
-                    <button class="btn" onclick="addCategory()" style="background: #E53935; border-radius: 20px; padding: 0.5rem 1.5rem;"><span class="material-icons" style="font-size: 1rem;">add</span> 追加</button>
+                    <button class="btn" onclick="addCategory()" style="background: var(--md-primary); border-radius: 20px; padding: 0.5rem 1.5rem;"><span class="material-icons" style="font-size: 1rem;">add</span> 追加</button>
                 </div>
             </div>
         </div>
@@ -452,8 +442,9 @@
     <script>
         const STORAGE_KEY = 'kakeibo_kazuma_kanako_v5'; 
         let currentMonthStr = "";
-        let charts = {}; // 円グラフと折れ線グラフの両方を管理
+        let charts = {};
 
+        const defaultIncomeCategories = ["給与", "賞与", "臨時収入", "副業収入"];
         const defaultFixedCategories = ["家賃", "ネット代", "保険", "水道光熱費", "サブスク費"];
         const defaultVariableCategories = [
             "携帯代", "サブスク費", "食費", "外食費", "交通費", 
@@ -462,18 +453,45 @@
             "自己投資", "奨学金返済", "特別な支出"
         ];
 
+        // グラフカラーの固定用マップ（標準項目）
+        const chartColorMap = {
+            "家賃": "#4CAF50", "水道光熱費": "#9C27B0", "食費": "#FF9800", "外食費": "#FF5722",
+            "ネット代": "#2196F3", "携帯代": "#03A9F4", "保険": "#F44336", "サブスク費": "#E91E63",
+            "交通費": "#00BCD4", "健康・医療費": "#009688", "日用品費": "#8BC34A", "交際費": "#FFEB3B", 
+            "衣服・美容代": "#E040FB", "趣味・娯楽": "#673AB7", "デート代": "#F06292", "旅行費": "#3F51B5", 
+            "金融投資": "#607D8B", "自己投資": "#795548", "奨学金返済": "#9E9E9E", "特別な支出": "#607D8B"
+        };
+
+        // 項目名から一意の色を生成・取得する関数
+        function getChartColor(label, isBackground = false) {
+            let hex = chartColorMap[label];
+            // マップにないカスタム項目は文字コードから色を自動生成して固定する
+            if (!hex) {
+                let hash = 0;
+                for (let i = 0; i < label.length; i++) hash = label.charCodeAt(i) + ((hash << 5) - hash);
+                const hue = Math.abs(hash) % 360;
+                return isBackground ? `hsla(${hue}, 70%, 50%, 0.1)` : `hsl(${hue}, 70%, 50%)`;
+            }
+            // 背景色（半透明）の対応
+            if (isBackground) {
+                let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, 0.1)`;
+            }
+            return hex;
+        }
+
         function loadData() {
             const saved = localStorage.getItem(STORAGE_KEY);
             let data;
             if (saved) {
                 data = JSON.parse(saved);
-                if (!data.variableCategories) {
-                    data.variableCategories = data.customCategories || defaultVariableCategories;
-                    data.fixedCategories = defaultFixedCategories;
-                }
+                if (!data.variableCategories) data.variableCategories = data.customCategories || defaultVariableCategories;
+                if (!data.fixedCategories) data.fixedCategories = defaultFixedCategories;
+                if (!data.incomeCategories) data.incomeCategories = defaultIncomeCategories;
             } else {
                 data = {
                     fixedExpenses: [],
+                    incomeCategories: defaultIncomeCategories,
                     variableCategories: defaultVariableCategories,
                     fixedCategories: defaultFixedCategories,
                     months: {}
@@ -487,9 +505,7 @@
         function saveData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
             render();
-            if(document.getElementById('sheet-graph').classList.contains('active')) {
-                renderGraphs();
-            }
+            if(document.getElementById('sheet-graph').classList.contains('active')) renderGraphs();
         }
 
         function getCurrentMonthData() {
@@ -501,6 +517,8 @@
 
         const monthInput = document.getElementById('month-input');
         const displayMonth = document.getElementById('display-month');
+        const kazumaIncSelect = document.getElementById('kazuma-inc-category');
+        const kanakoIncSelect = document.getElementById('kanako-inc-category');
         const varNameSelect = document.getElementById('var-name');
         const fixedNameSelect = document.getElementById('fixed-name');
 
@@ -521,11 +539,10 @@
         window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); saveData(); } };
         window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); saveData(); } };
 
-        // --- シート（タブ）切り替え機能 ---
+        // --- シート切り替え ---
         window.switchSheet = function(sheetId) {
             document.querySelectorAll('.sheet').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
             document.getElementById(`sheet-${sheetId}`).classList.add('active');
             document.getElementById(`tab-${sheetId}`).classList.add('active');
 
@@ -540,12 +557,17 @@
             }
         };
 
-        // --- モーダル（項目編集）機能 ---
+        // --- モーダル管理 ---
         let editingCategoryType = 'variable';
 
         window.openCategoryModal = function(type) {
             editingCategoryType = type;
-            document.getElementById('modal-title').innerHTML = type === 'fixed' ? '<span class="material-icons">settings</span> 固定費の項目リスト編集' : '<span class="material-icons">settings</span> 変動費の項目リスト編集';
+            let titleText = '';
+            if (type === 'fixed') titleText = '固定費の項目リスト編集';
+            else if (type === 'variable') titleText = '変動費の項目リスト編集';
+            else if (type === 'income') titleText = '収入の項目リスト編集';
+            
+            document.getElementById('modal-title').innerHTML = `<span class="material-icons">settings</span> ${titleText}`;
             renderCategoryModal();
             document.getElementById('category-modal').classList.add('show');
         };
@@ -555,14 +577,15 @@
             saveData();
         };
 
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('category-modal')) closeModal();
-        };
+        window.onclick = function(event) { if (event.target == document.getElementById('category-modal')) closeModal(); };
 
         function renderCategoryModal() {
             const listEl = document.getElementById('modal-category-list');
             listEl.innerHTML = '';
-            const categories = editingCategoryType === 'fixed' ? appData.fixedCategories : appData.variableCategories;
+            let categories;
+            if (editingCategoryType === 'fixed') categories = appData.fixedCategories;
+            else if (editingCategoryType === 'variable') categories = appData.variableCategories;
+            else if (editingCategoryType === 'income') categories = appData.incomeCategories;
             
             categories.forEach((cat, index) => {
                 const li = document.createElement('li');
@@ -574,7 +597,8 @@
 
         window.deleteCategory = function(index) {
             if (editingCategoryType === 'fixed') appData.fixedCategories.splice(index, 1);
-            else appData.variableCategories.splice(index, 1);
+            else if (editingCategoryType === 'variable') appData.variableCategories.splice(index, 1);
+            else if (editingCategoryType === 'income') appData.incomeCategories.splice(index, 1);
             renderCategoryModal();
         };
 
@@ -584,13 +608,14 @@
             if (!val) return;
             
             if (editingCategoryType === 'fixed') appData.fixedCategories.push(val);
-            else appData.variableCategories.push(val);
+            else if (editingCategoryType === 'variable') appData.variableCategories.push(val);
+            else if (editingCategoryType === 'income') appData.incomeCategories.push(val);
             
             inputEl.value = '';
             renderCategoryModal();
         };
 
-        // --- グラフ描画機能 ---
+        // --- グラフ描画 ---
         window.renderGraphs = function() {
             const startStr = document.getElementById('graph-start-month').value;
             const endStr = document.getElementById('graph-end-month').value;
@@ -611,18 +636,10 @@
                 d.setMonth(d.getMonth() + 1);
             }
 
-            // 折れ線グラフ用データ
-            const houseData = {};
-            const kazumaData = {};
-            const kanakoData = {};
-
-            // 円グラフ用データ（期間内の合計値）
-            const housePie = {};
-            const kazumaPie = {};
-            const kanakoPie = {};
+            const houseData = {}, kazumaData = {}, kanakoData = {};
+            const housePie = {}, kazumaPie = {}, kanakoPie = {};
 
             monthKeys.forEach((mKey, index) => {
-                // 固定費
                 appData.fixedExpenses.forEach(item => {
                     const isHouse = item.category.startsWith('共通');
                     const isKazuma = item.category === 'かずま';
@@ -643,7 +660,6 @@
                     }
                 });
 
-                // 変動費
                 if (appData.months[mKey]) {
                     appData.months[mKey].variableExpenses.forEach(item => {
                         const isHouse = item.category.startsWith('共通');
@@ -667,18 +683,16 @@
                 }
             });
 
-            // 折れ線グラフ描画関数
             function drawLineChart(canvasId, targetData) {
                 const ctx = document.getElementById(canvasId).getContext('2d');
                 if (charts[canvasId]) charts[canvasId].destroy();
                 
-                const datasets = Object.keys(targetData).map((name, i) => {
-                    const hue = (i * 137.5) % 360;
+                const datasets = Object.keys(targetData).map((name) => {
                     return {
                         label: name,
                         data: targetData[name],
-                        borderColor: `hsl(${hue}, 70%, 50%)`,
-                        backgroundColor: `hsl(${hue}, 70%, 50%, 0.1)`,
+                        borderColor: getChartColor(name, false),
+                        backgroundColor: getChartColor(name, true),
                         tension: 0.2,
                         fill: false,
                         borderWidth: 2
@@ -689,36 +703,26 @@
                     type: 'line',
                     data: { labels: labels, datasets: datasets },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        responsive: true, maintainAspectRatio: false,
                         scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '¥' + value.toLocaleString(); } } } },
                         plugins: { tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ¥' + context.parsed.y.toLocaleString(); } } } }
                     }
                 });
             }
 
-            // 円グラフ描画関数
             function drawPieChart(canvasId, pieData) {
                 const ctx = document.getElementById(canvasId).getContext('2d');
                 if (charts[canvasId]) charts[canvasId].destroy();
 
                 const itemLabels = Object.keys(pieData);
                 const itemData = Object.values(pieData);
-                const bgColors = itemLabels.map((_, i) => `hsl(${((i+1) * 137.5) % 360}, 65%, 55%)`);
+                const bgColors = itemLabels.map(label => getChartColor(label, false));
 
                 charts[canvasId] = new Chart(ctx, {
-                    type: 'pie', // または 'doughnut'（ドーナツ型）
-                    data: {
-                        labels: itemLabels,
-                        datasets: [{
-                            data: itemData,
-                            backgroundColor: bgColors,
-                            borderWidth: 1
-                        }]
-                    },
+                    type: 'pie',
+                    data: { labels: itemLabels, datasets: [{ data: itemData, backgroundColor: bgColors, borderWidth: 1 }] },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        responsive: true, maintainAspectRatio: false,
                         plugins: {
                             legend: { position: 'right' },
                             tooltip: { callbacks: { label: function(context) { return context.label + ': ¥' + context.parsed.toLocaleString(); } } }
@@ -727,11 +731,9 @@
                 });
             }
 
-            // グラフの描画実行
             drawPieChart('pie-household', housePie);
             drawPieChart('pie-kazuma', kazumaPie);
             drawPieChart('pie-kanako', kanakoPie);
-
             drawLineChart('chart-household', houseData);
             drawLineChart('chart-kazuma', kazumaData);
             drawLineChart('chart-kanako', kanakoData);
@@ -743,8 +745,17 @@
             const [y, m] = currentMonthStr.split('-');
             displayMonth.textContent = `${y}年${Number(m)}月`;
 
+            // プルダウン一括更新
+            kazumaIncSelect.innerHTML = '';
+            kanakoIncSelect.innerHTML = '';
+            appData.incomeCategories.forEach(cat => {
+                kazumaIncSelect.appendChild(new Option(cat, cat));
+                kanakoIncSelect.appendChild(new Option(cat, cat));
+            });
+
             varNameSelect.innerHTML = '';
             appData.variableCategories.forEach(cat => varNameSelect.appendChild(new Option(cat, cat)));
+            
             fixedNameSelect.innerHTML = '';
             appData.fixedCategories.forEach(cat => fixedNameSelect.appendChild(new Option(cat, cat)));
 
@@ -753,24 +764,24 @@
             document.getElementById('kazuma-income-list').innerHTML = '';
             md.incomes.kazuma.forEach(item => {
                 kazumaTotalIncome += item.amount;
-                document.getElementById('kazuma-income-list').innerHTML += `<tr><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon" onclick="deleteIncome('kazuma', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`;
+                document.getElementById('kazuma-income-list').innerHTML += `<tr><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteIncome('kazuma', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`;
             });
 
             document.getElementById('kanako-income-list').innerHTML = '';
             md.incomes.kanako.forEach(item => {
                 kanakoTotalIncome += item.amount;
-                document.getElementById('kanako-income-list').innerHTML += `<tr><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon" onclick="deleteIncome('kanako', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`;
+                document.getElementById('kanako-income-list').innerHTML += `<tr><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteIncome('kanako', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`;
             });
 
             document.getElementById('fixed-list').innerHTML = '';
             appData.fixedExpenses.forEach(item => {
-                document.getElementById('fixed-list').innerHTML += `<tr><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
+                document.getElementById('fixed-list').innerHTML += `<tr><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
             document.getElementById('variable-list').innerHTML = '';
             const sortedVar = [...md.variableExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
             sortedVar.forEach(item => {
-                document.getElementById('variable-list').innerHTML += `<tr><td>${item.date}</td><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
+                document.getElementById('variable-list').innerHTML += `<tr><td>${item.date}</td><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
             let kazumaPersonal = 0, kanakoPersonal = 0, kazumaPaidShared = 0, kanakoPaidShared = 0, splitShared = 0;
