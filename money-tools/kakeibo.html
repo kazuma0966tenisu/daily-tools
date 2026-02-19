@@ -6,6 +6,7 @@
     <title>ふたりの家計簿 - かずま & かなこ</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --md-primary: #00796B; 
@@ -37,16 +38,8 @@
             align-items: center;
             justify-content: space-between;
         }
-        .app-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .app-bar h1 {
-            margin: 0;
-            font-size: 1.25rem;
-            font-weight: 500;
-        }
+        .app-bar-left { display: flex; align-items: center; gap: 10px; }
+        .app-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 500; }
         
         .month-selector {
             background: rgba(255,255,255,0.2);
@@ -57,24 +50,57 @@
             gap: 8px;
         }
         .month-selector input {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1rem;
-            font-weight: 700;
-            outline: none;
-            font-family: inherit;
-            cursor: pointer;
+            background: transparent; border: none; color: white;
+            font-size: 1rem; font-weight: 700; outline: none;
+            font-family: inherit; cursor: pointer;
         }
         .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
         .container {
             max-width: 1000px;
-            margin: 2rem auto;
+            margin: 0 auto 2rem auto;
             padding: 0 1rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+        }
+
+        /* タブ切り替えデザイン */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem 0 0 0;
+        }
+        .tab-btn {
+            padding: 0.75rem 2rem;
+            border-radius: 24px;
+            border: 2px solid var(--md-primary);
+            background: transparent;
+            color: var(--md-primary);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn.active {
+            background: var(--md-primary);
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,121,107,0.4);
+        }
+        .sheet {
+            display: none; /* デフォルトは非表示 */
+            animation: fadeIn 0.3s ease;
+        }
+        .sheet.active {
+            display: block; /* activeが付いたら表示 */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .card {
@@ -82,668 +108,64 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
             padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .section-title {
-            margin-top: 0;
-            font-size: 1.1rem;
-            color: var(--md-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-top: 0; font-size: 1.1rem; color: var(--md-primary);
+            display: flex; align-items: center; gap: 8px;
             border-bottom: 2px solid var(--md-primary-light);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
+            padding-bottom: 0.5rem; margin-bottom: 1rem;
         }
 
-        .dash-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        .dash-box {
-            padding: 1.25rem;
-            border-radius: 8px;
-            border: 1px solid var(--md-border);
-            text-align: center;
-            background: #FAFAFA;
-        }
-        .dash-box h3 {
-            margin: 0 0 10px 0;
-            font-size: 0.95rem;
-            color: var(--md-text-secondary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
-        }
-        .dash-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            margin-bottom: 6px;
-            color: var(--md-text-secondary);
-        }
-        .dash-row span:last-child {
-            font-weight: 500;
-            color: var(--md-text);
-        }
-        .dash-main-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 10px 0 0 0;
-            padding-top: 10px;
-            border-top: 1px dashed var(--md-border);
-        }
+        /* ダッシュボード周り */
+        .dash-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+        .dash-box { padding: 1.25rem; border-radius: 8px; border: 1px solid var(--md-border); text-align: center; background: #FAFAFA; }
+        .dash-box h3 { margin: 0 0 10px 0; font-size: 0.95rem; color: var(--md-text-secondary); display: flex; justify-content: center; align-items: center; gap: 4px; }
+        .dash-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; color: var(--md-text-secondary); }
+        .dash-row span:last-child { font-weight: 500; color: var(--md-text); }
+        .dash-main-value { font-size: 1.5rem; font-weight: 700; margin: 10px 0 0 0; padding-top: 10px; border-top: 1px dashed var(--md-border); }
 
         .dash-kazuma { border-top: 4px solid var(--kazuma-color); }
         .dash-kazuma h3, .dash-kazuma .dash-main-value { color: var(--kazuma-color); }
-        
         .dash-kanako { border-top: 4px solid var(--kanako-color); }
         .dash-kanako h3, .dash-kanako .dash-main-value { color: var(--kanako-color); }
-        
         .dash-household { border-top: 4px solid var(--md-primary); background-color: #E0F2F1; border-color: #B2DFDB; }
         .dash-household h3, .dash-household .dash-main-value { color: var(--md-primary); }
 
         .settlement-alert {
-            background-color: #FFF3E0;
-            border-left: 4px solid #FF9800;
-            padding: 1rem;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-            color: #E65100;
-            line-height: 1.5;
+            background-color: #FFF3E0; border-left: 4px solid #FF9800; padding: 1rem;
+            border-radius: 4px; display: flex; align-items: center; gap: 12px;
+            font-weight: 500; color: #E65100; line-height: 1.5;
         }
-        
-        /* ⑤ 精算メッセージの強調用スタイル */
         .settlement-alert strong {
-            font-weight: 700;
-            text-decoration: underline;
-            text-decoration-color: #FF9800; /* アンダーラインの色を少し合わせる */
-            text-decoration-thickness: 2px;
-            text-underline-offset: 3px;
-            font-size: 1.05rem;
+            font-weight: 700; text-decoration: underline; text-decoration-color: #FF9800;
+            text-decoration-thickness: 2px; text-underline-offset: 3px; font-size: 1.05rem;
         }
 
+        /* フォーム周り */
         .form-row {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            background: #FAFAFA;
-            padding: 1rem;
-            border-radius: 4px;
-            border: 1px dashed var(--md-border);
+            display: flex; gap: 1rem; flex-wrap: wrap; background: #FAFAFA;
+            padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border);
         }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 140px;
-        }
-        .form-group label {
-            font-size: 0.8rem;
-            color: var(--md-text-secondary);
-            margin-bottom: 0.25rem;
-        }
+        .form-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
+        .form-group label { font-size: 0.8rem; color: var(--md-text-secondary); margin-bottom: 0.25rem; }
         .form-group input, .form-group select {
-            padding: 0.5rem;
-            font-size: 0.95rem;
-            border: none;
-            border-bottom: 1px solid var(--md-border);
-            background-color: transparent;
-            font-family: inherit;
+            padding: 0.5rem; font-size: 0.95rem; border: none; border-bottom: 1px solid var(--md-border);
+            background-color: transparent; font-family: inherit;
         }
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-bottom: 2px solid var(--md-primary);
-        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-bottom: 2px solid var(--md-primary); }
 
         .btn {
-            background-color: var(--md-primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            background-color: var(--md-primary); color: white; border: none;
+            padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem;
+            font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
         }
         .btn:hover { background-color: #00695C; }
-        .btn-outline {
-            background-color: transparent; color: var(--md-primary); border: 1px solid var(--md-primary);
-        }
-        .btn-outline:hover { background-color: rgba(0, 150, 136, 0.04); }
+        .btn-outline { background-color: transparent; color: var(--md-text); border: 1px solid var(--md-border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-outline:hover { background-color: #f0f0f0; }
         .btn-icon { background: none; border: none; color: var(--md-text-secondary); cursor: pointer; padding: 4px; border-radius: 50%; }
         .btn-icon:hover { background-color: #FFEBEE; color: var(--md-error); }
 
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem;}
-        th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem;}
-        th { color: var(--md-text-secondary); font-weight: 500; font-size: 0.85rem; }
-        .text-right { text-align: right; }
-
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
-        
-        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-
-        @media (max-width: 768px) {
-            .dash-container { grid-template-columns: 1fr; }
-            .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
-        }
-    </style>
-</head>
-<body>
-    <header class="app-bar">
-        <div class="app-bar-left">
-            <span class="material-icons">favorite</span>
-            <h1>ふたりの家計簿</h1>
-        </div>
-        <div class="month-selector">
-            <span class="material-icons">calendar_month</span>
-            <input type="month" id="month-input">
-        </div>
-    </header>
-
-    <main class="container">
-        <section class="card">
-            <h2 class="section-title"><span class="material-icons">analytics</span> <span id="display-month"></span> のダッシュボード</h2>
-            
-            <div class="dash-container">
-                <div class="dash-box dash-kazuma">
-                    <h3><span class="material-icons">person</span> かずま</h3>
-                    <div class="dash-row"><span>収入</span><span id="dash-kazuma-inc">¥0</span></div>
-                    <div class="dash-row"><span>個人出費</span><span id="dash-kazuma-exp">¥0</span></div>
-                    <div class="dash-row"><span>共通費用の負担(半額)</span><span id="dash-kazuma-share">¥0</span></div>
-                    <p class="dash-main-value" title="収入 - 個人出費 - 共通費用の半額">
-                        <span style="font-size:0.8rem; color:#757575; display:block; font-weight:normal;">個人推定貯蓄可能額</span>
-                        <span id="dash-kazuma-save">¥0</span>
-                    </p>
-                </div>
-
-                <div class="dash-box dash-kanako">
-                    <h3><span class="material-icons">person_3</span> かなこ</h3>
-                    <div class="dash-row"><span>収入</span><span id="dash-kanako-inc">¥0</span></div>
-                    <div class="dash-row"><span>個人出費</span><span id="dash-kanako-exp">¥0</span></div>
-                    <div class="dash-row"><span>共通費用の負担(半額)</span><span id="dash-kanako-share">¥0</span></div>
-                    <p class="dash-main-value" title="収入 - 個人出費 - 共通費用の半額">
-                        <span style="font-size:0.8rem; color:#757575; display:block; font-weight:normal;">個人推定貯蓄可能額</span>
-                        <span id="dash-kanako-save">¥0</span>
-                    </p>
-                </div>
-
-                <div class="dash-box dash-household">
-                    <h3><span class="material-icons">home</span> 世帯全体</h3>
-                    <div class="dash-row"><span>世帯収入合計</span><span id="dash-total-inc">¥0</span></div>
-                    <div class="dash-row"><span>世帯出費合計</span><span id="dash-total-exp">¥0</span></div>
-                    <br>
-                    <p class="dash-main-value">
-                        <span style="font-size:0.8rem; color:#00796B; display:block; font-weight:normal;">世帯 想定貯蓄可能額</span>
-                        <span id="dash-total-save">¥0</span>
-                    </p>
-                </div>
-            </div>
-
-            <div class="settlement-alert" id="settlement-alert">
-                <span class="material-icons" style="font-size: 1.5rem;">currency_exchange</span>
-                <span id="settlement-text" style="font-size: 0.95rem;">計算中...</span>
-            </div>
-        </section>
-
-        <section class="card">
-            <h2 class="section-title"><span class="material-icons">account_balance_wallet</span> 今月の収入設定</h2>
-            
-            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 300px;">
-                    <h3 style="font-size: 1rem; color: var(--kazuma-color); margin-top: 0;">かずまの収入</h3>
-                    <table>
-                        <tbody id="kazuma-income-list"></tbody>
-                    </table>
-                    <form id="form-kazuma-income" class="form-row" style="padding: 0.5rem;">
-                        <div class="form-group">
-                            <label>項目名</label>
-                            <select id="kazuma-inc-category" required>
-                                <option value="給与">給与</option>
-                                <option value="賞与">賞与</option>
-                                <option value="臨時収入">臨時収入</option>
-                                <option value="副業収入">副業収入</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>金額 (円)</label>
-                            <input type="number" id="kazuma-inc-amount" required min="0">
-                        </div>
-                        <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
-                            <button type="submit" class="btn"><span class="material-icons">add</span></button>
-                        </div>
-                    </form>
-                </div>
-
-                <div style="flex: 1; min-width: 300px;">
-                    <h3 style="font-size: 1rem; color: var(--kanako-color); margin-top: 0;">かなこの収入</h3>
-                    <table>
-                        <tbody id="kanako-income-list"></tbody>
-                    </table>
-                    <form id="form-kanako-income" class="form-row" style="padding: 0.5rem;">
-                        <div class="form-group">
-                            <label>項目名</label>
-                            <select id="kanako-inc-category" required>
-                                <option value="給与">給与</option>
-                                <option value="賞与">賞与</option>
-                                <option value="臨時収入">臨時収入</option>
-                                <option value="副業収入">副業収入</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>金額 (円)</label>
-                            <input type="number" id="kanako-inc-amount" required min="0">
-                        </div>
-                        <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
-                            <button type="submit" class="btn"><span class="material-icons">add</span></button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <section class="card">
-            <h2 class="section-title"><span class="material-icons">event_repeat</span> 固定費（毎月自動適用）</h2>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>項目</th>
-                        <th>負担者</th>
-                        <th class="text-right">金額</th>
-                        <th class="text-right">削除</th>
-                    </tr>
-                </thead>
-                <tbody id="fixed-list"></tbody>
-            </table>
-
-            <form id="form-fixed" class="form-row">
-                <div class="form-group">
-                    <label>項目名</label>
-                    <select id="fixed-name" required>
-                        <option value="家賃">家賃</option>
-                        <option value="ネット代">ネット代</option>
-                        <option value="保険">保険</option>
-                        <option value="水道光熱費">水道光熱費</option>
-                        <option value="サブスク費">サブスク費</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>金額 (円)</label>
-                    <input type="number" id="fixed-amount" required min="0">
-                </div>
-                <div class="form-group">
-                    <label>負担者</label>
-                    <select id="fixed-category">
-                        <option value="共通・かずま">共通・かずま（かずまが立替）</option>
-                        <option value="共通・かなこ">共通・かなこ（かなこが立替）</option>
-                        <option value="共通">共通（すでに折半済）</option>
-                        <option value="かずま">かずま（個人出費）</option>
-                        <option value="かなこ">かなこ（個人出費）</option>
-                    </select>
-                </div>
-                <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
-                    <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
-                </div>
-            </form>
-        </section>
-
-        <section class="card">
-            <div class="action-bar">
-                <h2 class="section-title" style="margin: 0; border: none; padding: 0;"><span class="material-icons">shopping_cart</span> 変動費（今月分）</h2>
-                <button type="button" class="btn btn-outline" onclick="editCategories()">
-                    <span class="material-icons">settings</span> 項目リストの編集
-                </button>
-            </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>日付</th>
-                        <th>項目</th>
-                        <th>負担者</th>
-                        <th class="text-right">金額</th>
-                        <th class="text-right">削除</th>
-                    </tr>
-                </thead>
-                <tbody id="variable-list"></tbody>
-            </table>
-
-            <form id="form-variable" class="form-row">
-                <div class="form-group">
-                    <label>日付</label>
-                    <input type="date" id="var-date" required>
-                </div>
-                <div class="form-group">
-                    <label>項目名</label>
-                    <select id="var-name" required></select>
-                </div>
-                <div class="form-group">
-                    <label>金額 (円)</label>
-                    <input type="number" id="var-amount" required min="0">
-                </div>
-                <div class="form-group">
-                    <label>負担者</label>
-                    <select id="var-category">
-                        <option value="共通・かずま">共通・かずま（かずまが立替）</option>
-                        <option value="共通・かなこ">共通・かなこ（かなこが立替）</option>
-                        <option value="共通">共通（すでに折半済）</option>
-                        <option value="かずま">かずま（個人出費）</option>
-                        <option value="かなこ">かなこ（個人出費）</option>
-                    </select>
-                </div>
-                <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
-                    <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
-                </div>
-            </form>
-        </section>
-    </main>
-
-    <script>
-        // データ構造の変更に伴い、保存キーをv4に変更
-        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v4';
-        let currentMonthStr = "";
-
-        const defaultCategories = [
-            "携帯代", "サブスク費", "食費", "外食費", "交通費", 
-            "健康・医療費", "日用品費", "交際費", "衣服・美容代", 
-            "趣味・娯楽", "デート代", "旅行費", "金融投資", 
-            "自己投資", "奨学金返済", "特別な支出"
-        ];
-
-        function loadData() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) return JSON.parse(saved);
-            
-            return {
-                fixedExpenses: [],
-                customCategories: defaultCategories, // カスタムカテゴリ保存用
-                months: {}
-            };
-        }
-
-        let appData = loadData();
-
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-            render();
-        }
-
-        function getCurrentMonthData() {
-            if (!appData.months[currentMonthStr]) {
-                appData.months[currentMonthStr] = {
-                    incomes: { kazuma: [], kanako: [] }, // 収入を配列に変更
-                    variableExpenses: []
-                };
-            }
-            return appData.months[currentMonthStr];
-        }
-
-        const monthInput = document.getElementById('month-input');
-        const displayMonth = document.getElementById('display-month');
-        const varNameSelect = document.getElementById('var-name');
-
-        function formatCurrency(num) {
-            return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(num);
-        }
-
-        function getCategoryBadge(cat) {
-            switch(cat) {
-                case '共通・かずま': return `<span class="badge" style="background:#E3F2FD; color:#1976D2;">共通・かずま</span>`;
-                case '共通・かなこ': return `<span class="badge" style="background:#FCE4EC; color:#C2185B;">共通・かなこ</span>`;
-                case '共通': return `<span class="badge" style="background:#E8F5E9; color:#388E3C;">共通(折半済)</span>`;
-                case 'かずま': return `<span class="badge" style="background:#EEEEEE; color:#616161;">かずま個人</span>`;
-                case 'かなこ': return `<span class="badge" style="background:#EEEEEE; color:#616161;">かなこ個人</span>`;
-                default: return `<span class="badge" style="background:#EEEEEE; color:#616161;">${cat}</span>`;
-            }
-        }
-
-        // --- 削除機能 ---
-        window.deleteIncome = function(person, id) {
-            const md = getCurrentMonthData();
-            md.incomes[person] = md.incomes[person].filter(i => i.id !== id);
-            saveData();
-        };
-
-        window.deleteFixed = function(id) {
-            if(confirm('固定費を削除しますか？')) {
-                appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id);
-                saveData();
-            }
-        };
-
-        window.deleteVariable = function(id) {
-            if(confirm('出費を削除しますか？')) {
-                const md = getCurrentMonthData();
-                md.variableExpenses = md.variableExpenses.filter(i => i.id !== id);
-                saveData();
-            }
-        };
-
-        // --- カテゴリ編集機能 ---
-        window.editCategories = function() {
-            const currentList = appData.customCategories.join('\n');
-            const result = prompt("変動費の項目リストを編集します。\n改行区切りで入力してください。", currentList);
-            
-            if (result !== null) {
-                // 空行を除外して配列にする
-                const newCategories = result.split('\n').map(s => s.trim()).filter(s => s !== "");
-                if (newCategories.length > 0) {
-                    appData.customCategories = newCategories;
-                    saveData();
-                } else {
-                    alert("項目は最低1つ以上必要です。");
-                }
-            }
-        };
-
-        // --- レンダリング処理 ---
-        function render() {
-            const md = getCurrentMonthData();
-
-            const [y, m] = currentMonthStr.split('-');
-            displayMonth.textContent = `${y}年${Number(m)}月`;
-
-            // 変動費カテゴリのプルダウン更新
-            varNameSelect.innerHTML = '';
-            appData.customCategories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                option.textContent = cat;
-                varNameSelect.appendChild(option);
-            });
-
-            // 収入の集計と描画
-            let kazumaTotalIncome = 0;
-            let kanakoTotalIncome = 0;
-
-            document.getElementById('kazuma-income-list').innerHTML = '';
-            md.incomes.kazuma.forEach(item => {
-                kazumaTotalIncome += item.amount;
-                document.getElementById('kazuma-income-list').innerHTML += `
-                    <tr>
-                        <td style="padding: 0.25rem 0;">${item.category}</td>
-                        <td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td>
-                        <td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon" onclick="deleteIncome('kazuma', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td>
-                    </tr>`;
-            });
-
-            document.getElementById('kanako-income-list').innerHTML = '';
-            md.incomes.kanako.forEach(item => {
-                kanakoTotalIncome += item.amount;
-                document.getElementById('kanako-income-list').innerHTML += `
-                    <tr>
-                        <td style="padding: 0.25rem 0;">${item.category}</td>
-                        <td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td>
-                        <td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon" onclick="deleteIncome('kanako', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td>
-                    </tr>`;
-            });
-
-            // リストの描画
-            document.getElementById('fixed-list').innerHTML = '';
-            appData.fixedExpenses.forEach(item => {
-                document.getElementById('fixed-list').innerHTML += `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${getCategoryBadge(item.category)}</td>
-                        <td class="text-right">${formatCurrency(item.amount)}</td>
-                        <td class="text-right"><button type="button" class="btn-icon" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td>
-                    </tr>`;
-            });
-
-            document.getElementById('variable-list').innerHTML = '';
-            const sortedVar = [...md.variableExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
-            sortedVar.forEach(item => {
-                document.getElementById('variable-list').innerHTML += `
-                    <tr>
-                        <td>${item.date}</td>
-                        <td>${item.name}</td>
-                        <td>${getCategoryBadge(item.category)}</td>
-                        <td class="text-right">${formatCurrency(item.amount)}</td>
-                        <td class="text-right"><button type="button" class="btn-icon" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td>
-                    </tr>`;
-            });
-
-            // 集計処理
-            let kazumaPersonal = 0;
-            let kanakoPersonal = 0;
-            let kazumaPaidShared = 0;
-            let kanakoPaidShared = 0;
-            let splitShared = 0;
-
-            const processExpense = (item) => {
-                if (item.category === '共通・かずま') kazumaPaidShared += item.amount;
-                else if (item.category === '共通・かなこ') kanakoPaidShared += item.amount;
-                else if (item.category === '共通') splitShared += item.amount;
-                else if (item.category === 'かずま') kazumaPersonal += item.amount;
-                else if (item.category === 'かなこ') kanakoPersonal += item.amount;
-            };
-
-            appData.fixedExpenses.forEach(processExpense);
-            md.variableExpenses.forEach(processExpense);
-
-            const sharedTotal = kazumaPaidShared + kanakoPaidShared + splitShared;
-            const sharedHalf = sharedTotal / 2;
-
-            const householdIncome = kazumaTotalIncome + kanakoTotalIncome;
-            const householdExpense = kazumaPersonal + kanakoPersonal + sharedTotal;
-
-            // 個人のダッシュボード反映
-            document.getElementById('dash-kazuma-inc').textContent = formatCurrency(kazumaTotalIncome);
-            document.getElementById('dash-kazuma-exp').textContent = formatCurrency(kazumaPersonal);
-            document.getElementById('dash-kazuma-share').textContent = formatCurrency(sharedHalf);
-            document.getElementById('dash-kazuma-save').textContent = formatCurrency(kazumaTotalIncome - kazumaPersonal - sharedHalf);
-
-            document.getElementById('dash-kanako-inc').textContent = formatCurrency(kanakoTotalIncome);
-            document.getElementById('dash-kanako-exp').textContent = formatCurrency(kanakoPersonal);
-            document.getElementById('dash-kanako-share').textContent = formatCurrency(sharedHalf);
-            document.getElementById('dash-kanako-save').textContent = formatCurrency(kanakoTotalIncome - kanakoPersonal - sharedHalf);
-
-            // 世帯のダッシュボード反映
-            document.getElementById('dash-total-inc').textContent = formatCurrency(householdIncome);
-            document.getElementById('dash-total-exp').textContent = formatCurrency(householdExpense);
-            document.getElementById('dash-total-save').textContent = formatCurrency(householdIncome - householdExpense);
-
-            // ⑤ 精算ロジックのテキスト修正
-            const diffX = (kanakoPaidShared - kazumaPaidShared) / 2;
-            const alertBox = document.getElementById('settlement-alert');
-            const alertText = document.getElementById('settlement-text');
-
-            if (kazumaPaidShared === 0 && kanakoPaidShared === 0) {
-                alertBox.style.display = 'none';
-            } else {
-                alertBox.style.display = 'flex';
-                if (diffX > 0) {
-                    // Xが正の数：かずまからかなこに支払う
-                    alertText.innerHTML = `今月の共通費精算：<br><strong>かずま</strong> が <strong>かなこ</strong> に <strong>${formatCurrency(diffX)}</strong> ペイする`;
-                } else if (diffX < 0) {
-                    // Xが負の数：かなこからかずまに支払う
-                    alertText.innerHTML = `今月の共通費精算：<br><strong>かなこ</strong> が <strong>かずま</strong> に <strong>${formatCurrency(Math.abs(diffX))}</strong> ペイする`;
-                } else {
-                    alertText.innerHTML = `今月の共通費精算：ピッタリ折半されています！`;
-                }
-            }
-        }
-
-        function init() {
-            const now = new Date();
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            currentMonthStr = `${yyyy}-${mm}`;
-            
-            monthInput.value = currentMonthStr;
-            document.getElementById('var-date').valueAsDate = now;
-
-            monthInput.addEventListener('change', (e) => {
-                if(e.target.value) {
-                    currentMonthStr = e.target.value;
-                    render();
-                }
-            });
-
-            // 収入追加イベント
-            document.getElementById('form-kazuma-income').addEventListener('submit', (e) => {
-                e.preventDefault();
-                getCurrentMonthData().incomes.kazuma.push({
-                    id: Date.now(),
-                    category: document.getElementById('kazuma-inc-category').value,
-                    amount: Number(document.getElementById('kazuma-inc-amount').value)
-                });
-                document.getElementById('kazuma-inc-amount').value = '';
-                saveData();
-            });
-
-            document.getElementById('form-kanako-income').addEventListener('submit', (e) => {
-                e.preventDefault();
-                getCurrentMonthData().incomes.kanako.push({
-                    id: Date.now(),
-                    category: document.getElementById('kanako-inc-category').value,
-                    amount: Number(document.getElementById('kanako-inc-amount').value)
-                });
-                document.getElementById('kanako-inc-amount').value = '';
-                saveData();
-            });
-
-            document.getElementById('form-fixed').addEventListener('submit', (e) => {
-                e.preventDefault();
-                appData.fixedExpenses.push({
-                    id: Date.now(),
-                    name: document.getElementById('fixed-name').value,
-                    amount: Number(document.getElementById('fixed-amount').value),
-                    category: document.getElementById('fixed-category').value
-                });
-                // 追加後、金額のみクリアする（項目は連続入力しやすいように残す）
-                document.getElementById('fixed-amount').value = '';
-                saveData();
-            });
-
-            document.getElementById('form-variable').addEventListener('submit', (e) => {
-                e.preventDefault();
-                getCurrentMonthData().variableExpenses.push({
-                    id: Date.now(),
-                    date: document.getElementById('var-date').value,
-                    name: document.getElementById('var-name').value,
-                    amount: Number(document.getElementById('var-amount').value),
-                    category: document.getElementById('var-category').value
-                });
-                document.getElementById('var-amount').value = '';
-                saveData();
-            });
-
-            render();
-        }
-
-        window.onload = init;
-    </script>
-</body>
-</html>
+        th,
