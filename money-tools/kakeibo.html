@@ -151,6 +151,7 @@
             background-color: transparent; font-family: inherit;
         }
         .form-group input:focus, .form-group select:focus { outline: none; border-bottom: 2px solid var(--md-primary); }
+        .form-group input[type="month"] { width: 100%; box-sizing: border-box;}
 
         .btn {
             background-color: var(--md-primary); color: white; border: none;
@@ -206,7 +207,6 @@
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
-        /* PCやタブレットなどの画面幅が少し狭くなった時の汎用レイアウト調整 */
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
             .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem;}
@@ -214,33 +214,21 @@
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
         }
 
-        /* ＝＝＝ 今回追加：スマホの縦画面（Portrait）専用のレイアウト調整 ＝＝＝ */
+        /* スマホの縦画面（Portrait）専用のレイアウト調整 */
         @media (max-width: 600px) and (orientation: portrait) {
-            /* ① モーダルの「＋追加」ボタンの見切れ対策 */
-            .category-add-form input {
-                min-width: 0; /* 入力欄が広がりすぎてボタンを押し出すのを防ぐ */
-            }
-            .category-add-form button {
-                padding: 0.5rem 1rem !important; /* ボタンの横幅を少しスリムにする */
-                flex-shrink: 0; /* 画面が狭くてもボタンが縮まないように固定する */
-            }
+            .category-add-form input { min-width: 0; }
+            .category-add-form button { padding: 0.5rem 1rem !important; flex-shrink: 0; }
             
-            /* ② グラフの表示範囲のレイアウト調整 */
             .graph-range-container {
-                flex-direction: column !important; /* 表示範囲とプルダウンを縦並びに */
-                align-items: flex-start !important;
-                gap: 4px !important;
-                width: 100%;
+                flex-direction: column !important; align-items: flex-start !important;
+                gap: 4px !important; width: 100%;
             }
-            .graph-range-inputs {
-                width: 100%;
-                justify-content: space-between; /* ２つのプルダウンを均等に配置 */
-            }
-            .graph-month-input {
-                padding: 0.4rem !important;
-                font-size: 0.85rem !important;
-                width: 45%; /* 入力欄の幅を少し小さくし、▽との隙間を詰める */
-            }
+            .graph-range-inputs { width: 100%; justify-content: space-between; }
+            .graph-month-input { padding: 0.4rem !important; font-size: 0.85rem !important; width: 45%; }
+            
+            /* 追加：固定費の期間入力欄をスマホで綺麗に並べる */
+            .fixed-period-inputs { flex-direction: row !important; gap: 0.5rem;}
+            .fixed-period-inputs > div { min-width: 0; flex: 1;}
         }
     </style>
 </head>
@@ -353,23 +341,32 @@
                     </button>
                 </div>
                 <table>
-                    <thead><tr><th>項目</th><th>負担者</th><th class="text-right">金額</th><th class="text-right">削除</th></tr></thead>
+                    <thead><tr><th>項目</th><th>負担者</th><th>適用期間</th><th class="text-right">金額</th><th class="text-right">削除</th></tr></thead>
                     <tbody id="fixed-list"></tbody>
                 </table>
                 <form id="form-fixed" class="form-row">
-                    <div class="form-group"><label>項目名</label><select id="fixed-name" required></select></div>
-                    <div class="form-group"><label>金額 (円)</label><input type="number" id="fixed-amount" required min="0"></div>
-                    <div class="form-group">
-                        <label>負担者</label>
-                        <select id="fixed-category">
-                            <option value="共通・かずま">共通・かずま（かずまが立替）</option>
-                            <option value="共通・かなこ">共通・かなこ（かなこが立替）</option>
-                            <option value="共通">共通（すでに折半済）</option>
-                            <option value="かずま">かずま（個人出費）</option>
-                            <option value="かなこ">かなこ（個人出費）</option>
-                        </select>
+                    <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+                        <div class="form-group"><label>項目名</label><select id="fixed-name" required></select></div>
+                        <div class="form-group"><label>金額 (円)</label><input type="number" id="fixed-amount" required min="0"></div>
+                        <div class="form-group">
+                            <label>負担者</label>
+                            <select id="fixed-category">
+                                <option value="共通・かずま">共通・かずま（かずまが立替）</option>
+                                <option value="共通・かなこ">共通・かなこ（かなこが立替）</option>
+                                <option value="共通">共通（すでに折半済）</option>
+                                <option value="かずま">かずま（個人出費）</option>
+                                <option value="かなこ">かなこ（個人出費）</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
+                    <div class="form-row fixed-period-inputs" style="width: 100%; padding: 0; background: none; border: none; margin-top: 0.5rem;">
+                        <div class="form-group"><label>開始月 (必須)</label><input type="month" id="fixed-start" required></div>
+                        <div style="display:flex; align-items:flex-end; padding-bottom: 0.5rem; font-weight:bold;">〜</div>
+                        <div class="form-group"><label>終了月 (任意・空欄可)</label><input type="month" id="fixed-end"></div>
+                        <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
+                            <button type="submit" class="btn"><span class="material-icons">add</span> 追加</button>
+                        </div>
+                    </div>
                 </form>
             </section>
 
@@ -439,15 +436,22 @@
                 <h3 class="graph-title" style="color: var(--md-primary); border-color: var(--md-primary-light);">
                     <span class="material-icons">show_chart</span> 月別の推移（折れ線グラフ）
                 </h3>
-
                 <h4 style="color: var(--md-primary); margin-bottom: 0;">世帯全体（共通出費）</h4>
                 <div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="chart-household"></canvas></div>
-
                 <h4 style="color: var(--kazuma-color); margin-bottom: 0;">かずま（個人出費）</h4>
                 <div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="chart-kazuma"></canvas></div>
-
                 <h4 style="color: var(--kanako-color); margin-bottom: 0;">かなこ（個人出費）</h4>
-                <div style="position: relative; height: 300px;"><canvas id="chart-kanako"></canvas></div>
+                <div style="position: relative; height: 300px; margin-bottom: 3rem;"><canvas id="chart-kanako"></canvas></div>
+
+                <h3 class="graph-title" style="color: var(--md-primary); border-color: var(--md-primary-light);">
+                    <span class="material-icons">bar_chart</span> 月ごとの収支の推移
+                </h3>
+                <h4 style="color: var(--md-primary); margin-bottom: 0;">世帯全体（共通出費）</h4>
+                <div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="combo-household"></canvas></div>
+                <h4 style="color: var(--kazuma-color); margin-bottom: 0;">かずま（個人出費）</h4>
+                <div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="combo-kazuma"></canvas></div>
+                <h4 style="color: var(--kanako-color); margin-bottom: 0;">かなこ（個人出費）</h4>
+                <div style="position: relative; height: 300px; margin-bottom: 1rem;"><canvas id="combo-kanako"></canvas></div>
 
             </section>
         </div>
@@ -471,7 +475,8 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v5'; 
+        // データの持ち方が変わるため、バージョンアップして以前のデータをリセットまたは初期化します
+        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v6'; 
         let currentMonthStr = "";
         let charts = {};
 
@@ -517,10 +522,8 @@
                 if (!data.incomeCategories) data.incomeCategories = defaultIncomeCategories;
             } else {
                 data = {
-                    fixedExpenses: [],
-                    incomeCategories: defaultIncomeCategories,
-                    variableCategories: defaultVariableCategories,
-                    fixedCategories: defaultFixedCategories,
+                    fixedExpenses: [], incomeCategories: defaultIncomeCategories,
+                    variableCategories: defaultVariableCategories, fixedCategories: defaultFixedCategories,
                     months: {}
                 };
             }
@@ -597,11 +600,7 @@
             document.getElementById('category-modal').classList.add('show');
         };
 
-        window.closeModal = function() {
-            document.getElementById('category-modal').classList.remove('show');
-            saveData();
-        };
-
+        window.closeModal = function() { document.getElementById('category-modal').classList.remove('show'); saveData(); };
         window.onclick = function(event) { if (event.target == document.getElementById('category-modal')) closeModal(); };
 
         function renderCategoryModal() {
@@ -631,15 +630,33 @@
             const inputEl = document.getElementById('new-category-name');
             const val = inputEl.value.trim();
             if (!val) return;
-            
             if (editingCategoryType === 'fixed') appData.fixedCategories.push(val);
             else if (editingCategoryType === 'variable') appData.variableCategories.push(val);
             else if (editingCategoryType === 'income') appData.incomeCategories.push(val);
-            
             inputEl.value = '';
             renderCategoryModal();
         };
 
+        // --- ★重要追加機能：指定月が期間内か判定する関数 ---
+        function isFixedExpenseActive(item, targetMonthStr) {
+            // targetMonthStr は "YYYY-MM"
+            const targetDate = new Date(targetMonthStr + "-01");
+            const startDate = new Date(item.startMonth + "-01");
+            
+            // 開始月より前なら無効
+            if (targetDate < startDate) return false;
+            
+            // 終了月が設定されていて、かつ終了月を過ぎていれば無効
+            if (item.endMonth) {
+                // 終了月も含めるため、終了月の翌月1日未満かで判定
+                const endDate = new Date(item.endMonth + "-01");
+                // endDateは例えば2026-03なら、2026-03-01。targetDateが2026-04-01になったらfalseにしたい
+                if (targetDate > endDate) return false; 
+            }
+            return true;
+        }
+
+        // --- グラフ描画 ---
         window.renderGraphs = function() {
             const startStr = document.getElementById('graph-start-month').value;
             const endStr = document.getElementById('graph-end-month').value;
@@ -662,9 +679,18 @@
 
             const houseData = {}, kazumaData = {}, kanakoData = {};
             const housePie = {}, kazumaPie = {}, kanakoPie = {};
+            const comboHouse = { inc: [], exp: [], bal: [] };
+            const comboKazuma = { inc: [], exp: [], bal: [] };
+            const comboKanako = { inc: [], exp: [], bal: [] };
 
             monthKeys.forEach((mKey, index) => {
+                let monthKazInc = 0, monthKanaInc = 0;
+                let monthShareExp = 0, monthKazExp = 0, monthKanaExp = 0;
+
+                // 固定費の集計（★判定関数を通す）
                 appData.fixedExpenses.forEach(item => {
+                    if (!isFixedExpenseActive(item, mKey)) return; // 期間外ならスキップ
+
                     const isHouse = item.category.startsWith('共通');
                     const isKazuma = item.category === 'かずま';
                     const isKanako = item.category === 'かなこ';
@@ -673,14 +699,17 @@
                         if (!houseData[item.name]) houseData[item.name] = new Array(monthKeys.length).fill(0);
                         houseData[item.name][index] += item.amount;
                         housePie[item.name] = (housePie[item.name] || 0) + item.amount;
+                        monthShareExp += item.amount;
                     } else if (isKazuma) {
                         if (!kazumaData[item.name]) kazumaData[item.name] = new Array(monthKeys.length).fill(0);
                         kazumaData[item.name][index] += item.amount;
                         kazumaPie[item.name] = (kazumaPie[item.name] || 0) + item.amount;
+                        monthKazExp += item.amount;
                     } else if (isKanako) {
                         if (!kanakoData[item.name]) kanakoData[item.name] = new Array(monthKeys.length).fill(0);
                         kanakoData[item.name][index] += item.amount;
                         kanakoPie[item.name] = (kanakoPie[item.name] || 0) + item.amount;
+                        monthKanaExp += item.amount;
                     }
                 });
 
@@ -694,17 +723,36 @@
                             if (!houseData[item.name]) houseData[item.name] = new Array(monthKeys.length).fill(0);
                             houseData[item.name][index] += item.amount;
                             housePie[item.name] = (housePie[item.name] || 0) + item.amount;
+                            monthShareExp += item.amount;
                         } else if (isKazuma) {
                             if (!kazumaData[item.name]) kazumaData[item.name] = new Array(monthKeys.length).fill(0);
                             kazumaData[item.name][index] += item.amount;
                             kazumaPie[item.name] = (kazumaPie[item.name] || 0) + item.amount;
+                            monthKazExp += item.amount;
                         } else if (isKanako) {
                             if (!kanakoData[item.name]) kanakoData[item.name] = new Array(monthKeys.length).fill(0);
                             kanakoData[item.name][index] += item.amount;
                             kanakoPie[item.name] = (kanakoPie[item.name] || 0) + item.amount;
+                            monthKanaExp += item.amount;
                         }
                     });
+
+                    appData.months[mKey].incomes.kazuma.forEach(i => monthKazInc += i.amount);
+                    appData.months[mKey].incomes.kanako.forEach(i => monthKanaInc += i.amount);
                 }
+
+                // 複合グラフの計算
+                const hInc = monthKazInc + monthKanaInc;
+                const hExp = monthShareExp + monthKazExp + monthKanaExp;
+                comboHouse.inc.push(hInc); comboHouse.exp.push(-hExp); comboHouse.bal.push(hInc - hExp);
+
+                const kazInc = monthKazInc;
+                const kazExp = (monthShareExp / 2) + monthKazExp;
+                comboKazuma.inc.push(kazInc); comboKazuma.exp.push(-kazExp); comboKazuma.bal.push(kazInc - kazExp);
+
+                const kanaInc = monthKanaInc;
+                const kanaExp = (monthShareExp / 2) + monthKanaExp;
+                comboKanako.inc.push(kanaInc); comboKanako.exp.push(-kanaExp); comboKanako.bal.push(kanaInc - kanaExp);
             });
 
             function drawLineChart(canvasId, targetData) {
@@ -713,19 +761,14 @@
                 
                 const datasets = Object.keys(targetData).map((name) => {
                     return {
-                        label: name,
-                        data: targetData[name],
-                        borderColor: getChartColor(name, false),
-                        backgroundColor: getChartColor(name, true),
-                        tension: 0.2,
-                        fill: false,
-                        borderWidth: 2
+                        label: name, data: targetData[name],
+                        borderColor: getChartColor(name, false), backgroundColor: getChartColor(name, true),
+                        tension: 0.2, fill: false, borderWidth: 2
                     };
                 });
 
                 charts[canvasId] = new Chart(ctx, {
-                    type: 'line',
-                    data: { labels: labels, datasets: datasets },
+                    type: 'line', data: { labels: labels, datasets: datasets },
                     options: {
                         responsive: true, maintainAspectRatio: false,
                         scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '¥' + value.toLocaleString(); } } } },
@@ -738,8 +781,9 @@
                 const ctx = document.getElementById(canvasId).getContext('2d');
                 if (charts[canvasId]) charts[canvasId].destroy();
 
-                const itemLabels = Object.keys(pieData);
-                const itemData = Object.values(pieData);
+                const sortedEntries = Object.entries(pieData).sort((a, b) => b[1] - a[1]);
+                const itemLabels = sortedEntries.map(e => e[0]);
+                const itemData = sortedEntries.map(e => e[1]);
                 const bgColors = itemLabels.map(label => getChartColor(label, false));
 
                 charts[canvasId] = new Chart(ctx, {
@@ -749,7 +793,62 @@
                         responsive: true, maintainAspectRatio: false,
                         plugins: {
                             legend: { position: 'right' },
-                            tooltip: { callbacks: { label: function(context) { return context.label + ': ¥' + context.parsed.toLocaleString(); } } }
+                            tooltip: { 
+                                callbacks: { 
+                                    label: function(context) { 
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const val = context.parsed;
+                                        const percentage = total > 0 ? ((val / total) * 100).toFixed(1) + '%' : '0%';
+                                        return context.label + ': ¥' + val.toLocaleString() + ' (' + percentage + ')'; 
+                                    } 
+                                } 
+                            }
+                        }
+                    }
+                });
+            }
+
+            function drawComboChart(canvasId, dataObj) {
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                if (charts[canvasId]) charts[canvasId].destroy();
+
+                charts[canvasId] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                type: 'line', label: '収支', data: dataObj.bal,
+                                borderColor: '#546E7A', backgroundColor: '#546E7A',
+                                borderWidth: 2, tension: 0.2, fill: false, yAxisID: 'y'
+                            },
+                            {
+                                type: 'bar', label: '収入', data: dataObj.inc,
+                                backgroundColor: '#4DB6AC', yAxisID: 'y'
+                            },
+                            {
+                                type: 'bar', label: '支出', data: dataObj.exp,
+                                backgroundColor: '#E57373', yAxisID: 'y'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { stacked: true },
+                            y: { stacked: true, ticks: { callback: function(value) { return '¥' + value.toLocaleString(); } } }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let val = context.raw;
+                                        if (context.dataset.label === '支出') val = Math.abs(val);
+                                        return context.dataset.label + ': ¥' + val.toLocaleString();
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -758,9 +857,14 @@
             drawPieChart('pie-household', housePie);
             drawPieChart('pie-kazuma', kazumaPie);
             drawPieChart('pie-kanako', kanakoPie);
+            
             drawLineChart('chart-household', houseData);
             drawLineChart('chart-kazuma', kazumaData);
             drawLineChart('chart-kanako', kanakoData);
+
+            drawComboChart('combo-household', comboHouse);
+            drawComboChart('combo-kazuma', comboKazuma);
+            drawComboChart('combo-kanako', comboKanako);
         };
 
         function render() {
@@ -768,18 +872,10 @@
             const [y, m] = currentMonthStr.split('-');
             displayMonth.textContent = `${y}年${Number(m)}月`;
 
-            kazumaIncSelect.innerHTML = '';
-            kanakoIncSelect.innerHTML = '';
-            appData.incomeCategories.forEach(cat => {
-                kazumaIncSelect.appendChild(new Option(cat, cat));
-                kanakoIncSelect.appendChild(new Option(cat, cat));
-            });
-
-            varNameSelect.innerHTML = '';
-            appData.variableCategories.forEach(cat => varNameSelect.appendChild(new Option(cat, cat)));
-            
-            fixedNameSelect.innerHTML = '';
-            appData.fixedCategories.forEach(cat => fixedNameSelect.appendChild(new Option(cat, cat)));
+            kazumaIncSelect.innerHTML = ''; kanakoIncSelect.innerHTML = '';
+            appData.incomeCategories.forEach(cat => { kazumaIncSelect.appendChild(new Option(cat, cat)); kanakoIncSelect.appendChild(new Option(cat, cat)); });
+            varNameSelect.innerHTML = ''; appData.variableCategories.forEach(cat => varNameSelect.appendChild(new Option(cat, cat)));
+            fixedNameSelect.innerHTML = ''; appData.fixedCategories.forEach(cat => fixedNameSelect.appendChild(new Option(cat, cat)));
 
             let kazumaTotalIncome = 0, kanakoTotalIncome = 0;
 
@@ -797,7 +893,12 @@
 
             document.getElementById('fixed-list').innerHTML = '';
             appData.fixedExpenses.forEach(item => {
-                document.getElementById('fixed-list').innerHTML += `<tr><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
+                // 表示用の文字列整形
+                const startStr = item.startMonth.replace('-', '年') + '月';
+                const endStr = item.endMonth ? (item.endMonth.replace('-', '年') + '月') : '継続中';
+                const periodStr = `<span style="font-size:0.75rem; color:#757575;">${startStr}〜<br>${endStr}</span>`;
+
+                document.getElementById('fixed-list').innerHTML += `<tr><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td>${periodStr}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
             document.getElementById('variable-list').innerHTML = '';
@@ -807,16 +908,25 @@
             });
 
             let kazumaPersonal = 0, kanakoPersonal = 0, kazumaPaidShared = 0, kanakoPaidShared = 0, splitShared = 0;
-            const processExpense = (item) => {
+            
+            // ★ダッシュボードの計算も、現在の月が期間内かどうか判定する
+            appData.fixedExpenses.forEach(item => {
+                if (isFixedExpenseActive(item, currentMonthStr)) {
+                    if (item.category === '共通・かずま') kazumaPaidShared += item.amount;
+                    else if (item.category === '共通・かなこ') kanakoPaidShared += item.amount;
+                    else if (item.category === '共通') splitShared += item.amount;
+                    else if (item.category === 'かずま') kazumaPersonal += item.amount;
+                    else if (item.category === 'かなこ') kanakoPersonal += item.amount;
+                }
+            });
+
+            md.variableExpenses.forEach(item => {
                 if (item.category === '共通・かずま') kazumaPaidShared += item.amount;
                 else if (item.category === '共通・かなこ') kanakoPaidShared += item.amount;
                 else if (item.category === '共通') splitShared += item.amount;
                 else if (item.category === 'かずま') kazumaPersonal += item.amount;
                 else if (item.category === 'かなこ') kanakoPersonal += item.amount;
-            };
-
-            appData.fixedExpenses.forEach(processExpense);
-            md.variableExpenses.forEach(processExpense);
+            });
 
             const sharedTotal = kazumaPaidShared + kanakoPaidShared + splitShared;
             const sharedHalf = sharedTotal / 2;
@@ -859,41 +969,53 @@
             
             monthInput.value = currentMonthStr;
             document.getElementById('var-date').valueAsDate = now;
+            // 固定費のデフォルト開始月を現在月にセット
+            document.getElementById('fixed-start').value = currentMonthStr;
 
-            monthInput.addEventListener('change', (e) => {
-                if(e.target.value) { currentMonthStr = e.target.value; render(); }
+            monthInput.addEventListener('change', (e) => { 
+                if(e.target.value) { 
+                    currentMonthStr = e.target.value;
+                    document.getElementById('fixed-start').value = currentMonthStr; // 月を変えたら開始月も連動させる
+                    render(); 
+                } 
             });
-
             document.getElementById('graph-start-month').addEventListener('change', renderGraphs);
             document.getElementById('graph-end-month').addEventListener('change', renderGraphs);
 
             document.getElementById('form-kazuma-income').addEventListener('submit', (e) => {
-                e.preventDefault();
-                getCurrentMonthData().incomes.kazuma.push({ id: Date.now(), category: document.getElementById('kazuma-inc-category').value, amount: Number(document.getElementById('kazuma-inc-amount').value) });
+                e.preventDefault(); getCurrentMonthData().incomes.kazuma.push({ id: Date.now(), category: document.getElementById('kazuma-inc-category').value, amount: Number(document.getElementById('kazuma-inc-amount').value) });
                 document.getElementById('kazuma-inc-amount').value = ''; saveData();
             });
 
             document.getElementById('form-kanako-income').addEventListener('submit', (e) => {
-                e.preventDefault();
-                getCurrentMonthData().incomes.kanako.push({ id: Date.now(), category: document.getElementById('kanako-inc-category').value, amount: Number(document.getElementById('kanako-inc-amount').value) });
+                e.preventDefault(); getCurrentMonthData().incomes.kanako.push({ id: Date.now(), category: document.getElementById('kanako-inc-category').value, amount: Number(document.getElementById('kanako-inc-amount').value) });
                 document.getElementById('kanako-inc-amount').value = ''; saveData();
             });
 
             document.getElementById('form-fixed').addEventListener('submit', (e) => {
-                e.preventDefault();
-                appData.fixedExpenses.push({ id: Date.now(), name: document.getElementById('fixed-name').value, amount: Number(document.getElementById('fixed-amount').value), category: document.getElementById('fixed-category').value });
-                document.getElementById('fixed-amount').value = ''; saveData();
+                e.preventDefault(); 
+                appData.fixedExpenses.push({ 
+                    id: Date.now(), 
+                    name: document.getElementById('fixed-name').value, 
+                    amount: Number(document.getElementById('fixed-amount').value), 
+                    category: document.getElementById('fixed-category').value,
+                    startMonth: document.getElementById('fixed-start').value,
+                    endMonth: document.getElementById('fixed-end').value
+                });
+                document.getElementById('fixed-amount').value = ''; 
+                // 追加後は開始月を現在月に、終了月を空に戻す
+                document.getElementById('fixed-start').value = currentMonthStr;
+                document.getElementById('fixed-end').value = '';
+                saveData();
             });
 
             document.getElementById('form-variable').addEventListener('submit', (e) => {
-                e.preventDefault();
-                getCurrentMonthData().variableExpenses.push({ id: Date.now(), date: document.getElementById('var-date').value, name: document.getElementById('var-name').value, amount: Number(document.getElementById('var-amount').value), category: document.getElementById('var-category').value });
+                e.preventDefault(); getCurrentMonthData().variableExpenses.push({ id: Date.now(), date: document.getElementById('var-date').value, name: document.getElementById('var-name').value, amount: Number(document.getElementById('var-amount').value), category: document.getElementById('var-category').value });
                 document.getElementById('var-amount').value = ''; saveData();
             });
 
             render();
         }
-
         window.onload = init;
     </script>
 </body>
