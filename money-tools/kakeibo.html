@@ -150,6 +150,21 @@
         .category-add-form { display: flex; gap: 0.5rem; }
         .category-add-form input { flex: 1; padding: 0.75rem; border: 1px solid #BDBDBD; border-radius: 4px; background-color: white; font-size: 0.95rem;}
 
+        /* メモ表示用（長文は省略する設定） */
+        .memo-preview {
+            display: inline-block;
+            max-width: 150px; /* スマホでも見切れない幅 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: bottom;
+            color: var(--md-primary);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .memo-preview:hover { color: #004D40; }
+
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
@@ -167,6 +182,7 @@
             .graph-month-input { padding: 0.4rem !important; font-size: 0.85rem !important; width: 45%; }
             .fixed-period-inputs { flex-direction: row !important; gap: 0.5rem;}
             .fixed-period-inputs > div { min-width: 0; flex: 1;}
+            .memo-preview { max-width: 100px; } /* スマホ縦画面ではさらに狭くする */
         }
     </style>
 </head>
@@ -175,7 +191,10 @@
         <div class="app-bar-left">
             <span class="material-icons">favorite</span>
             <h1>ふたりの家計簿</h1>
-            <button class="btn-icon" onclick="exportCSV()" title="データをCSVでダウンロード"><span class="material-icons">download</span></button>
+            <div style="margin-left: 1rem; display: flex; gap: 0.2rem;">
+                <button class="btn-icon" onclick="exportCSV()" title="CSVでダウンロード"><span class="material-icons">download</span></button>
+                <button class="btn-icon" onclick="copyForSpreadsheet()" title="スプレッドシートにコピー"><span class="material-icons">table_chart</span></button>
+            </div>
         </div>
         <div class="tabs">
             <button id="tab-input" class="tab-btn active" onclick="switchSheet('input')"><span class="material-icons">edit_note</span> 入力シート</button>
@@ -323,7 +342,6 @@
                     <div class="form-group" style="flex: 0.5;"><label>日付</label><input type="date" id="var-date" required></div>
                     <div class="form-group"><label>項目名</label><select id="var-name" required></select></div>
                     <div class="form-group"><label>メモ(任意)</label><input type="text" id="var-memo" placeholder="例: スーパー"></div>
-                    
                     <div class="form-group"><label>金額 (円)</label><input type="number" id="var-amount" required min="0"></div>
                     <div class="form-group">
                         <label>負担者</label>
@@ -403,15 +421,26 @@
         <div class="modal-content">
             <div class="modal-header"><h3><span class="material-icons">account_balance</span> 予算の設定</h3><button class="btn-icon" onclick="closeModal('budget-modal')"><span class="material-icons">close</span></button></div>
             <div class="modal-body">
-                <p style="font-size: 0.8rem; color: #757575; margin-top: 0;">世帯全体(共通)の出費に対する予算を項目ごとに設定できます。空欄の場合はアラートは出ません。</p>
+                <p style="font-size: 0.8rem; color: #757575; margin-top: 0;">世帯全体(共通)の出費に対する予算を設定できます。</p>
                 <div id="budget-input-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
                 <button class="btn" style="width: 100%; justify-content: center;" onclick="saveBudgets()">保存して閉じる</button>
             </div>
         </div>
     </div>
 
+    <div id="memo-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><span class="material-icons">notes</span> メモの詳細</h3>
+                <button class="btn-icon" onclick="closeModal('memo-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body" style="word-wrap: break-word; white-space: pre-wrap;">
+                <p id="memo-full-text" style="margin: 0; line-height: 1.6; color: var(--md-text); font-size: 0.95rem;"></p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // データ構造が変わるためv7へ
         const STORAGE_KEY = 'kakeibo_kazuma_kanako_v7'; 
         let currentMonthStr = "";
         let charts = {};
@@ -487,10 +516,23 @@
             }
         };
 
-        // --- 各種モーダル制御 ---
-        let editingCategoryType = 'variable';
         window.closeModal = function(modalId) { document.getElementById(modalId).classList.remove('show'); };
         
+        // メモ表示用モーダル
+        window.openMemoModal = function(id) {
+            let targetMemo = '';
+            // 全ての月から該当のIDのメモを探す
+            Object.values(appData.months).forEach(md => {
+                const item = md.variableExpenses.find(v => v.id === id);
+                if (item) targetMemo = item.memo;
+            });
+            if (targetMemo) {
+                document.getElementById('memo-full-text').textContent = targetMemo;
+                document.getElementById('memo-modal').classList.add('show');
+            }
+        };
+
+        let editingCategoryType = 'variable';
         window.openCategoryModal = function(type) {
             editingCategoryType = type;
             let titleText = type === 'fixed' ? '固定費' : (type === 'variable' ? '変動費' : '収入');
@@ -516,27 +558,14 @@
             document.getElementById('new-category-name').value = ''; renderCategoryModal(); saveData();
         };
 
-        // 目標モーダル
-        window.openGoalModal = function() {
-            document.getElementById('goal-name-input').value = appData.goal.name || '';
-            document.getElementById('goal-amount-input').value = appData.goal.amount || '';
-            document.getElementById('goal-modal').classList.add('show');
-        };
-        window.saveGoal = function() {
-            appData.goal.name = document.getElementById('goal-name-input').value;
-            appData.goal.amount = Number(document.getElementById('goal-amount-input').value) || 0;
-            closeModal('goal-modal'); saveData();
-        };
+        window.openGoalModal = function() { document.getElementById('goal-name-input').value = appData.goal.name || ''; document.getElementById('goal-amount-input').value = appData.goal.amount || ''; document.getElementById('goal-modal').classList.add('show'); };
+        window.saveGoal = function() { appData.goal.name = document.getElementById('goal-name-input').value; appData.goal.amount = Number(document.getElementById('goal-amount-input').value) || 0; closeModal('goal-modal'); saveData(); };
 
-        // 予算モーダル
         window.openBudgetModal = function() {
             const listEl = document.getElementById('budget-input-list'); listEl.innerHTML = '';
             appData.variableCategories.forEach(cat => {
                 const currentVal = appData.budgets[cat] || '';
-                listEl.innerHTML += `<div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
-                    <label style="font-size:0.9rem;">${cat}</label>
-                    <div style="display:flex; align-items:center; gap:4px;"><input type="number" id="budget-${cat}" value="${currentVal}" style="width:100px; padding:4px;" placeholder="設定なし"> 円</div>
-                </div>`;
+                listEl.innerHTML += `<div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;"><label style="font-size:0.9rem;">${cat}</label><div style="display:flex; align-items:center; gap:4px;"><input type="number" id="budget-${cat}" value="${currentVal}" style="width:100px; padding:4px;" placeholder="設定なし"> 円</div></div>`;
             });
             document.getElementById('budget-modal').classList.add('show');
         };
@@ -550,21 +579,14 @@
         };
 
         function isFixedExpenseActive(item, targetMonthStr) {
-            const targetDate = new Date(targetMonthStr + "-01");
-            const startDate = new Date(item.startMonth + "-01");
+            const targetDate = new Date(targetMonthStr + "-01"); const startDate = new Date(item.startMonth + "-01");
             if (targetDate < startDate) return false;
-            if (item.endMonth) {
-                const endDate = new Date(item.endMonth + "-01");
-                if (targetDate > endDate) return false; 
-            }
+            if (item.endMonth) { const endDate = new Date(item.endMonth + "-01"); if (targetDate > endDate) return false; }
             return true;
         }
 
-        // --- 新機能：CSVエクスポート ---
         window.exportCSV = function() {
-            let csv = "\uFEFF"; // BOMを追加してExcelでの文字化けを防ぐ
-            csv += "日付(月),種類,項目名,メモ,金額,負担者\n";
-
+            let csv = "\uFEFF"; csv += "日付(月),種類,項目名,メモ,金額,負担者\n";
             Object.keys(appData.months).forEach(mKey => {
                 const md = appData.months[mKey];
                 md.incomes.kazuma.forEach(i => csv += `${mKey},収入,${i.category},,${i.amount},かずま\n`);
@@ -572,12 +594,28 @@
                 md.variableExpenses.forEach(i => csv += `${i.date},変動費,${i.name},${i.memo||''},${i.amount},${i.category}\n`);
                 appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) csv += `${mKey},固定費,${i.name},,${i.amount},${i.category}\n`; });
             });
+            const blob = new Blob([csv], { type: 'text/csv' }); const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `家計簿データ_${currentMonthStr}.csv`; a.click(); window.URL.revokeObjectURL(url);
+        };
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `家計簿データ_${currentMonthStr}.csv`; a.click();
-            window.URL.revokeObjectURL(url);
+        // --- 新機能：スプレッドシートへコピペ用出力 ---
+        window.copyForSpreadsheet = function() {
+            let tsv = "日付(月)\t種類\t項目名\tメモ\t金額\t負担者\n";
+            Object.keys(appData.months).forEach(mKey => {
+                const md = appData.months[mKey];
+                md.incomes.kazuma.forEach(i => tsv += `${mKey}\t収入\t${i.category}\t\t${i.amount}\tかずま\n`);
+                md.incomes.kanako.forEach(i => tsv += `${mKey}\t収入\t${i.category}\t\t${i.amount}\tかなこ\n`);
+                md.variableExpenses.forEach(i => tsv += `${i.date}\t変動費\t${i.name}\t${i.memo||''}\t${i.amount}\t${i.category}\n`);
+                appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) tsv += `${mKey}\t固定費\t${i.name}\t\t${i.amount}\t${i.category}\n`; });
+            });
+
+            navigator.clipboard.writeText(tsv).then(() => {
+                if (confirm("データをコピーしました！\nすぐにGoogleスプレッドシートを開いて貼り付け（ペースト）しますか？")) {
+                    window.open('https://sheet.new/', '_blank');
+                }
+            }).catch(err => {
+                alert("コピーに失敗しました。お使いの端末が対応していない可能性があります。");
+            });
         };
 
         window.renderGraphs = function() {
@@ -653,7 +691,6 @@
         function render() {
             const md = getCurrentMonthData(); const [y, m] = currentMonthStr.split('-'); displayMonth.textContent = `${y}年${Number(m)}月`;
 
-            // 目標計算
             let totalHistorySavings = 0;
             Object.keys(appData.months).forEach(mKey => {
                 let mInc = 0, mExp = 0;
@@ -690,29 +727,26 @@
             });
 
             document.getElementById('variable-list').innerHTML = '';
-            let budgetSpent = {}; // 予算計算用
+            let budgetSpent = {};
             const sortedVar = [...md.variableExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
             sortedVar.forEach(item => {
-                // メモがある場合は項目名の下に表示
-                const memoHtml = item.memo ? `<br><span style="font-size:0.75rem; color:var(--md-text-secondary);"><span class="material-icons" style="font-size:0.75rem; vertical-align:middle;">notes</span> ${item.memo}</span>` : '';
+                // 変更箇所：メモを省略表示（青文字リンク）にして、タップでモーダルを開く
+                const memoHtml = item.memo ? `<br><span style="font-size:0.75rem; color:var(--md-text-secondary);"><span class="material-icons" style="font-size:0.75rem; vertical-align:middle;">notes</span> <span class="memo-preview" onclick="openMemoModal(${item.id})">${item.memo}</span></span>` : '';
                 document.getElementById('variable-list').innerHTML += `<tr><td>${item.date}</td><td>${item.name}${memoHtml}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
             let kazumaPersonal = 0, kanakoPersonal = 0, kazumaPaidShared = 0, kanakoPaidShared = 0, splitShared = 0;
-            
             appData.fixedExpenses.forEach(item => {
                 if (isFixedExpenseActive(item, currentMonthStr)) {
                     if (item.category.startsWith('共通')) budgetSpent[item.name] = (budgetSpent[item.name] || 0) + item.amount;
                     if (item.category === '共通・かずま') kazumaPaidShared += item.amount; else if (item.category === '共通・かなこ') kanakoPaidShared += item.amount; else if (item.category === '共通') splitShared += item.amount; else if (item.category === 'かずま') kazumaPersonal += item.amount; else if (item.category === 'かなこ') kanakoPersonal += item.amount;
                 }
             });
-
             md.variableExpenses.forEach(item => {
                 if (item.category.startsWith('共通')) budgetSpent[item.name] = (budgetSpent[item.name] || 0) + item.amount;
                 if (item.category === '共通・かずま') kazumaPaidShared += item.amount; else if (item.category === '共通・かなこ') kanakoPaidShared += item.amount; else if (item.category === '共通') splitShared += item.amount; else if (item.category === 'かずま') kazumaPersonal += item.amount; else if (item.category === 'かなこ') kanakoPersonal += item.amount;
             });
 
-            // 予算アラートの判定
             let budgetAlertHtml = '';
             for (let cat in appData.budgets) {
                 let limit = appData.budgets[cat]; let spent = budgetSpent[cat] || 0;
@@ -750,20 +784,24 @@
             document.getElementById('form-kanako-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kanako.push({ id: Date.now(), category: document.getElementById('kanako-inc-category').value, amount: Number(document.getElementById('kanako-inc-amount').value) }); document.getElementById('kanako-inc-amount').value = ''; saveData(); });
             document.getElementById('form-fixed').addEventListener('submit', (e) => { e.preventDefault(); appData.fixedExpenses.push({ id: Date.now(), name: document.getElementById('fixed-name').value, amount: Number(document.getElementById('fixed-amount').value), category: document.getElementById('fixed-category').value, startMonth: document.getElementById('fixed-start').value, endMonth: document.getElementById('fixed-end').value }); document.getElementById('fixed-amount').value = ''; document.getElementById('fixed-start').value = currentMonthStr; document.getElementById('fixed-end').value = ''; saveData(); });
             
-            // 新機能対応：変動費フォームのメモ取得
             document.getElementById('form-variable').addEventListener('submit', (e) => { 
                 e.preventDefault(); 
                 getCurrentMonthData().variableExpenses.push({ 
                     id: Date.now(), date: document.getElementById('var-date').value, 
                     name: document.getElementById('var-name').value, 
-                    memo: document.getElementById('var-memo').value, // メモ保存
+                    memo: document.getElementById('var-memo').value,
                     amount: Number(document.getElementById('var-amount').value), 
                     category: document.getElementById('var-category').value 
                 }); 
                 document.getElementById('var-amount').value = ''; 
-                document.getElementById('var-memo').value = ''; // メモもクリア
+                document.getElementById('var-memo').value = '';
                 saveData(); 
             });
+
+            // 背景クリックでモーダルを閉じる処理を統合
+            window.onclick = function(event) { 
+                if (event.target.classList.contains('modal')) closeModal(event.target.id); 
+            };
 
             render();
         }
