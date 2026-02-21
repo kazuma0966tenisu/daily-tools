@@ -84,7 +84,6 @@
         h3 { margin-top: 0; font-size: 16px; color: #4b5563; }
         img { max-width: 100%; height: auto; border-radius: 4px; display: none; }
         
-        /* 透過部分がわかりやすいように市松模様を背景に設定 */
         .transparent-bg {
             background-image: 
                 linear-gradient(45deg, #ccc 25%, transparent 25%), 
@@ -124,7 +123,6 @@
     </div>
 
     <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/browser/bundle.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/browser/bundle.umd.js"></script>
     <script>
         const imageInput = document.getElementById('imageInput');
         const originalImage = document.getElementById('originalImage');
@@ -145,12 +143,12 @@
             loading.innerText = 'AIが背景を切り抜いています...（少々お待ちください）';
 
             try {
-                // AIモデルの読み込み元を明示的に指定
+                // 修正ポイント②：AIモデルデータの読み込み元も公式unpkgサーバーに合わせる
                 const config = {
-                    publicPath: "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/"
+                    publicPath: "https://unpkg.com/@imgly/background-removal@1.4.3/dist/"
                 };
 
-                // 背景透過を実行（window. をつけて確実に呼び出す）
+                // 背景透過を実行
                 const blob = await window.imglyRemoveBackground(file, config);
                 
                 // 処理結果の画像を表示
@@ -166,7 +164,7 @@
 
             } catch (error) {
                 console.error("背景透過エラー:", error);
-                alert("画像の処理中にエラーが発生しました。");
+                alert("画像の処理中にエラーが発生しました。詳細はコンソールを確認してください。");
             } finally {
                 loading.style.display = 'none';
             }
