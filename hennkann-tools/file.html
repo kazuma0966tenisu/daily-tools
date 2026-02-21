@@ -49,8 +49,9 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 1rem;
-            display: none;
+            display: none; /* 初期状態では隠しておく */
             width: 100%;
+            margin-top: 15px;
             transition: background 0.2s;
         }
         .btn:hover { background-color: #218838; }
@@ -63,12 +64,12 @@
     <h1>JPEG → PNG 変換</h1>
     
     <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-        ファイルをドロップするか、クリックして選択
-        <input type="file" id="fileInput" accept="image/jpeg">
+        ここをクリックしてJPEGファイルを選択<br>（またはファイルをドロップ）
+        <input type="file" id="fileInput" accept="image/jpeg, image/jpg">
     </div>
 
     <img id="preview" alt="プレビュー">
-    <button id="downloadBtn" class="btn">PNGとしてダウンロード</button>
+    <button id="downloadBtn" class="btn">PNGとしてPCに保存</button>
     <p id="status"></p>
 </div>
 
@@ -78,11 +79,13 @@
     const downloadBtn = document.getElementById('downloadBtn');
     const status = document.getElementById('status');
 
+    // 画像が選択されたときの処理
     fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        if (file.type !== "image/jpeg") {
+        // JPEG形式かどうかの簡易チェック
+        if (!file.type.match('image/jpeg')) {
             alert("JPEG形式のファイルを選択してください。");
             return;
         }
@@ -91,33 +94,37 @@
         reader.onload = function(event) {
             preview.src = event.target.result;
             preview.style.display = 'block';
-            downloadBtn.style.display = 'block';
-            status.textContent = "変換の準備ができました！";
+            downloadBtn.style.display = 'block'; // 画像が読み込まれたら保存ボタンを表示
+            status.textContent = "変換の準備ができました！「PNGとしてPCに保存」ボタンを押してください。";
         };
         reader.readAsDataURL(file);
     });
 
+    // 「PNGとしてPCに保存」ボタンが押されたときの処理
     downloadBtn.addEventListener('click', function() {
+        // キャンバスを作成
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // キャンバスのサイズを画像に合わせる
+        // キャンバスのサイズを元の画像のサイズに合わせる
         canvas.width = preview.naturalWidth;
         canvas.height = preview.naturalHeight;
         
-        // 画像を描画
+        // キャンバスに画像を描画
         ctx.drawImage(preview, 0, 0);
         
-        // PNGとして出力
+        // キャンバスのデータをPNG形式のデータURLに変換
         const pngUrl = canvas.toDataURL('image/png');
         
-        // ダウンロード用のリンクを作成
+        // PCに保存（ダウンロード）するための見えないリンクを作成
         const link = document.createElement('a');
-        link.download = 'converted-image.png';
+        link.download = 'converted-image.png'; // 保存されるファイル名
         link.href = pngUrl;
+        
+        // リンクをプログラムからクリックしてダウンロードを強制実行
         link.click();
         
-        status.textContent = "ダウンロード完了！";
+        status.textContent = "PCへの保存（ダウンロード）が完了しました！";
     });
 </script>
 
