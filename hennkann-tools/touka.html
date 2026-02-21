@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>完全無料・高画質 背景透過アプリ</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #333;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 { margin-top: 0; color: #1f2937; }
+        p { color: #6b7280; margin-bottom: 20px; }
+        
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .btn {
+            background-color: #4f46e5;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background-color: #4338ca; }
+        .btn-download { background-color: #10b981; margin-top: 20px; display: none; }
+        .btn-download:hover { background-color: #059669; }
+
+        #loading {
+            margin: 20px 0;
+            font-weight: bold;
+            color: #4f46e5;
+            display: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        .image-box {
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9fafb;
+        }
+        h3 { margin-top: 0; font-size: 16px; color: #4b5563; }
+        img { max-width: 100%; height: auto; border-radius: 4px; display: none; }
+        
+        /* 透過部分がわかりやすいように市松模様を背景に設定 */
+        .transparent-bg {
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>背景透過ツール</h1>
+        <p>画像を選択してください。AIがブラウザ上で処理を行うため、無料で最大解像度のままダウンロードできます。</p>
+        
+        <div class="upload-btn-wrapper">
+            <button class="btn">画像を選択</button>
+            <input type="file" id="imageInput" accept="image/png, image/jpeg, image/jpg, image/webp">
+        </div>
+
+        <div id="loading">AIモデルを読み込み中...（初回は数十秒かかる場合があります）</div>
+
+        <div class="grid">
+            <div class="image-box">
+                <h3>元画像</h3>
+                <img id="originalImage" alt="Original Image">
+            </div>
+            <div class="image-box transparent-bg">
+                <h3>透過後</h3>
+                <img id="processedImage" alt="Processed Image">
+            </div>
+        </div>
+
+        <a id="downloadBtn" class="btn btn-download" download="removed-background.png">高画質でダウンロード</a>
+    </div>
+
+    <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/browser/bundle.umd.js"></script>
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const originalImage = document.getElementById('originalImage');
+        const processedImage = document.getElementById('processedImage');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loading = document.getElementById('loading');
+
+        imageInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // UIの初期化
+            originalImage.src = URL.createObjectURL(file);
+            originalImage.style.display = 'block';
+            processedImage.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            loading.style.display = 'block';
+            loading.innerText = 'AIが背景を切り抜いています...（少々お待ちください）';
+
+            try {
+                // @imglyライブラリを使用して背景を透過
+                // ブラウザ上で推論を行うため、サーバーに画像は送信されません
+                const blob = await imglyRemoveBackground(file);
+                
+                // 処理結果の画像を表示
+                const url = URL.createObjectURL(blob);
+                processedImage.src = url;
+                processedImage.style.display = 'block';
+                
+                // ダウンロードボタンの設定
+                downloadBtn.href = url;
+                // 元のファイル名に -nobg を追加
+                const originalName = file.name.split('.')[0];
+                downloadBtn.download = `${originalName}-nobg.png`;
+                downloadBtn.style.display = 'inline-block';
+
+            } catch (error) {
+                console.error("背景透過エラー:", error);
+                alert("画像の処理中にエラーが発生しました。");
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
