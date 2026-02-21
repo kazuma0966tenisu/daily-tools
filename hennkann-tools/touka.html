@@ -143,10 +143,14 @@
             loading.style.display = 'block';
             loading.innerText = 'AIが背景を切り抜いています...（少々お待ちください）';
 
-            try {
+           try {
+                // モデルファイルの読み込み元（CDN）を明示的に指定
+                const config = {
+                    publicPath: "https://unpkg.com/@imgly/background-removal@1.4.3/dist/"
+                };
+
                 // @imglyライブラリを使用して背景を透過
-                // ブラウザ上で推論を行うため、サーバーに画像は送信されません
-                const blob = await imglyRemoveBackground(file);
+                const blob = await imglyRemoveBackground(file, config);
                 
                 // 処理結果の画像を表示
                 const url = URL.createObjectURL(blob);
