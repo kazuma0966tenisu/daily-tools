@@ -122,8 +122,9 @@
         <a id="downloadBtn" class="btn btn-download" download="removed-background.png">高画質でダウンロード</a>
     </div>
 
-    <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/browser/bundle.umd.js"></script>
-    <script>
+    <script type="module">
+        import imglyRemoveBackground from "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/+esm";
+
         const imageInput = document.getElementById('imageInput');
         const originalImage = document.getElementById('originalImage');
         const processedImage = document.getElementById('processedImage');
@@ -143,13 +144,13 @@
             loading.innerText = 'AIが背景を切り抜いています...（少々お待ちください）';
 
             try {
-                // ここが unpkg になっていることが重要です
+                // publicPath を公式の unpkg サーバーに指定
                 const config = {
                     publicPath: "https://unpkg.com/@imgly/background-removal@1.4.3/dist/"
                 };
 
-                // 背景透過を実行
-                const blob = await window.imglyRemoveBackground(file, config);
+                // 背景透過を実行（window. を外して直接呼び出します）
+                const blob = await imglyRemoveBackground(file, config);
                 
                 // 処理結果の画像を表示
                 const url = URL.createObjectURL(blob);
