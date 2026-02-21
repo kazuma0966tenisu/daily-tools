@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPEG → PNG 変換ツール</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        h1 { color: #333; margin-bottom: 1.5rem; font-size: 1.5rem; }
+        .drop-zone {
+            border: 2px dashed #007bff;
+            padding: 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 1.5rem;
+        }
+        .drop-zone:hover { background-color: #e9f2ff; }
+        #fileInput { display: none; }
+        #preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 1rem;
+            display: none;
+            border-radius: 4px;
+        }
+        .btn {
+            background-color: #28a745;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: none;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: #218838; }
+        #status { margin-top: 1rem; color: #666; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>JPEG → PNG 変換</h1>
+    
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+        ファイルをドロップするか、クリックして選択
+        <input type="file" id="fileInput" accept="image/jpeg">
+    </div>
+
+    <img id="preview" alt="プレビュー">
+    <button id="downloadBtn" class="btn">PNGとしてダウンロード</button>
+    <p id="status"></p>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const status = document.getElementById('status');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.type !== "image/jpeg") {
+            alert("JPEG形式のファイルを選択してください。");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            preview.src = event.target.result;
+            preview.style.display = 'block';
+            downloadBtn.style.display = 'block';
+            status.textContent = "変換の準備ができました！";
+        };
+        reader.readAsDataURL(file);
+    });
+
+    downloadBtn.addEventListener('click', function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // キャンバスのサイズを画像に合わせる
+        canvas.width = preview.naturalWidth;
+        canvas.height = preview.naturalHeight;
+        
+        // 画像を描画
+        ctx.drawImage(preview, 0, 0);
+        
+        // PNGとして出力
+        const pngUrl = canvas.toDataURL('image/png');
+        
+        // ダウンロード用のリンクを作成
+        const link = document.createElement('a');
+        link.download = 'converted-image.png';
+        link.href = pngUrl;
+        link.click();
+        
+        status.textContent = "ダウンロード完了！";
+    });
+</script>
+
+</body>
+</html>
