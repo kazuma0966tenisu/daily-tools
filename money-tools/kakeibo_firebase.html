@@ -18,130 +18,74 @@
             --md-border: #E0E0E0;
             --md-error: #D32F2F;
             --md-warning: #FF9800;
-            
             --kazuma-color: #1976D2;
             --kanako-color: #C2185B;
         }
 
-        body {
-            margin: 0; font-family: 'Noto Sans JP', sans-serif;
-            background-color: var(--md-bg); color: var(--md-text);
-        }
-
-        /* アプリバー */
-        .app-bar {
-            background-color: var(--md-primary); color: white;
-            padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            display: flex; align-items: center; justify-content: space-between;
-        }
+        body { margin: 0; font-family: 'Noto Sans JP', sans-serif; background-color: var(--md-bg); color: var(--md-text); }
+        .app-bar { background-color: var(--md-primary); color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; }
         .app-bar-left { display: flex; align-items: center; gap: 10px; }
         .app-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 500; }
-        
-        .month-selector {
-            background: rgba(255,255,255,0.2); padding: 4px 12px;
-            border-radius: 20px; display: flex; align-items: center; gap: 8px;
-        }
-        .month-selector input {
-            background: transparent; border: none; color: white;
-            font-size: 1rem; font-weight: 700; outline: none;
-            font-family: inherit; cursor: pointer;
-        }
+        .month-selector { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
+        .month-selector input { background: transparent; border: none; color: white; font-size: 1rem; font-weight: 700; outline: none; font-family: inherit; cursor: pointer; }
         .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
-
-        .container {
-            max-width: 1000px; margin: 0 auto 2rem auto; padding: 0 1rem;
-            display: flex; flex-direction: column; gap: 1.5rem;
-        }
-
-        /* タブ */
+        .container { max-width: 1000px; margin: 0 auto 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
         .tabs { display: flex; justify-content: center; gap: 1rem; padding: 0; margin-left: auto; margin-right: 1.5rem; }
-        .tab-btn {
-            padding: 0.5rem 1.5rem; border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; font-weight: 500;
-            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
-        }
+        .tab-btn { padding: 0.5rem 1.5rem; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
         .tab-btn:hover { background: rgba(255, 255, 255, 0.25); }
         .tab-btn.active { background: white; color: var(--md-primary); border-color: white; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-
         .sheet { display: none; animation: fadeIn 0.3s ease; }
         .sheet.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card {
-            background-color: var(--md-surface); border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            padding: 1.5rem; margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-            margin-top: 0; font-size: 1.1rem; color: var(--md-primary);
-            display: flex; align-items: center; gap: 8px;
-            border-bottom: 2px solid var(--md-primary-light);
-            padding-bottom: 0.5rem; margin-bottom: 1rem;
-        }
-
-        /* ダッシュボード周り */
+        .card { background-color: var(--md-surface); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section-title { margin-top: 0; font-size: 1.1rem; color: var(--md-primary); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--md-primary-light); padding-bottom: 0.5rem; margin-bottom: 1rem; }
         .dash-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
         .dash-box { padding: 1.25rem; border-radius: 8px; border: 1px solid var(--md-border); text-align: center; background: #FAFAFA; }
         .dash-box h3 { margin: 0 0 10px 0; font-size: 0.95rem; color: var(--md-text-secondary); display: flex; justify-content: center; align-items: center; gap: 4px; }
         .dash-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; color: var(--md-text-secondary); }
         .dash-row span:last-child { font-weight: 500; color: var(--md-text); }
         .dash-main-value { font-size: 1.5rem; font-weight: 700; margin: 10px 0 0 0; padding-top: 10px; border-top: 1px dashed var(--md-border); }
-
         .dash-kazuma { border-top: 4px solid var(--kazuma-color); }
         .dash-kazuma h3, .dash-kazuma .dash-main-value { color: var(--kazuma-color); }
         .dash-kanako { border-top: 4px solid var(--kanako-color); }
         .dash-kanako h3, .dash-kanako .dash-main-value { color: var(--kanako-color); }
         .dash-household { border-top: 4px solid var(--md-primary); background-color: #E0F2F1; border-color: #B2DFDB; }
         .dash-household h3, .dash-household .dash-main-value { color: var(--md-primary); }
-
-        /* アラート・プログレスバー */
         .alert-box { padding: 1rem; border-radius: 4px; display: flex; align-items: center; gap: 12px; font-weight: 500; line-height: 1.5; margin-bottom: 0.5rem;}
         .alert-settlement { background-color: #FFF3E0; border-left: 4px solid #FF9800; color: #E65100; }
         .alert-settlement strong { font-weight: 700; text-decoration: underline; text-decoration-color: #FF9800; text-decoration-thickness: 2px; text-underline-offset: 3px; font-size: 1.05rem; }
         .alert-budget-warn { background-color: #FFFDE7; border-left: 4px solid #FBC02D; color: #F57F17; font-size: 0.9rem; padding: 0.75rem;}
         .alert-budget-danger { background-color: #FFEBEE; border-left: 4px solid #F44336; color: #C62828; font-size: 0.9rem; padding: 0.75rem;}
-
         .progress-wrap { background: #EEEEEE; border-radius: 10px; height: 16px; width: 100%; overflow: hidden; margin: 8px 0; }
         .progress-bar { background: var(--md-primary); height: 100%; width: 0%; transition: width 0.8s ease; }
-
-        /* フォーム周り */
         .form-row { display: flex; gap: 1rem; flex-wrap: wrap; background: #FAFAFA; padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border); }
         .form-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
         .form-group label { font-size: 0.8rem; color: var(--md-text-secondary); margin-bottom: 0.25rem; }
         .form-group input, .form-group select { padding: 0.5rem; font-size: 0.95rem; border: none; border-bottom: 1px solid var(--md-border); background-color: transparent; font-family: inherit; }
         .form-group input:focus, .form-group select:focus { outline: none; border-bottom: 2px solid var(--md-primary); }
         .form-group input[type="month"] { width: 100%; box-sizing: border-box;}
-
         .btn { background-color: var(--md-primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
         .btn:hover { background-color: #00695C; }
         .btn-outline { background-color: transparent; color: var(--md-text); border: 1px solid var(--md-border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .btn-outline:hover { background-color: #f0f0f0; }
-        
         .btn-icon { background: none; border: none; color: var(--md-text-secondary); cursor: pointer; padding: 4px; border-radius: 50%; transition: 0.2s;}
         .app-bar-left .btn-icon { color: white; opacity: 0.8;}
         .app-bar-left .btn-icon:hover { opacity: 1; background-color: rgba(255,255,255,0.2);}
         .modal-header .btn-icon:hover { background-color: #E0F2F1; color: var(--md-primary); }
         .btn-icon-danger:hover { background-color: #FFEBEE; color: var(--md-error); }
-
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem;}
         th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem;}
         th { color: var(--md-text-secondary); font-weight: 500; font-size: 0.85rem; }
         .text-right { text-align: right; }
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
-        
         .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .action-bar h2 { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-
-        /* モーダル */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .modal.show { display: flex; }
         .modal-content { background-color: #fff; border-radius: 8px; width: 90%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
         .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--md-border); display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { margin: 0; font-size: 1.1rem; color: var(--md-text); display: flex; align-items: center; gap: 8px; }
         .modal-body { padding: 1.5rem; overflow-y: auto; background: #FAFAFA; border-radius: 0 0 8px 8px;}
-        
         .category-list { list-style: none; padding: 0; margin: 0 0 1.5rem 0; background: white; border: 1px solid var(--md-border); border-radius: 4px; }
         .category-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #EEEEEE; }
         .category-item:last-child { border-bottom: none; }
@@ -149,22 +93,8 @@
         .category-item button:hover { background: var(--md-error); }
         .category-add-form { display: flex; gap: 0.5rem; }
         .category-add-form input { flex: 1; padding: 0.75rem; border: 1px solid #BDBDBD; border-radius: 4px; background-color: white; font-size: 0.95rem;}
-
-        /* メモ表示用（長文は省略する設定） */
-        .memo-preview {
-            display: inline-block;
-            max-width: 150px; /* スマホでも見切れない幅 */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: bottom;
-            color: var(--md-primary);
-            cursor: pointer;
-            text-decoration: underline;
-            font-weight: 500;
-        }
+        .memo-preview { display: inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; color: var(--md-primary); cursor: pointer; text-decoration: underline; font-weight: 500; }
         .memo-preview:hover { color: #004D40; }
-
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
@@ -182,7 +112,7 @@
             .graph-month-input { padding: 0.4rem !important; font-size: 0.85rem !important; width: 45%; }
             .fixed-period-inputs { flex-direction: row !important; gap: 0.5rem;}
             .fixed-period-inputs > div { min-width: 0; flex: 1;}
-            .memo-preview { max-width: 100px; } /* スマホ縦画面ではさらに狭くする */
+            .memo-preview { max-width: 100px; } 
         }
     </style>
 </head>
@@ -208,7 +138,6 @@
 
     <main class="container">
         <div id="sheet-input" class="sheet active">
-            
             <section class="card" style="padding-bottom: 1rem;">
                 <div class="action-bar" style="margin-bottom: 0.5rem;">
                     <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">flag</span> ふたりの目標</h2>
@@ -227,11 +156,8 @@
             <section class="card">
                 <div class="action-bar">
                     <h2 class="section-title" style="margin: 0; border: none; padding: 0;"><span class="material-icons">analytics</span> <span id="display-month"></span> のダッシュボード</h2>
-                    <button type="button" class="btn btn-outline" onclick="openBudgetModal()">
-                        <span class="material-icons">account_balance</span> 予算設定
-                    </button>
+                    <button type="button" class="btn btn-outline" onclick="openBudgetModal()"><span class="material-icons">account_balance</span> 予算設定</button>
                 </div>
-
                 <div class="dash-container">
                     <div class="dash-box dash-kazuma">
                         <h3><span class="material-icons">person</span> かずま</h3>
@@ -255,12 +181,8 @@
                         <p class="dash-main-value"><span style="font-size:0.8rem; color:#00796B; display:block; font-weight:normal;">世帯 想定貯蓄可能額</span><span id="dash-total-save">¥0</span></p>
                     </div>
                 </div>
-
                 <div id="alerts-container">
-                    <div class="alert-box alert-settlement" id="settlement-alert" style="display:none;">
-                        <span class="material-icons" style="font-size: 1.5rem;">currency_exchange</span>
-                        <span id="settlement-text" style="font-size: 0.95rem;">計算中...</span>
-                    </div>
+                    <div class="alert-box alert-settlement" id="settlement-alert" style="display:none;"><span class="material-icons" style="font-size: 1.5rem;">currency_exchange</span><span id="settlement-text" style="font-size: 0.95rem;">計算中...</span></div>
                     <div id="budget-alerts"></div>
                 </div>
             </section>
@@ -405,7 +327,6 @@
             </div>
         </div>
     </div>
-
     <div id="goal-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3><span class="material-icons">flag</span> 目標の設定</h3><button class="btn-icon" onclick="closeModal('goal-modal')"><span class="material-icons">close</span></button></div>
@@ -416,7 +337,6 @@
             </div>
         </div>
     </div>
-
     <div id="budget-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3><span class="material-icons">account_balance</span> 予算の設定</h3><button class="btn-icon" onclick="closeModal('budget-modal')"><span class="material-icons">close</span></button></div>
@@ -427,21 +347,36 @@
             </div>
         </div>
     </div>
-
     <div id="memo-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3><span class="material-icons">notes</span> メモの詳細</h3>
-                <button class="btn-icon" onclick="closeModal('memo-modal')"><span class="material-icons">close</span></button>
-            </div>
+            <div class="modal-header"><h3><span class="material-icons">notes</span> メモの詳細</h3><button class="btn-icon" onclick="closeModal('memo-modal')"><span class="material-icons">close</span></button></div>
             <div class="modal-body" style="word-wrap: break-word; white-space: pre-wrap;">
                 <p id="memo-full-text" style="margin: 0; line-height: 1.6; color: var(--md-text); font-size: 0.95rem;"></p>
             </div>
         </div>
     </div>
 
-    <script>
-        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v7'; 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        // かずまさん専用のFirebase鍵
+        const firebaseConfig = {
+            apiKey: "AIzaSyAemMGQNlk6FvGpJZpt3QQtHbZYCbbfgdk",
+            authDomain: "kakeibo-kazuma.firebaseapp.com",
+            databaseURL: "https://kakeibo-kazuma-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "kakeibo-kazuma",
+            storageBucket: "kakeibo-kazuma.firebasestorage.app",
+            messagingSenderId: "1085525702418",
+            appId: "1:1085525702418:web:1a22fb6e9327468da065cb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, 'kakeiboData'); // クラウド上の保存先
+
+        // グローバル変数と基本設定
+        let appData = null; // クラウドから降ってくるデータを入れる箱
         let currentMonthStr = "";
         let charts = {};
 
@@ -465,26 +400,60 @@
             return hex;
         }
 
-        function loadData() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            let data;
-            if (saved) {
-                data = JSON.parse(saved);
-                if (!data.variableCategories) data.variableCategories = defaultVariableCategories;
-                if (!data.fixedCategories) data.fixedCategories = defaultFixedCategories;
-                if (!data.incomeCategories) data.incomeCategories = defaultIncomeCategories;
-                if (!data.goal) data.goal = { name: '', amount: 0 };
-                if (!data.budgets) data.budgets = {};
-            } else {
-                data = { fixedExpenses: [], incomeCategories: defaultIncomeCategories, variableCategories: defaultVariableCategories, fixedCategories: defaultFixedCategories, months: {}, goal: { name: '', amount: 0 }, budgets: {} };
-            }
+        // Firebase特有の「空の配列が消える現象」を防ぐためのデータ整形
+        function sanitizeData(data) {
+            if (!data) data = {};
+            if (!data.fixedExpenses) data.fixedExpenses = [];
+            if (!data.incomeCategories) data.incomeCategories = defaultIncomeCategories;
+            if (!data.variableCategories) data.variableCategories = defaultVariableCategories;
+            if (!data.fixedCategories) data.fixedCategories = defaultFixedCategories;
+            if (!data.months) data.months = {};
+            Object.keys(data.months).forEach(m => {
+                if (!data.months[m].variableExpenses) data.months[m].variableExpenses = [];
+                if (!data.months[m].incomes) data.months[m].incomes = { kazuma: [], kanako: [] };
+                if (!data.months[m].incomes.kazuma) data.months[m].incomes.kazuma = [];
+                if (!data.months[m].incomes.kanako) data.months[m].incomes.kanako = [];
+            });
+            if (!data.goal) data.goal = { name: '', amount: 0 };
+            if (!data.budgets) data.budgets = {};
             return data;
         }
 
-        let appData = loadData();
+        // --- ★ リアルタイム同期の心臓部 ★ ---
+        onValue(dbRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // クラウドにデータがあればそれを使う
+                appData = sanitizeData(data);
+                render();
+                if(document.getElementById('sheet-graph').classList.contains('active')) renderGraphs();
+            } else {
+                // クラウドが空っぽの時（初回アクセス時）
+                // ローカル（スマホ本体）に過去のデータが残っていれば吸い上げて移行する
+                const local = localStorage.getItem('kakeibo_kazuma_kanako_v7');
+                if (local) {
+                    appData = sanitizeData(JSON.parse(local));
+                } else {
+                    // 全くの初めての場合は初期データ
+                    appData = sanitizeData({});
+                }
+                window.saveData(); // 吸い上げたデータをFirebaseに送る
+            }
+        });
 
-        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); render(); if(document.getElementById('sheet-graph').classList.contains('active')) renderGraphs(); }
-        function getCurrentMonthData() { if (!appData.months[currentMonthStr]) { appData.months[currentMonthStr] = { incomes: { kazuma: [], kanako: [] }, variableExpenses: [] }; } return appData.months[currentMonthStr]; }
+        // データをクラウドに保存する関数
+        window.saveData = function() {
+            set(dbRef, appData).catch(error => {
+                console.error("保存エラー:", error);
+                alert("データの保存に失敗しました。通信環境を確認してください。");
+            });
+        }
+
+        function getCurrentMonthData() { 
+            if (!appData.months[currentMonthStr]) { appData.months[currentMonthStr] = { incomes: { kazuma: [], kanako: [] }, variableExpenses: [] }; } 
+            return appData.months[currentMonthStr]; 
+        }
+
         const monthInput = document.getElementById('month-input');
         const displayMonth = document.getElementById('display-month');
         function formatCurrency(num) { return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(num); }
@@ -500,9 +469,10 @@
             }
         }
 
-        window.deleteIncome = function(person, id) { getCurrentMonthData().incomes[person] = getCurrentMonthData().incomes[person].filter(i => i.id !== id); saveData(); };
-        window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); saveData(); } };
-        window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); saveData(); } };
+        // --- 各種操作関数をwindowに紐付け（HTMLから呼べるようにする） ---
+        window.deleteIncome = function(person, id) { getCurrentMonthData().incomes[person] = getCurrentMonthData().incomes[person].filter(i => i.id !== id); window.saveData(); };
+        window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); window.saveData(); } };
+        window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); window.saveData(); } };
 
         window.switchSheet = function(sheetId) {
             document.querySelectorAll('.sheet').forEach(el => el.classList.remove('active'));
@@ -512,24 +482,16 @@
             if (sheetId === 'graph') {
                 const now = new Date(); const yyyy = now.getFullYear();
                 if(!document.getElementById('graph-start-month').value) { document.getElementById('graph-start-month').value = `${yyyy}-01`; document.getElementById('graph-end-month').value = `${yyyy}-12`; }
-                renderGraphs();
+                window.renderGraphs();
             }
         };
 
         window.closeModal = function(modalId) { document.getElementById(modalId).classList.remove('show'); };
         
-        // メモ表示用モーダル
         window.openMemoModal = function(id) {
             let targetMemo = '';
-            // 全ての月から該当のIDのメモを探す
-            Object.values(appData.months).forEach(md => {
-                const item = md.variableExpenses.find(v => v.id === id);
-                if (item) targetMemo = item.memo;
-            });
-            if (targetMemo) {
-                document.getElementById('memo-full-text').textContent = targetMemo;
-                document.getElementById('memo-modal').classList.add('show');
-            }
+            Object.values(appData.months).forEach(md => { const item = md.variableExpenses.find(v => v.id === id); if (item) targetMemo = item.memo; });
+            if (targetMemo) { document.getElementById('memo-full-text').textContent = targetMemo; document.getElementById('memo-modal').classList.add('show'); }
         };
 
         let editingCategoryType = 'variable';
@@ -548,18 +510,18 @@
             if (editingCategoryType === 'fixed') appData.fixedCategories.splice(index, 1);
             else if (editingCategoryType === 'variable') appData.variableCategories.splice(index, 1);
             else if (editingCategoryType === 'income') appData.incomeCategories.splice(index, 1);
-            renderCategoryModal(); saveData();
+            renderCategoryModal(); window.saveData();
         };
         window.addCategory = function() {
             const val = document.getElementById('new-category-name').value.trim(); if (!val) return;
             if (editingCategoryType === 'fixed') appData.fixedCategories.push(val);
             else if (editingCategoryType === 'variable') appData.variableCategories.push(val);
             else if (editingCategoryType === 'income') appData.incomeCategories.push(val);
-            document.getElementById('new-category-name').value = ''; renderCategoryModal(); saveData();
+            document.getElementById('new-category-name').value = ''; renderCategoryModal(); window.saveData();
         };
 
         window.openGoalModal = function() { document.getElementById('goal-name-input').value = appData.goal.name || ''; document.getElementById('goal-amount-input').value = appData.goal.amount || ''; document.getElementById('goal-modal').classList.add('show'); };
-        window.saveGoal = function() { appData.goal.name = document.getElementById('goal-name-input').value; appData.goal.amount = Number(document.getElementById('goal-amount-input').value) || 0; closeModal('goal-modal'); saveData(); };
+        window.saveGoal = function() { appData.goal.name = document.getElementById('goal-name-input').value; appData.goal.amount = Number(document.getElementById('goal-amount-input').value) || 0; window.closeModal('goal-modal'); window.saveData(); };
 
         window.openBudgetModal = function() {
             const listEl = document.getElementById('budget-input-list'); listEl.innerHTML = '';
@@ -575,7 +537,7 @@
                 if(val && Number(val) > 0) appData.budgets[cat] = Number(val);
                 else delete appData.budgets[cat];
             });
-            closeModal('budget-modal'); saveData();
+            window.closeModal('budget-modal'); window.saveData();
         };
 
         function isFixedExpenseActive(item, targetMonthStr) {
@@ -598,7 +560,6 @@
             const a = document.createElement('a'); a.href = url; a.download = `家計簿データ_${currentMonthStr}.csv`; a.click(); window.URL.revokeObjectURL(url);
         };
 
-        // --- 新機能：スプレッドシートへコピペ用出力 ---
         window.copyForSpreadsheet = function() {
             let tsv = "日付(月)\t種類\t項目名\tメモ\t金額\t負担者\n";
             Object.keys(appData.months).forEach(mKey => {
@@ -608,17 +569,15 @@
                 md.variableExpenses.forEach(i => tsv += `${i.date}\t変動費\t${i.name}\t${i.memo||''}\t${i.amount}\t${i.category}\n`);
                 appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) tsv += `${mKey}\t固定費\t${i.name}\t\t${i.amount}\t${i.category}\n`; });
             });
-
             navigator.clipboard.writeText(tsv).then(() => {
                 if (confirm("データをコピーしました！\nすぐにGoogleスプレッドシートを開いて貼り付け（ペースト）しますか？")) {
                     window.open('https://sheet.new/', '_blank');
                 }
-            }).catch(err => {
-                alert("コピーに失敗しました。お使いの端末が対応していない可能性があります。");
-            });
+            }).catch(err => { alert("コピーに失敗しました。お使いの端末が対応していない可能性があります。"); });
         };
 
         window.renderGraphs = function() {
+            if(!appData) return;
             const startStr = document.getElementById('graph-start-month').value; const endStr = document.getElementById('graph-end-month').value;
             if (!startStr || !endStr) return;
             let startD = new Date(startStr + "-01"); let endD = new Date(endStr + "-01"); if (startD > endD) return;
@@ -689,6 +648,7 @@
         };
 
         function render() {
+            if(!appData) return; // データロード前は描画しない
             const md = getCurrentMonthData(); const [y, m] = currentMonthStr.split('-'); displayMonth.textContent = `${y}年${Number(m)}月`;
 
             let totalHistorySavings = 0;
@@ -730,7 +690,6 @@
             let budgetSpent = {};
             const sortedVar = [...md.variableExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
             sortedVar.forEach(item => {
-                // 変更箇所：メモを省略表示（青文字リンク）にして、タップでモーダルを開く
                 const memoHtml = item.memo ? `<br><span style="font-size:0.75rem; color:var(--md-text-secondary);"><span class="material-icons" style="font-size:0.75rem; vertical-align:middle;">notes</span> <span class="memo-preview" onclick="openMemoModal(${item.id})">${item.memo}</span></span>` : '';
                 document.getElementById('variable-list').innerHTML += `<tr><td>${item.date}</td><td>${item.name}${memoHtml}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
@@ -772,17 +731,18 @@
             if (kazumaPaidShared === 0 && kanakoPaidShared === 0) { alertBox.style.display = 'none'; } else { alertBox.style.display = 'flex'; if (diffX > 0) alertText.innerHTML = `今月の共通費精算：<br><strong>かずま</strong> が <strong>かなこ</strong> に <strong>${formatCurrency(diffX)}</strong> ペイする`; else if (diffX < 0) alertText.innerHTML = `今月の共通費精算：<br><strong>かなこ</strong> が <strong>かずま</strong> に <strong>${formatCurrency(Math.abs(diffX))}</strong> ペイする`; else alertText.innerHTML = `今月の共通費精算：ピッタリ折半されています！`; }
         }
 
+        // 初期化処理（UIイベントの登録など）
         function init() {
             const now = new Date(); const yyyy = now.getFullYear(); const mm = String(now.getMonth() + 1).padStart(2, '0');
             currentMonthStr = `${yyyy}-${mm}`;
             monthInput.value = currentMonthStr; document.getElementById('var-date').valueAsDate = now; document.getElementById('fixed-start').value = currentMonthStr;
 
             monthInput.addEventListener('change', (e) => { if(e.target.value) { currentMonthStr = e.target.value; document.getElementById('fixed-start').value = currentMonthStr; render(); } });
-            document.getElementById('graph-start-month').addEventListener('change', renderGraphs); document.getElementById('graph-end-month').addEventListener('change', renderGraphs);
+            document.getElementById('graph-start-month').addEventListener('change', window.renderGraphs); document.getElementById('graph-end-month').addEventListener('change', window.renderGraphs);
 
-            document.getElementById('form-kazuma-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kazuma.push({ id: Date.now(), category: document.getElementById('kazuma-inc-category').value, amount: Number(document.getElementById('kazuma-inc-amount').value) }); document.getElementById('kazuma-inc-amount').value = ''; saveData(); });
-            document.getElementById('form-kanako-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kanako.push({ id: Date.now(), category: document.getElementById('kanako-inc-category').value, amount: Number(document.getElementById('kanako-inc-amount').value) }); document.getElementById('kanako-inc-amount').value = ''; saveData(); });
-            document.getElementById('form-fixed').addEventListener('submit', (e) => { e.preventDefault(); appData.fixedExpenses.push({ id: Date.now(), name: document.getElementById('fixed-name').value, amount: Number(document.getElementById('fixed-amount').value), category: document.getElementById('fixed-category').value, startMonth: document.getElementById('fixed-start').value, endMonth: document.getElementById('fixed-end').value }); document.getElementById('fixed-amount').value = ''; document.getElementById('fixed-start').value = currentMonthStr; document.getElementById('fixed-end').value = ''; saveData(); });
+            document.getElementById('form-kazuma-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kazuma.push({ id: Date.now(), category: document.getElementById('kazuma-inc-category').value, amount: Number(document.getElementById('kazuma-inc-amount').value) }); document.getElementById('kazuma-inc-amount').value = ''; window.saveData(); });
+            document.getElementById('form-kanako-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kanako.push({ id: Date.now(), category: document.getElementById('kanako-inc-category').value, amount: Number(document.getElementById('kanako-inc-amount').value) }); document.getElementById('kanako-inc-amount').value = ''; window.saveData(); });
+            document.getElementById('form-fixed').addEventListener('submit', (e) => { e.preventDefault(); appData.fixedExpenses.push({ id: Date.now(), name: document.getElementById('fixed-name').value, amount: Number(document.getElementById('fixed-amount').value), category: document.getElementById('fixed-category').value, startMonth: document.getElementById('fixed-start').value, endMonth: document.getElementById('fixed-end').value }); document.getElementById('fixed-amount').value = ''; document.getElementById('fixed-start').value = currentMonthStr; document.getElementById('fixed-end').value = ''; window.saveData(); });
             
             document.getElementById('form-variable').addEventListener('submit', (e) => { 
                 e.preventDefault(); 
@@ -795,15 +755,11 @@
                 }); 
                 document.getElementById('var-amount').value = ''; 
                 document.getElementById('var-memo').value = '';
-                saveData(); 
+                window.saveData(); 
             });
 
-            // 背景クリックでモーダルを閉じる処理を統合
-            window.onclick = function(event) { 
-                if (event.target.classList.contains('modal')) closeModal(event.target.id); 
-            };
-
-            render();
+            // 背景クリックでモーダルを閉じる
+            window.onclick = function(event) { if (event.target.classList.contains('modal')) window.closeModal(event.target.id); };
         }
         window.onload = init;
     </script>
