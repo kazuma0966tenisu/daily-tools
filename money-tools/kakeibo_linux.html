@@ -1,1 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ふたりの家計簿 - かずま & かなこ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --md-primary: #00796B; 
+            --md-primary-light: #B2DFDB;
+            --md-bg: #F5F5F6;
+            --md-surface: #FFFFFF;
+            --md-text: #212121;
+            --md-text-secondary: #757575;
+            --md-border: #E0E0E0;
+            --md-error: #D32F2F;
+            --md-warning: #FF9800;
+            
+            --kazuma-color: #1976D2;
+            --kanako-color: #C2185B;
+        }
 
+        body {
+            margin: 0; font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--md-bg); color: var(--md-text);
+        }
+
+        /* アプリバー */
+        .app-bar {
+            background-color: var(--md-primary); color: white;
+            padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .app-bar-left { display: flex; align-items: center; gap: 10px; }
+        .app-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 500; }
+        
+        .month-selector {
+            background: rgba(255,255,255,0.2); padding: 4px 12px;
+            border-radius: 20px; display: flex; align-items: center; gap: 8px;
+        }
+        .month-selector input {
+            background: transparent; border: none; color: white;
+            font-size: 1rem; font-weight: 700; outline: none;
+            font-family: inherit; cursor: pointer;
+        }
+        .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        .container {
+            max-width: 1000px; margin: 0 auto 2rem auto; padding: 0 1rem;
+            display: flex; flex-direction: column; gap: 1.5rem;
+        }
+
+        /* タブ */
+        .tabs { display: flex; justify-content: center; gap: 1rem; padding: 0; margin-left: auto; margin-right: 1.5rem; }
+        .tab-btn {
+            padding: 0.5rem 1.5rem; border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; font-weight: 500;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.25); }
+        .tab-btn.active { background: white; color: var(--md-primary); border-color: white; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+
+        .sheet { display: none; animation: fadeIn 0.3s ease; }
+        .sheet.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background-color: var(--md-surface); border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            margin-top: 0; font-size: 1.1rem; color: var(--md-primary);
+            display: flex; align-items: center; gap: 8px;
+            border-bottom: 2px solid var(--md-primary-light);
+            padding-bottom: 0.5rem; margin-bottom: 1rem;
+        }
+
+        /* ダッシュボード周り */
+        .dash-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+        .dash-box { padding: 1.25rem; border-radius: 8px; border: 1px solid var(--md-border); text-align: center; background: #FAFAFA; }
+        .dash-box h3 { margin: 0 0 10px 0; font-size: 0.95rem; color: var(--md-text-secondary); display: flex; justify-content: center; align-items: center; gap: 4px; }
+        .dash-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; color: var(--md-text-secondary); }
+        .dash-row span:last-child { font-weight: 500; color: var(--md-text); }
+        .dash-main-value { font-size: 1.5rem; font-weight: 700; margin: 10px 0 0 0; padding-top: 10px; border-top: 1px dashed var(--md-border); }
+
+        .dash-kazuma { border-top: 4px solid var(--kazuma-color); }
+        .dash-kazuma h3, .dash-kazuma .dash-main-value { color: var(--kazuma-color); }
+        .dash-kanako { border-top: 4px solid var(--kanako-color); }
+        .dash-kanako h3, .dash-kanako .dash-main-value { color: var(--kanako-color); }
+        .dash-household { border-top: 4px solid var(--md-primary); background-color: #E0F2F1; border-color: #B2DFDB; }
+        .dash-household h3, .dash-household .dash-main-value { color: var(--md-primary); }
+
+        /* アラート・プログレスバー */
+        .alert-box { padding: 1rem; border-radius: 4px; display: flex; align-items: center; gap: 12px; font-weight: 500; line-height: 1.5; margin-bottom: 0.5rem;}
+        .alert-settlement { background-color: #FFF3E0; border-left: 4px solid #FF9800; color: #E65100; }
+        .alert-settlement strong { font-weight: 700; text-decoration: underline; text-decoration-color: #FF9800; text-decoration-thickness: 2px; text-underline-offset: 3px; font-size: 1.05rem; }
+        .alert-budget-warn { background-color: #FFFDE7; border-left: 4px solid #FBC02D; color: #F57F17; font-size: 0.9rem; padding: 0.75rem;}
+        .alert-budget-danger { background-color: #FFEBEE; border-left: 4px solid #F44336; color: #C62828; font-size: 0.9rem; padding: 0.75rem;}
+
+        .progress-wrap { background: #EEEEEE; border-radius: 10px; height: 16px; width: 100%; overflow: hidden; margin: 8px 0; }
+        .progress-bar { background: var(--md-primary); height: 100%; width: 0%; transition: width 0.8s ease; }
+
+        /* フォーム周り */
+        .form-row { display: flex; gap: 1rem; flex-wrap: wrap; background: #FAFAFA; padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border); }
+        .form-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
+        .form-group label { font-size: 0.8rem; color: var(--md-text-secondary); margin-bottom: 0.25rem; }
+        .form-group input, .form-group select { padding: 0.5rem; font-size: 0.95rem; border: none; border-bottom: 1px solid var(--md-border); background-color: transparent; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-bottom: 2px solid var(--md-primary); }
+        .form-group input[type="month"] { width: 100%; box-sizing: border-box;}
+
+        .btn { background-color: var(--md-primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .btn:hover { background-color: #00695C; }
+        .btn-outline { background-color: transparent; color: var(--md-text); border: 1px solid var(--md-border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-outline:hover { background-color: #f0f0f0; }
+        
+        .btn-icon { background: none; border: none; color: var(--md-text-secondary); cursor: pointer; padding: 4px; border-radius: 50%; transition: 0.2s;}
+        .app-bar-left .btn-icon { color: white; opacity: 0.8;}
+        .app-bar-left .btn-icon:hover { opacity: 1; background-color: rgba(255,255,255,0.2);}
+        .modal-header .btn-icon:hover { background-color: #E0F2F1; color: var(--md-primary); }
+        .btn-icon-danger:hover { background-color: #FFEBEE; color: var(--md-error); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem;}
+        th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem;}
+        th { color: var(--md-text-secondary); font-weight: 500; font-size: 0.85rem; }
+        .text-right { text-align: right; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
+        
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .action-bar h2 { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        /* モーダル */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal.show { display: flex; }
+        .modal-content { background-color: #fff; border-radius: 8px; width: 90%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--md-border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { margin: 0; font-size: 1.1rem; color: var(--md-text); display: flex; align-items: center; gap: 8px; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; background: #FAFAFA; border-radius: 0 0 8px 8px;}
+        
+        .category-list { list-style: none; padding: 0; margin: 0 0 1.5rem 0; background: white; border: 1px solid var(--md-border); border-radius: 4px; }
+        .category-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #EEEEEE; }
+        .category-item:last-child { border-bottom: none; }
+        .category-item button { background: #424242; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .category-item button:hover { background: var(--md-error); }
+        .category-add-form { display: flex; gap: 0.5rem; }
+        .category-add-form input { flex: 1; padding: 0.75rem; border: 1px solid #BDBDBD; border-radius: 4px; background-color: white; font-size: 0.95rem;}
+
+        /* メモ表示用（長文は省略する設定） */
+        .memo-preview {
+            display: inline-block;
+            max-width: 150px; /* スマホでも見切れない幅 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: bottom;
+            color: var(--md-primary);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .memo-preview:hover { color: #004D40; }
+
+        canvas { width: 100%; }
+        .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
+
+        @media (max-width: 768px) {
+            .dash-container { grid-template-columns: 1fr; }
+            .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem;}
+            .tabs { margin: 0 auto; width: 100%; justify-content: center; }
+            .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+        @media (max-width: 600px) and (orientation: portrait) {
+            .category-add-form input { min-width: 0; }
+            .category-add-form button { padding: 0.5rem 1rem !important; flex-shrink: 0; }
+            .graph-range-container { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; width: 100%; }
+            .graph-range-inputs { width: 100%; justify-content: space-between; }
+            .graph-month-input { padding: 0.4rem !important; font-size: 0.85rem !important; width: 45%; }
+            .fixed-period-inputs { flex-direction: row !important; gap: 0.5rem;}
+            .fixed-period-inputs > div { min-width: 0; flex: 1;}
+            .memo-preview { max-width: 100px; } /* スマホ縦画面ではさらに狭くする */
+        }
+    </style>
+</head>
+<body>
+    <header class="app-bar">
+        <div class="app-bar-left">
+            <span class="material-icons">favorite</span>
+            <h1>ふたりの家計簿</h1>
+            <div style="margin-left: 1rem; display: flex; gap: 0.2rem;">
+                <button class="btn-icon" onclick="exportCSV()" title="CSVでダウンロード"><span class="material-icons">download</span></button>
+                <button class="btn-icon" onclick="copyForSpreadsheet()" title="スプレッドシートにコピー"><span class="material-icons">table_chart</span></button>
+            </div>
+        </div>
+        <div class="tabs">
+            <button id="tab-input" class="tab-btn active" onclick="switchSheet('input')"><span class="material-icons">edit_note</span> 入力シート</button>
+            <button id="tab-graph" class="tab-btn" onclick="switchSheet('graph')"><span class="material-icons">insights</span> グラフシート</button>
+        </div>
+        <div class="month-selector">
+            <span class="material-icons">calendar_month</span>
+            <input type="month" id="month-input">
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="sheet-input" class="sheet active">
+            
+            <section class="card" style="padding-bottom: 1rem;">
+                <div class="action-bar" style="margin-bottom: 0.5rem;">
+                    <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">flag</span> ふたりの目標</h2>
+                    <button type="button" class="btn btn-outline" style="padding: 4px 12px;" onclick="openGoalModal()">
+                        <span class="material-icons" style="font-size:1rem;">edit</span> 設定
+                    </button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <strong id="goal-name-display" style="font-size: 1.1rem;">目標未設定</strong>
+                    <span id="goal-amount-display" style="font-weight: 500; color: var(--md-primary);">¥0 / ¥0</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-bar" id="goal-progress-bar"></div></div>
+                <div style="text-align: right; font-size: 0.85rem; color: var(--md-text-secondary);" id="goal-percent-display">0% 達成</div>
+            </section>
+
+            <section class="card">
+                <div class="action-bar">
+                    <h2 class="section-title" style="margin: 0; border: none; padding: 0;"><span class="material-icons">analytics</span> <span id="display-month"></span> のダッシュボード</h2>
+                    <button type="button" class="btn btn-outline" onclick="openBudgetModal()">
+                        <span class="material-icons">account_balance</span> 予算設定
+                    </button>
+                </div>
+
+                <div class="dash-container">
+                    <div class="dash-box dash-kazuma">
+                        <h3><span class="material-icons">person</span> かずま</h3>
+                        <div class="dash-row"><span>収入</span><span id="dash-kazuma-inc">¥0</span></div>
+                        <div class="dash-row"><span>個人出費</span><span id="dash-kazuma-exp">¥0</span></div>
+                        <div class="dash-row"><span>共通費用の負担(半額)</span><span id="dash-kazuma-share">¥0</span></div>
+                        <p class="dash-main-value" title="収入 - 個人出費 - 共通費用の半額"><span style="font-size:0.8rem; color:#757575; display:block; font-weight:normal;">個人推定貯蓄可能額</span><span id="dash-kazuma-save">¥0</span></p>
+                    </div>
+                    <div class="dash-box dash-kanako">
+                        <h3><span class="material-icons">person_3</span> かなこ</h3>
+                        <div class="dash-row"><span>収入</span><span id="dash-kanako-inc">¥0</span></div>
+                        <div class="dash-row"><span>個人出費</span><span id="dash-kanako-exp">¥0</span></div>
+                        <div class="dash-row"><span>共通費用の負担(半額)</span><span id="dash-kanako-share">¥0</span></div>
+                        <p class="dash-main-value" title="収入 - 個人出費 - 共通費用の半額"><span style="font-size:0.8rem; color:#757575; display:block; font-weight:normal;">個人推定貯蓄可能額</span><span id="dash-kanako-save">¥0</span></p>
+                    </div>
+                    <div class="dash-box dash-household">
+                        <h3><span class="material-icons">home</span> 世帯全体</h3>
+                        <div class="dash-row"><span>世帯収入合計</span><span id="dash-total-inc">¥0</span></div>
+                        <div class="dash-row"><span>世帯出費合計</span><span id="dash-total-exp">¥0</span></div>
+                        <br>
+                        <p class="dash-main-value"><span style="font-size:0.8rem; color:#00796B; display:block; font-weight:normal;">世帯 想定貯蓄可能額</span><span id="dash-total-save">¥0</span></p>
+                    </div>
+                </div>
+
+                <div id="alerts-container">
+                    <div class="alert-box alert-settlement" id="settlement-alert" style="display:none;">
+                        <span class="material-icons" style="font-size: 1.5rem;">currency_exchange</span>
+                        <span id="settlement-text" style="font-size: 0.95rem;">計算中...</span>
+                    </div>
+                    <div id="budget-alerts"></div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="action-bar">
+                    <h2 class="section-title" style="margin: 0; border: none; padding: 0;"><span class="material-icons">account_balance_wallet</span> 今月の収入設定</h2>
+                    <button type="button" class="btn btn-outline" onclick="openCategoryModal('income')"><span class="material-icons">settings</span> 項目リストの編集</button>
+                </div>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 300px;">
+                        <h3 style="font-size: 1rem; color: var(--kazuma-color); margin-top: 0;">かずまの収入</h3>
+                        <table><tbody id="kazuma-income-list"></tbody></table>
+                        <form id="form-kazuma-income" class="form-row">
+                            <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+                                <div class="form-group"><label>項目名</label><select id="kazuma-inc-category" required></select></div>
+                                <div class="form-group"><label>金額 (円)</label><input type="number" id="kazuma-inc-amount" required min="0"></div>
+                            </div>
+                            <div style="width: 100%; display: flex; justify-content: flex-end; margin-top: 0.5rem;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
+                        </form>
+                    </div>
+                    <div style="flex: 1; min-width: 300px;">
+                        <h3 style="font-size: 1rem; color: var(--kanako-color); margin-top: 0;">かなこの収入</h3>
+                        <table><tbody id="kanako-income-list"></tbody></table>
+                        <form id="form-kanako-income" class="form-row">
+                            <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+                                <div class="form-group"><label>項目名</label><select id="kanako-inc-category" required></select></div>
+                                <div class="form-group"><label>金額 (円)</label><input type="number" id="kanako-inc-amount" required min="0"></div>
+                            </div>
+                            <div style="width: 100%; display: flex; justify-content: flex-end; margin-top: 0.5rem;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="action-bar">
+                    <h2 class="section-title"><span class="material-icons">event_repeat</span> 固定費（毎月自動適用）</h2>
+                    <button type="button" class="btn btn-outline" onclick="openCategoryModal('fixed')"><span class="material-icons">settings</span> 項目リストの編集</button>
+                </div>
+                <table>
+                    <thead><tr><th>項目</th><th>負担者</th><th>適用期間</th><th class="text-right">金額</th><th class="text-right">削除</th></tr></thead>
+                    <tbody id="fixed-list"></tbody>
+                </table>
+                <form id="form-fixed" class="form-row">
+                    <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+                        <div class="form-group"><label>項目名</label><select id="fixed-name" required></select></div>
+                        <div class="form-group"><label>金額 (円)</label><input type="number" id="fixed-amount" required min="0"></div>
+                        <div class="form-group">
+                            <label>負担者</label>
+                            <select id="fixed-category">
+                                <option value="共通・かずま">共通・かずま（かずまが立替）</option>
+                                <option value="共通・かなこ">共通・かなこ（かなこが立替）</option>
+                                <option value="共通">共通（すでに折半済）</option>
+                                <option value="かずま">かずま（個人出費）</option>
+                                <option value="かなこ">かなこ（個人出費）</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row fixed-period-inputs" style="width: 100%; padding: 0; background: none; border: none; margin-top: 0.5rem;">
+                        <div class="form-group"><label>開始月 (必須)</label><input type="month" id="fixed-start" required></div>
+                        <div style="display:flex; align-items:flex-end; padding-bottom: 0.5rem; font-weight:bold;">〜</div>
+                        <div class="form-group"><label>終了月 (任意・空欄可)</label><input type="month" id="fixed-end"></div>
+                        <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card">
+                <div class="action-bar">
+                    <h2 class="section-title"><span class="material-icons">shopping_cart</span> 変動費（今月分）</h2>
+                    <button type="button" class="btn btn-outline" onclick="openCategoryModal('variable')"><span class="material-icons">settings</span> 項目リストの編集</button>
+                </div>
+                <table>
+                    <thead><tr><th>日付</th><th>項目</th><th>負担者</th><th class="text-right">金額</th><th class="text-right">削除</th></tr></thead>
+                    <tbody id="variable-list"></tbody>
+                </table>
+                <form id="form-variable" class="form-row">
+                    <div class="form-group" style="flex: 0.5;"><label>日付</label><input type="date" id="var-date" required></div>
+                    <div class="form-group"><label>項目名</label><select id="var-name" required></select></div>
+                    <div class="form-group"><label>メモ(任意)</label><input type="text" id="var-memo" placeholder="例: スーパー"></div>
+                    <div class="form-group"><label>金額 (円)</label><input type="number" id="var-amount" required min="0"></div>
+                    <div class="form-group">
+                        <label>負担者</label>
+                        <select id="var-category">
+                            <option value="共通・かずま">共通・かずま（かずまが立替）</option>
+                            <option value="共通・かなこ">共通・かなこ（かなこが立替）</option>
+                            <option value="共通">共通（すでに折半済）</option>
+                            <option value="かずま">かずま（個人出費）</option>
+                            <option value="かなこ">かなこ（個人出費）</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
+                </form>
+            </section>
+        </div>
+
+        <div id="sheet-graph" class="sheet">
+            <section class="card">
+                <div class="action-bar" style="background: #FAFAFA; padding: 1rem; border-radius: 8px; border: 1px solid var(--md-border);">
+                    <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">query_stats</span> 支出分析グラフ</h2>
+                    <div class="graph-range-container" style="display: flex; align-items: center; gap: 8px;">
+                        <span class="graph-range-label" style="font-size: 0.9rem; font-weight: bold; color: var(--md-text-secondary);">表示範囲：</span>
+                        <div class="graph-range-inputs" style="display: flex; align-items: center; gap: 8px;">
+                            <input type="month" id="graph-start-month" class="graph-month-input" style="padding: 0.5rem; border: 1px solid var(--md-border); border-radius: 4px; font-family: inherit;">
+                            <span style="font-weight: bold;">〜</span>
+                            <input type="month" id="graph-end-month" class="graph-month-input" style="padding: 0.5rem; border: 1px solid var(--md-border); border-radius: 4px; font-family: inherit;">
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="graph-title" style="color: var(--md-primary); border-color: var(--md-primary-light);"><span class="material-icons">donut_large</span> 項目別の支出割合（円グラフ）</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 3rem;">
+                    <div class="dash-box" style="background: white;"><h4 style="margin-top:0; color: var(--md-primary);">世帯全体（共通出費）</h4><div style="position: relative; height: 220px;"><canvas id="pie-household"></canvas></div></div>
+                    <div class="dash-box" style="background: white;"><h4 style="margin-top:0; color: var(--kazuma-color);">かずま（個人出費）</h4><div style="position: relative; height: 220px;"><canvas id="pie-kazuma"></canvas></div></div>
+                    <div class="dash-box" style="background: white;"><h4 style="margin-top:0; color: var(--kanako-color);">かなこ（個人出費）</h4><div style="position: relative; height: 220px;"><canvas id="pie-kanako"></canvas></div></div>
+                </div>
+
+                <h3 class="graph-title" style="color: var(--md-primary); border-color: var(--md-primary-light);"><span class="material-icons">show_chart</span> 月別の推移（折れ線グラフ）</h3>
+                <h4 style="color: var(--md-primary); margin-bottom: 0;">世帯全体（共通出費）</h4><div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="chart-household"></canvas></div>
+                <h4 style="color: var(--kazuma-color); margin-bottom: 0;">かずま（個人出費）</h4><div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="chart-kazuma"></canvas></div>
+                <h4 style="color: var(--kanako-color); margin-bottom: 0;">かなこ（個人出費）</h4><div style="position: relative; height: 300px; margin-bottom: 3rem;"><canvas id="chart-kanako"></canvas></div>
+
+                <h3 class="graph-title" style="color: var(--md-primary); border-color: var(--md-primary-light);"><span class="material-icons">bar_chart</span> 月ごとの収支の推移</h3>
+                <h4 style="color: var(--md-primary); margin-bottom: 0;">世帯全体（共通出費）</h4><div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="combo-household"></canvas></div>
+                <h4 style="color: var(--kazuma-color); margin-bottom: 0;">かずま（個人出費）</h4><div style="position: relative; height: 300px; margin-bottom: 2rem;"><canvas id="combo-kazuma"></canvas></div>
+                <h4 style="color: var(--kanako-color); margin-bottom: 0;">かなこ（個人出費）</h4><div style="position: relative; height: 300px; margin-bottom: 1rem;"><canvas id="combo-kanako"></canvas></div>
+            </section>
+        </div>
+    </main>
+
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="modal-title"><span class="material-icons">settings</span> 項目リストの編集</h3><button class="btn-icon" onclick="closeModal('category-modal')"><span class="material-icons">close</span></button></div>
+            <div class="modal-body">
+                <p style="font-size: 0.8rem; color: #757575; margin-top: 0;">※削除ボタンを押すとリストから消えます。</p>
+                <ul id="modal-category-list" class="category-list"></ul>
+                <div class="category-add-form">
+                    <input type="text" id="new-category-name" placeholder="ここに入力">
+                    <button class="btn" onclick="addCategory()" style="background: var(--md-primary); border-radius: 20px; padding: 0.5rem 1.5rem; flex-shrink: 0;"><span class="material-icons" style="font-size: 1rem;">add</span> 追加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="goal-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3><span class="material-icons">flag</span> 目標の設定</h3><button class="btn-icon" onclick="closeModal('goal-modal')"><span class="material-icons">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 1rem;"><label>目標の名前（例: ハワイ旅行）</label><input type="text" id="goal-name-input"></div>
+                <div class="form-group" style="margin-bottom: 1rem;"><label>目標金額 (円)</label><input type="number" id="goal-amount-input" min="0"></div>
+                <button class="btn" style="width: 100%; justify-content: center;" onclick="saveGoal()">保存して閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="budget-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3><span class="material-icons">account_balance</span> 予算の設定</h3><button class="btn-icon" onclick="closeModal('budget-modal')"><span class="material-icons">close</span></button></div>
+            <div class="modal-body">
+                <p style="font-size: 0.8rem; color: #757575; margin-top: 0;">世帯全体(共通)の出費に対する予算を設定できます。</p>
+                <div id="budget-input-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
+                <button class="btn" style="width: 100%; justify-content: center;" onclick="saveBudgets()">保存して閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="memo-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><span class="material-icons">notes</span> メモの詳細</h3>
+                <button class="btn-icon" onclick="closeModal('memo-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body" style="word-wrap: break-word; white-space: pre-wrap;">
+                <p id="memo-full-text" style="margin: 0; line-height: 1.6; color: var(--md-text); font-size: 0.95rem;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'kakeibo_kazuma_kanako_v7'; 
+        let currentMonthStr = "";
+        let charts = {};
+
+        const defaultIncomeCategories = ["給与", "賞与", "臨時収入", "副業収入"];
+        const defaultFixedCategories = ["家賃", "ネット代", "保険", "水道光熱費", "サブスク費"];
+        const defaultVariableCategories = ["携帯代", "サブスク費", "食費", "外食費", "交通費", "健康・医療費", "日用品費", "交際費", "衣服・美容代", "趣味・娯楽", "デート代", "旅行費", "金融投資", "自己投資", "奨学金返済", "特別な支出"];
+
+        const chartColorMap = {
+            "家賃": "#4CAF50", "水道光熱費": "#9C27B0", "食費": "#FF9800", "外食費": "#FF5722", "ネット代": "#2196F3", "携帯代": "#03A9F4", "保険": "#F44336", "サブスク費": "#E91E63",
+            "交通費": "#00BCD4", "健康・医療費": "#009688", "日用品費": "#8BC34A", "交際費": "#FFEB3B", "衣服・美容代": "#E040FB", "趣味・娯楽": "#673AB7", "デート代": "#F06292", "旅行費": "#3F51B5", "金融投資": "#607D8B", "自己投資": "#795548", "奨学金返済": "#9E9E9E", "特別な支出": "#607D8B"
+        };
+
+        function getChartColor(label, isBackground = false) {
+            let hex = chartColorMap[label];
+            if (!hex) {
+                let hash = 0; for (let i = 0; i < label.length; i++) hash = label.charCodeAt(i) + ((hash << 5) - hash);
+                const hue = Math.abs(hash) % 360;
+                return isBackground ? `hsla(${hue}, 70%, 50%, 0.1)` : `hsl(${hue}, 70%, 50%)`;
+            }
+            if (isBackground) { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${r}, ${g}, ${b}, 0.1)`; }
+            return hex;
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            let data;
+            if (saved) {
+                data = JSON.parse(saved);
+                if (!data.variableCategories) data.variableCategories = defaultVariableCategories;
+                if (!data.fixedCategories) data.fixedCategories = defaultFixedCategories;
+                if (!data.incomeCategories) data.incomeCategories = defaultIncomeCategories;
+                if (!data.goal) data.goal = { name: '', amount: 0 };
+                if (!data.budgets) data.budgets = {};
+            } else {
+                data = { fixedExpenses: [], incomeCategories: defaultIncomeCategories, variableCategories: defaultVariableCategories, fixedCategories: defaultFixedCategories, months: {}, goal: { name: '', amount: 0 }, budgets: {} };
+            }
+            return data;
+        }
+
+        let appData = loadData();
+
+        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); render(); if(document.getElementById('sheet-graph').classList.contains('active')) renderGraphs(); }
+        function getCurrentMonthData() { if (!appData.months[currentMonthStr]) { appData.months[currentMonthStr] = { incomes: { kazuma: [], kanako: [] }, variableExpenses: [] }; } return appData.months[currentMonthStr]; }
+        const monthInput = document.getElementById('month-input');
+        const displayMonth = document.getElementById('display-month');
+        function formatCurrency(num) { return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(num); }
+
+        function getCategoryBadge(cat) {
+            switch(cat) {
+                case '共通・かずま': return `<span class="badge" style="background:#E3F2FD; color:#1976D2;">共通・かずま</span>`;
+                case '共通・かなこ': return `<span class="badge" style="background:#FCE4EC; color:#C2185B;">共通・かなこ</span>`;
+                case '共通': return `<span class="badge" style="background:#E8F5E9; color:#388E3C;">共通(折半済)</span>`;
+                case 'かずま': return `<span class="badge" style="background:#EEEEEE; color:#616161;">かずま個人</span>`;
+                case 'かなこ': return `<span class="badge" style="background:#EEEEEE; color:#616161;">かなこ個人</span>`;
+                default: return `<span class="badge" style="background:#EEEEEE; color:#616161;">${cat}</span>`;
+            }
+        }
+
+        window.deleteIncome = function(person, id) { getCurrentMonthData().incomes[person] = getCurrentMonthData().incomes[person].filter(i => i.id !== id); saveData(); };
+        window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); saveData(); } };
+        window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); saveData(); } };
+
+        window.switchSheet = function(sheetId) {
+            document.querySelectorAll('.sheet').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`sheet-${sheetId}`).classList.add('active');
+            document.getElementById(`tab-${sheetId}`).classList.add('active');
+            if (sheetId === 'graph') {
+                const now = new Date(); const yyyy = now.getFullYear();
+                if(!document.getElementById('graph-start-month').value) { document.getElementById('graph-start-month').value = `${yyyy}-01`; document.getElementById('graph-end-month').value = `${yyyy}-12`; }
+                renderGraphs();
+            }
+        };
+
+        window.closeModal = function(modalId) { document.getElementById(modalId).classList.remove('show'); };
+        
+        // メモ表示用モーダル
+        window.openMemoModal = function(id) {
+            let targetMemo = '';
+            // 全ての月から該当のIDのメモを探す
+            Object.values(appData.months).forEach(md => {
+                const item = md.variableExpenses.find(v => v.id === id);
+                if (item) targetMemo = item.memo;
+            });
+            if (targetMemo) {
+                document.getElementById('memo-full-text').textContent = targetMemo;
+                document.getElementById('memo-modal').classList.add('show');
+            }
+        };
+
+        let editingCategoryType = 'variable';
+        window.openCategoryModal = function(type) {
+            editingCategoryType = type;
+            let titleText = type === 'fixed' ? '固定費' : (type === 'variable' ? '変動費' : '収入');
+            document.getElementById('modal-title').innerHTML = `<span class="material-icons">settings</span> ${titleText}の項目リスト編集`;
+            renderCategoryModal(); document.getElementById('category-modal').classList.add('show');
+        };
+        function renderCategoryModal() {
+            const listEl = document.getElementById('modal-category-list'); listEl.innerHTML = '';
+            let categories = editingCategoryType === 'fixed' ? appData.fixedCategories : (editingCategoryType === 'variable' ? appData.variableCategories : appData.incomeCategories);
+            categories.forEach((cat, index) => { listEl.innerHTML += `<li class="category-item"><span>${cat}</span><button type="button" onclick="deleteCategory(${index})">削除</button></li>`; });
+        }
+        window.deleteCategory = function(index) {
+            if (editingCategoryType === 'fixed') appData.fixedCategories.splice(index, 1);
+            else if (editingCategoryType === 'variable') appData.variableCategories.splice(index, 1);
+            else if (editingCategoryType === 'income') appData.incomeCategories.splice(index, 1);
+            renderCategoryModal(); saveData();
+        };
+        window.addCategory = function() {
+            const val = document.getElementById('new-category-name').value.trim(); if (!val) return;
+            if (editingCategoryType === 'fixed') appData.fixedCategories.push(val);
+            else if (editingCategoryType === 'variable') appData.variableCategories.push(val);
+            else if (editingCategoryType === 'income') appData.incomeCategories.push(val);
+            document.getElementById('new-category-name').value = ''; renderCategoryModal(); saveData();
+        };
+
+        window.openGoalModal = function() { document.getElementById('goal-name-input').value = appData.goal.name || ''; document.getElementById('goal-amount-input').value = appData.goal.amount || ''; document.getElementById('goal-modal').classList.add('show'); };
+        window.saveGoal = function() { appData.goal.name = document.getElementById('goal-name-input').value; appData.goal.amount = Number(document.getElementById('goal-amount-input').value) || 0; closeModal('goal-modal'); saveData(); };
+
+        window.openBudgetModal = function() {
+            const listEl = document.getElementById('budget-input-list'); listEl.innerHTML = '';
+            appData.variableCategories.forEach(cat => {
+                const currentVal = appData.budgets[cat] || '';
+                listEl.innerHTML += `<div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;"><label style="font-size:0.9rem;">${cat}</label><div style="display:flex; align-items:center; gap:4px;"><input type="number" id="budget-${cat}" value="${currentVal}" style="width:100px; padding:4px;" placeholder="設定なし"> 円</div></div>`;
+            });
+            document.getElementById('budget-modal').classList.add('show');
+        };
+        window.saveBudgets = function() {
+            appData.variableCategories.forEach(cat => {
+                const val = document.getElementById(`budget-${cat}`).value;
+                if(val && Number(val) > 0) appData.budgets[cat] = Number(val);
+                else delete appData.budgets[cat];
+            });
+            closeModal('budget-modal'); saveData();
+        };
+
+        function isFixedExpenseActive(item, targetMonthStr) {
+            const targetDate = new Date(targetMonthStr + "-01"); const startDate = new Date(item.startMonth + "-01");
+            if (targetDate < startDate) return false;
+            if (item.endMonth) { const endDate = new Date(item.endMonth + "-01"); if (targetDate > endDate) return false; }
+            return true;
+        }
+
+        window.exportCSV = function() {
+            let csv = "\uFEFF"; csv += "日付(月),種類,項目名,メモ,金額,負担者\n";
+            Object.keys(appData.months).forEach(mKey => {
+                const md = appData.months[mKey];
+                md.incomes.kazuma.forEach(i => csv += `${mKey},収入,${i.category},,${i.amount},かずま\n`);
+                md.incomes.kanako.forEach(i => csv += `${mKey},収入,${i.category},,${i.amount},かなこ\n`);
+                md.variableExpenses.forEach(i => csv += `${i.date},変動費,${i.name},${i.memo||''},${i.amount},${i.category}\n`);
+                appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) csv += `${mKey},固定費,${i.name},,${i.amount},${i.category}\n`; });
+            });
+            const blob = new Blob([csv], { type: 'text/csv' }); const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `家計簿データ_${currentMonthStr}.csv`; a.click(); window.URL.revokeObjectURL(url);
+        };
+
+        // --- 新機能：スプレッドシートへコピペ用出力 ---
+        window.copyForSpreadsheet = function() {
+            let tsv = "日付(月)\t種類\t項目名\tメモ\t金額\t負担者\n";
+            Object.keys(appData.months).forEach(mKey => {
+                const md = appData.months[mKey];
+                md.incomes.kazuma.forEach(i => tsv += `${mKey}\t収入\t${i.category}\t\t${i.amount}\tかずま\n`);
+                md.incomes.kanako.forEach(i => tsv += `${mKey}\t収入\t${i.category}\t\t${i.amount}\tかなこ\n`);
+                md.variableExpenses.forEach(i => tsv += `${i.date}\t変動費\t${i.name}\t${i.memo||''}\t${i.amount}\t${i.category}\n`);
+                appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) tsv += `${mKey}\t固定費\t${i.name}\t\t${i.amount}\t${i.category}\n`; });
+            });
+
+            navigator.clipboard.writeText(tsv).then(() => {
+                if (confirm("データをコピーしました！\nすぐにGoogleスプレッドシートを開いて貼り付け（ペースト）しますか？")) {
+                    window.open('https://sheet.new/', '_blank');
+                }
+            }).catch(err => {
+                alert("コピーに失敗しました。お使いの端末が対応していない可能性があります。");
+            });
+        };
+
+        window.renderGraphs = function() {
+            const startStr = document.getElementById('graph-start-month').value; const endStr = document.getElementById('graph-end-month').value;
+            if (!startStr || !endStr) return;
+            let startD = new Date(startStr + "-01"); let endD = new Date(endStr + "-01"); if (startD > endD) return;
+
+            const labels = []; const monthKeys = []; let d = new Date(startD);
+            while (d <= endD) {
+                const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0');
+                labels.push(`${y}年${Number(m)}月`); monthKeys.push(`${y}-${m}`); d.setMonth(d.getMonth() + 1);
+            }
+
+            const houseData = {}, kazumaData = {}, kanakoData = {};
+            const housePie = {}, kazumaPie = {}, kanakoPie = {};
+            const comboHouse = { inc: [], exp: [], bal: [] };
+            const comboKazuma = { inc: [], exp: [], bal: [] };
+            const comboKanako = { inc: [], exp: [], bal: [] };
+
+            monthKeys.forEach((mKey, index) => {
+                let monthKazInc = 0, monthKanaInc = 0; let monthShareExp = 0, monthKazExp = 0, monthKanaExp = 0;
+                appData.fixedExpenses.forEach(item => {
+                    if (!isFixedExpenseActive(item, mKey)) return;
+                    const isHouse = item.category.startsWith('共通'); const isKazuma = item.category === 'かずま'; const isKanako = item.category === 'かなこ';
+                    if (isHouse) { if (!houseData[item.name]) houseData[item.name] = new Array(monthKeys.length).fill(0); houseData[item.name][index] += item.amount; housePie[item.name] = (housePie[item.name] || 0) + item.amount; monthShareExp += item.amount; }
+                    else if (isKazuma) { if (!kazumaData[item.name]) kazumaData[item.name] = new Array(monthKeys.length).fill(0); kazumaData[item.name][index] += item.amount; kazumaPie[item.name] = (kazumaPie[item.name] || 0) + item.amount; monthKazExp += item.amount; }
+                    else if (isKanako) { if (!kanakoData[item.name]) kanakoData[item.name] = new Array(monthKeys.length).fill(0); kanakoData[item.name][index] += item.amount; kanakoPie[item.name] = (kanakoPie[item.name] || 0) + item.amount; monthKanaExp += item.amount; }
+                });
+
+                if (appData.months[mKey]) {
+                    appData.months[mKey].variableExpenses.forEach(item => {
+                        const isHouse = item.category.startsWith('共通'); const isKazuma = item.category === 'かずま'; const isKanako = item.category === 'かなこ';
+                        if (isHouse) { if (!houseData[item.name]) houseData[item.name] = new Array(monthKeys.length).fill(0); houseData[item.name][index] += item.amount; housePie[item.name] = (housePie[item.name] || 0) + item.amount; monthShareExp += item.amount; }
+                        else if (isKazuma) { if (!kazumaData[item.name]) kazumaData[item.name] = new Array(monthKeys.length).fill(0); kazumaData[item.name][index] += item.amount; kazumaPie[item.name] = (kazumaPie[item.name] || 0) + item.amount; monthKazExp += item.amount; }
+                        else if (isKanako) { if (!kanakoData[item.name]) kanakoData[item.name] = new Array(monthKeys.length).fill(0); kanakoData[item.name][index] += item.amount; kanakoPie[item.name] = (kanakoPie[item.name] || 0) + item.amount; monthKanaExp += item.amount; }
+                    });
+                    appData.months[mKey].incomes.kazuma.forEach(i => monthKazInc += i.amount);
+                    appData.months[mKey].incomes.kanako.forEach(i => monthKanaInc += i.amount);
+                }
+
+                const hInc = monthKazInc + monthKanaInc; const hExp = monthShareExp + monthKazExp + monthKanaExp;
+                comboHouse.inc.push(hInc); comboHouse.exp.push(-hExp); comboHouse.bal.push(hInc - hExp);
+                const kazInc = monthKazInc; const kazExp = (monthShareExp / 2) + monthKazExp;
+                comboKazuma.inc.push(kazInc); comboKazuma.exp.push(-kazExp); comboKazuma.bal.push(kazInc - kazExp);
+                const kanaInc = monthKanaInc; const kanaExp = (monthShareExp / 2) + monthKanaExp;
+                comboKanako.inc.push(kanaInc); comboKanako.exp.push(-kanaExp); comboKanako.bal.push(kanaInc - kanaExp);
+            });
+
+            function drawLineChart(canvasId, targetData) {
+                const ctx = document.getElementById(canvasId).getContext('2d'); if (charts[canvasId]) charts[canvasId].destroy();
+                const datasets = Object.keys(targetData).map((name) => { return { label: name, data: targetData[name], borderColor: getChartColor(name, false), backgroundColor: getChartColor(name, true), tension: 0.2, fill: false, borderWidth: 2 }; });
+                charts[canvasId] = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: datasets }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '¥' + value.toLocaleString(); } } } }, plugins: { tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ¥' + context.parsed.y.toLocaleString(); } } } } } });
+            }
+
+            function drawPieChart(canvasId, pieData) {
+                const ctx = document.getElementById(canvasId).getContext('2d'); if (charts[canvasId]) charts[canvasId].destroy();
+                const sortedEntries = Object.entries(pieData).sort((a, b) => b[1] - a[1]);
+                const itemLabels = sortedEntries.map(e => e[0]); const itemData = sortedEntries.map(e => e[1]);
+                const bgColors = itemLabels.map(label => getChartColor(label, false));
+                charts[canvasId] = new Chart(ctx, { type: 'pie', data: { labels: itemLabels, datasets: [{ data: itemData, backgroundColor: bgColors, borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: function(context) { const total = context.dataset.data.reduce((a, b) => a + b, 0); const val = context.parsed; const percentage = total > 0 ? ((val / total) * 100).toFixed(1) + '%' : '0%'; return context.label + ': ¥' + val.toLocaleString() + ' (' + percentage + ')'; } } } } } });
+            }
+
+            function drawComboChart(canvasId, dataObj) {
+                const ctx = document.getElementById(canvasId).getContext('2d'); if (charts[canvasId]) charts[canvasId].destroy();
+                charts[canvasId] = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [ { type: 'line', label: '収支', data: dataObj.bal, borderColor: '#546E7A', backgroundColor: '#546E7A', borderWidth: 2, tension: 0.2, fill: false, yAxisID: 'y' }, { type: 'bar', label: '収入', data: dataObj.inc, backgroundColor: '#4DB6AC', yAxisID: 'y' }, { type: 'bar', label: '支出', data: dataObj.exp, backgroundColor: '#E57373', yAxisID: 'y' } ] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: function(value) { return '¥' + value.toLocaleString(); } } } }, plugins: { tooltip: { callbacks: { label: function(context) { let val = context.raw; if (context.dataset.label === '支出') val = Math.abs(val); return context.dataset.label + ': ¥' + val.toLocaleString(); } } } } } });
+            }
+
+            drawPieChart('pie-household', housePie); drawPieChart('pie-kazuma', kazumaPie); drawPieChart('pie-kanako', kanakoPie);
+            drawLineChart('chart-household', houseData); drawLineChart('chart-kazuma', kazumaData); drawLineChart('chart-kanako', kanakoData);
+            drawComboChart('combo-household', comboHouse); drawComboChart('combo-kazuma', comboKazuma); drawComboChart('combo-kanako', comboKanako);
+        };
+
+        function render() {
+            const md = getCurrentMonthData(); const [y, m] = currentMonthStr.split('-'); displayMonth.textContent = `${y}年${Number(m)}月`;
+
+            let totalHistorySavings = 0;
+            Object.keys(appData.months).forEach(mKey => {
+                let mInc = 0, mExp = 0;
+                appData.months[mKey].incomes.kazuma.forEach(i => mInc += i.amount); appData.months[mKey].incomes.kanako.forEach(i => mInc += i.amount);
+                appData.months[mKey].variableExpenses.forEach(i => mExp += i.amount);
+                appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) mExp += i.amount; });
+                totalHistorySavings += (mInc - mExp);
+            });
+            const goalNameEl = document.getElementById('goal-name-display'); const goalAmtEl = document.getElementById('goal-amount-display');
+            const goalBarEl = document.getElementById('goal-progress-bar'); const goalPctEl = document.getElementById('goal-percent-display');
+            if (appData.goal && appData.goal.amount > 0) {
+                goalNameEl.textContent = appData.goal.name || '無題の目標';
+                let pct = Math.floor((totalHistorySavings / appData.goal.amount) * 100);
+                if (pct < 0) pct = 0; if (pct > 100) pct = 100;
+                goalAmtEl.textContent = `${formatCurrency(totalHistorySavings)} / ${formatCurrency(appData.goal.amount)}`;
+                goalBarEl.style.width = `${pct}%`; goalPctEl.textContent = `現在 ${pct}% 達成！`;
+            } else {
+                goalNameEl.textContent = '目標未設定'; goalAmtEl.textContent = '¥0 / ¥0'; goalBarEl.style.width = '0%'; goalPctEl.textContent = '目標を設定して貯金を見える化しよう';
+            }
+
+            document.getElementById('kazuma-inc-category').innerHTML = ''; document.getElementById('kanako-inc-category').innerHTML = '';
+            appData.incomeCategories.forEach(cat => { document.getElementById('kazuma-inc-category').appendChild(new Option(cat, cat)); document.getElementById('kanako-inc-category').appendChild(new Option(cat, cat)); });
+            document.getElementById('var-name').innerHTML = ''; appData.variableCategories.forEach(cat => document.getElementById('var-name').appendChild(new Option(cat, cat)));
+            document.getElementById('fixed-name').innerHTML = ''; appData.fixedCategories.forEach(cat => document.getElementById('fixed-name').appendChild(new Option(cat, cat)));
+
+            let kazumaTotalIncome = 0, kanakoTotalIncome = 0;
+            document.getElementById('kazuma-income-list').innerHTML = ''; md.incomes.kazuma.forEach(item => { kazumaTotalIncome += item.amount; document.getElementById('kazuma-income-list').innerHTML += `<tr><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteIncome('kazuma', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`; });
+            document.getElementById('kanako-income-list').innerHTML = ''; md.incomes.kanako.forEach(item => { kanakoTotalIncome += item.amount; document.getElementById('kanako-income-list').innerHTML += `<tr><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteIncome('kanako', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`; });
+
+            document.getElementById('fixed-list').innerHTML = '';
+            appData.fixedExpenses.forEach(item => {
+                const startStr = item.startMonth.replace('-', '年') + '月'; const endStr = item.endMonth ? (item.endMonth.replace('-', '年') + '月') : '継続中';
+                document.getElementById('fixed-list').innerHTML += `<tr><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td><span style="font-size:0.75rem; color:#757575;">${startStr}〜<br>${endStr}</span></td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
+            });
+
+            document.getElementById('variable-list').innerHTML = '';
+            let budgetSpent = {};
+            const sortedVar = [...md.variableExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+            sortedVar.forEach(item => {
+                // 変更箇所：メモを省略表示（青文字リンク）にして、タップでモーダルを開く
+                const memoHtml = item.memo ? `<br><span style="font-size:0.75rem; color:var(--md-text-secondary);"><span class="material-icons" style="font-size:0.75rem; vertical-align:middle;">notes</span> <span class="memo-preview" onclick="openMemoModal(${item.id})">${item.memo}</span></span>` : '';
+                document.getElementById('variable-list').innerHTML += `<tr><td>${item.date}</td><td>${item.name}${memoHtml}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
+            });
+
+            let kazumaPersonal = 0, kanakoPersonal = 0, kazumaPaidShared = 0, kanakoPaidShared = 0, splitShared = 0;
+            appData.fixedExpenses.forEach(item => {
+                if (isFixedExpenseActive(item, currentMonthStr)) {
+                    if (item.category.startsWith('共通')) budgetSpent[item.name] = (budgetSpent[item.name] || 0) + item.amount;
+                    if (item.category === '共通・かずま') kazumaPaidShared += item.amount; else if (item.category === '共通・かなこ') kanakoPaidShared += item.amount; else if (item.category === '共通') splitShared += item.amount; else if (item.category === 'かずま') kazumaPersonal += item.amount; else if (item.category === 'かなこ') kanakoPersonal += item.amount;
+                }
+            });
+            md.variableExpenses.forEach(item => {
+                if (item.category.startsWith('共通')) budgetSpent[item.name] = (budgetSpent[item.name] || 0) + item.amount;
+                if (item.category === '共通・かずま') kazumaPaidShared += item.amount; else if (item.category === '共通・かなこ') kanakoPaidShared += item.amount; else if (item.category === '共通') splitShared += item.amount; else if (item.category === 'かずま') kazumaPersonal += item.amount; else if (item.category === 'かなこ') kanakoPersonal += item.amount;
+            });
+
+            let budgetAlertHtml = '';
+            for (let cat in appData.budgets) {
+                let limit = appData.budgets[cat]; let spent = budgetSpent[cat] || 0;
+                if (limit > 0 && spent >= limit * 0.8) {
+                    let remaining = limit - spent;
+                    if (remaining < 0) budgetAlertHtml += `<div class="alert-box alert-budget-danger"><span class="material-icons">error_outline</span> 世帯全体の【${cat}】が予算を ${formatCurrency(Math.abs(remaining))} オーバーしています！</div>`;
+                    else budgetAlertHtml += `<div class="alert-box alert-budget-warn"><span class="material-icons">warning_amber</span> 世帯全体の【${cat}】が予算に近づいています（残り ${formatCurrency(remaining)}）</div>`;
+                }
+            }
+            document.getElementById('budget-alerts').innerHTML = budgetAlertHtml;
+
+            const sharedTotal = kazumaPaidShared + kanakoPaidShared + splitShared;
+            const sharedHalf = sharedTotal / 2;
+            const householdIncome = kazumaTotalIncome + kanakoTotalIncome;
+            const householdExpense = kazumaPersonal + kanakoPersonal + sharedTotal;
+
+            document.getElementById('dash-kazuma-inc').textContent = formatCurrency(kazumaTotalIncome); document.getElementById('dash-kazuma-exp').textContent = formatCurrency(kazumaPersonal); document.getElementById('dash-kazuma-share').textContent = formatCurrency(sharedHalf); document.getElementById('dash-kazuma-save').textContent = formatCurrency(kazumaTotalIncome - kazumaPersonal - sharedHalf);
+            document.getElementById('dash-kanako-inc').textContent = formatCurrency(kanakoTotalIncome); document.getElementById('dash-kanako-exp').textContent = formatCurrency(kanakoPersonal); document.getElementById('dash-kanako-share').textContent = formatCurrency(sharedHalf); document.getElementById('dash-kanako-save').textContent = formatCurrency(kanakoTotalIncome - kanakoPersonal - sharedHalf);
+            document.getElementById('dash-total-inc').textContent = formatCurrency(householdIncome); document.getElementById('dash-total-exp').textContent = formatCurrency(householdExpense); document.getElementById('dash-total-save').textContent = formatCurrency(householdIncome - householdExpense);
+
+            const diffX = (kanakoPaidShared - kazumaPaidShared) / 2;
+            const alertBox = document.getElementById('settlement-alert'); const alertText = document.getElementById('settlement-text');
+            if (kazumaPaidShared === 0 && kanakoPaidShared === 0) { alertBox.style.display = 'none'; } else { alertBox.style.display = 'flex'; if (diffX > 0) alertText.innerHTML = `今月の共通費精算：<br><strong>かずま</strong> が <strong>かなこ</strong> に <strong>${formatCurrency(diffX)}</strong> ペイする`; else if (diffX < 0) alertText.innerHTML = `今月の共通費精算：<br><strong>かなこ</strong> が <strong>かずま</strong> に <strong>${formatCurrency(Math.abs(diffX))}</strong> ペイする`; else alertText.innerHTML = `今月の共通費精算：ピッタリ折半されています！`; }
+        }
+
+        function init() {
+            const now = new Date(); const yyyy = now.getFullYear(); const mm = String(now.getMonth() + 1).padStart(2, '0');
+            currentMonthStr = `${yyyy}-${mm}`;
+            monthInput.value = currentMonthStr; document.getElementById('var-date').valueAsDate = now; document.getElementById('fixed-start').value = currentMonthStr;
+
+            monthInput.addEventListener('change', (e) => { if(e.target.value) { currentMonthStr = e.target.value; document.getElementById('fixed-start').value = currentMonthStr; render(); } });
+            document.getElementById('graph-start-month').addEventListener('change', renderGraphs); document.getElementById('graph-end-month').addEventListener('change', renderGraphs);
+
+            document.getElementById('form-kazuma-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kazuma.push({ id: Date.now(), category: document.getElementById('kazuma-inc-category').value, amount: Number(document.getElementById('kazuma-inc-amount').value) }); document.getElementById('kazuma-inc-amount').value = ''; saveData(); });
+            document.getElementById('form-kanako-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kanako.push({ id: Date.now(), category: document.getElementById('kanako-inc-category').value, amount: Number(document.getElementById('kanako-inc-amount').value) }); document.getElementById('kanako-inc-amount').value = ''; saveData(); });
+            document.getElementById('form-fixed').addEventListener('submit', (e) => { e.preventDefault(); appData.fixedExpenses.push({ id: Date.now(), name: document.getElementById('fixed-name').value, amount: Number(document.getElementById('fixed-amount').value), category: document.getElementById('fixed-category').value, startMonth: document.getElementById('fixed-start').value, endMonth: document.getElementById('fixed-end').value }); document.getElementById('fixed-amount').value = ''; document.getElementById('fixed-start').value = currentMonthStr; document.getElementById('fixed-end').value = ''; saveData(); });
+            
+            document.getElementById('form-variable').addEventListener('submit', (e) => { 
+                e.preventDefault(); 
+                getCurrentMonthData().variableExpenses.push({ 
+                    id: Date.now(), date: document.getElementById('var-date').value, 
+                    name: document.getElementById('var-name').value, 
+                    memo: document.getElementById('var-memo').value,
+                    amount: Number(document.getElementById('var-amount').value), 
+                    category: document.getElementById('var-category').value 
+                }); 
+                document.getElementById('var-amount').value = ''; 
+                document.getElementById('var-memo').value = '';
+                saveData(); 
+            });
+
+            // 背景クリックでモーダルを閉じる処理を統合
+            window.onclick = function(event) { 
+                if (event.target.classList.contains('modal')) closeModal(event.target.id); 
+            };
+
+            render();
+        }
+        window.onload = init;
+    </script>
+</body>
+</html>
