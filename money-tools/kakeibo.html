@@ -80,12 +80,15 @@
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
         .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .action-bar h2 { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        
+        /* モーダル */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .modal.show { display: flex; }
         .modal-content { background-color: #fff; border-radius: 8px; width: 90%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
         .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--md-border); display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { margin: 0; font-size: 1.1rem; color: var(--md-text); display: flex; align-items: center; gap: 8px; }
         .modal-body { padding: 1.5rem; overflow-y: auto; background: #FAFAFA; border-radius: 0 0 8px 8px;}
+        
         .category-list { list-style: none; padding: 0; margin: 0 0 1.5rem 0; background: white; border: 1px solid var(--md-border); border-radius: 4px; }
         .category-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #EEEEEE; }
         .category-item:last-child { border-bottom: none; }
@@ -95,6 +98,11 @@
         .category-add-form input { flex: 1; padding: 0.75rem; border: 1px solid #BDBDBD; border-radius: 4px; background-color: white; font-size: 0.95rem;}
         .memo-preview { display: inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; color: var(--md-primary); cursor: pointer; text-decoration: underline; font-weight: 500; }
         .memo-preview:hover { color: #004D40; }
+        
+        /* 編集可能な行のスタイル */
+        .clickable-row { cursor: pointer; transition: background-color 0.1s; }
+        .clickable-row:active { background-color: #E0F2F1; } /* タップ時のフィードバック */
+
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
@@ -356,11 +364,27 @@
         </div>
     </div>
 
+    <div id="edit-entry-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><span class="material-icons">edit</span> 項目を編集</h3>
+                <button class="btn-icon" onclick="closeModal('edit-entry-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-entry-form" onsubmit="event.preventDefault(); updateEntry();">
+                    <div id="edit-form-content"></div>
+                    <div style="margin-top: 1.5rem; text-align: right;">
+                        <button type="submit" class="btn">更新</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // かずまさん専用のFirebase鍵
         const firebaseConfig = {
             apiKey: "AIzaSyAemMGQNlk6FvGpJZpt3QQtHbZYCbbfgdk",
             authDomain: "kakeibo-kazuma.firebaseapp.com",
@@ -373,16 +397,21 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const dbRef = ref(db, 'kakeiboData'); // クラウド上の保存先
+        const dbRef = ref(db, 'kakeiboData');
 
-        // グローバル変数と基本設定
-        let appData = null; // クラウドから降ってくるデータを入れる箱
+        let appData = null;
         let currentMonthStr = "";
         let charts = {};
+        
+        // 編集用の一時保存変数
+        let editingId = null;
+        let editingType = null;
+        let editingPerson = null;
 
         const defaultIncomeCategories = ["給与", "賞与", "臨時収入", "副業収入"];
         const defaultFixedCategories = ["家賃", "ネット代", "保険", "水道光熱費", "サブスク費"];
         const defaultVariableCategories = ["携帯代", "サブスク費", "食費", "外食費", "交通費", "健康・医療費", "日用品費", "交際費", "衣服・美容代", "趣味・娯楽", "デート代", "旅行費", "金融投資", "自己投資", "奨学金返済", "特別な支出"];
+        const payerOptions = ['共通・かずま', '共通・かなこ', '共通', 'かずま', 'かなこ'];
 
         const chartColorMap = {
             "家賃": "#4CAF50", "水道光熱費": "#9C27B0", "食費": "#FF9800", "外食費": "#FF5722", "ネット代": "#2196F3", "携帯代": "#03A9F4", "保険": "#F44336", "サブスク費": "#E91E63",
@@ -400,7 +429,6 @@
             return hex;
         }
 
-        // Firebase特有の「空の配列が消える現象」を防ぐためのデータ整形
         function sanitizeData(data) {
             if (!data) data = {};
             if (!data.fixedExpenses) data.fixedExpenses = [];
@@ -419,34 +447,21 @@
             return data;
         }
 
-        // --- ★ リアルタイム同期の心臓部 ★ ---
         onValue(dbRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // クラウドにデータがあればそれを使う
                 appData = sanitizeData(data);
                 render();
                 if(document.getElementById('sheet-graph').classList.contains('active')) renderGraphs();
             } else {
-                // クラウドが空っぽの時（初回アクセス時）
-                // ローカル（スマホ本体）に過去のデータが残っていれば吸い上げて移行する
                 const local = localStorage.getItem('kakeibo_kazuma_kanako_v7');
-                if (local) {
-                    appData = sanitizeData(JSON.parse(local));
-                } else {
-                    // 全くの初めての場合は初期データ
-                    appData = sanitizeData({});
-                }
-                window.saveData(); // 吸い上げたデータをFirebaseに送る
+                appData = sanitizeData(local ? JSON.parse(local) : {});
+                window.saveData();
             }
         });
 
-        // データをクラウドに保存する関数
         window.saveData = function() {
-            set(dbRef, appData).catch(error => {
-                console.error("保存エラー:", error);
-                alert("データの保存に失敗しました。通信環境を確認してください。");
-            });
+            set(dbRef, appData).catch(error => { console.error("保存エラー:", error); alert("データの保存に失敗しました。通信環境を確認してください。"); });
         }
 
         function getCurrentMonthData() { 
@@ -469,7 +484,6 @@
             }
         }
 
-        // --- 各種操作関数をwindowに紐付け（HTMLから呼べるようにする） ---
         window.deleteIncome = function(person, id) { getCurrentMonthData().incomes[person] = getCurrentMonthData().incomes[person].filter(i => i.id !== id); window.saveData(); };
         window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); window.saveData(); } };
         window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); window.saveData(); } };
@@ -487,36 +501,102 @@
         };
 
         window.closeModal = function(modalId) { document.getElementById(modalId).classList.remove('show'); };
-        
+        window.onclick = function(event) { if (event.target.classList.contains('modal')) window.closeModal(event.target.id); };
+
         window.openMemoModal = function(id) {
             let targetMemo = '';
             Object.values(appData.months).forEach(md => { const item = md.variableExpenses.find(v => v.id === id); if (item) targetMemo = item.memo; });
             if (targetMemo) { document.getElementById('memo-full-text').textContent = targetMemo; document.getElementById('memo-modal').classList.add('show'); }
         };
 
-        let editingCategoryType = 'variable';
+        // --- 編集機能 (ここから追加) ---
+        function createOptionsHtml(list, selectedValue) {
+            return list.map(val => `<option value="${val}" ${val === selectedValue ? 'selected' : ''}>${val}</option>`).join('');
+        }
+
+        window.openEditModal = function(type, id, person = null) {
+            editingId = id;
+            editingType = type;
+            editingPerson = person;
+            
+            const formContent = document.getElementById('edit-form-content');
+            formContent.innerHTML = ''; // クリア
+            
+            let item;
+            let html = '';
+
+            if (type === 'income') {
+                item = getCurrentMonthData().incomes[person].find(i => i.id === id);
+                html += `<div class="form-group" style="margin-bottom:1rem;"><label>項目名</label><select id="edit-category" style="width:100%; box-sizing:border-box;">${createOptionsHtml(appData.incomeCategories, item.category)}</select></div>`;
+                html += `<div class="form-group"><label>金額</label><input type="number" id="edit-amount" value="${item.amount}" style="width:100%; box-sizing:border-box;"></div>`;
+            } else if (type === 'fixed') {
+                item = appData.fixedExpenses.find(i => i.id === id);
+                html += `<div class="form-group" style="margin-bottom:1rem;"><label>項目名</label><select id="edit-name" style="width:100%; box-sizing:border-box;">${createOptionsHtml(appData.fixedCategories, item.name)}</select></div>`;
+                html += `<div class="form-group" style="margin-bottom:1rem;"><label>金額</label><input type="number" id="edit-amount" value="${item.amount}" style="width:100%; box-sizing:border-box;"></div>`;
+                html += `<div class="form-group" style="margin-bottom:1rem;"><label>負担者</label><select id="edit-payer" style="width:100%; box-sizing:border-box;">${createOptionsHtml(payerOptions, item.category)}</select></div>`;
+                html += `<div style="display:flex; gap:0.5rem;"><div class="form-group" style="flex:1;"><label>開始月</label><input type="month" id="edit-start" value="${item.startMonth}" style="width:100%; box-sizing:border-box;"></div><div class="form-group" style="flex:1;"><label>終了月</label><input type="month" id="edit-end" value="${item.endMonth || ''}" style="width:100%; box-sizing:border-box;"></div></div>`;
+            } else if (type === 'variable') {
+                item = getCurrentMonthData().variableExpenses.find(i => i.id === id);
+                html += `<div class="form-group" style="margin-bottom:1rem;"><label>日付</label><input type="date" id="edit-date" value="${item.date}" style="width:100%; box-sizing:border-box;"></div>`;
+                html += `<div class="form-group" style="margin-bottom:1rem;"><label>項目名</label><select id="edit-name" style="width:100%; box-sizing:border-box;">${createOptionsHtml(appData.variableCategories, item.name)}</select></div>`;
+                html += `<div class="form-group" style="margin-bottom:1rem;"><label>メモ</label><input type="text" id="edit-memo" value="${item.memo || ''}" style="width:100%; box-sizing:border-box;"></div>`;
+                html += `<div class="form-group" style="margin-bottom:1rem;"><label>金額</label><input type="number" id="edit-amount" value="${item.amount}" style="width:100%; box-sizing:border-box;"></div>`;
+                html += `<div class="form-group"><label>負担者</label><select id="edit-payer" style="width:100%; box-sizing:border-box;">${createOptionsHtml(payerOptions, item.category)}</select></div>`;
+            }
+
+            formContent.innerHTML = html;
+            document.getElementById('edit-entry-modal').classList.add('show');
+        };
+
+        window.updateEntry = function() {
+            if (editingType === 'income') {
+                const item = getCurrentMonthData().incomes[editingPerson].find(i => i.id === editingId);
+                item.category = document.getElementById('edit-category').value;
+                item.amount = Number(document.getElementById('edit-amount').value);
+            } else if (editingType === 'fixed') {
+                const item = appData.fixedExpenses.find(i => i.id === editingId);
+                item.name = document.getElementById('edit-name').value;
+                item.amount = Number(document.getElementById('edit-amount').value);
+                item.category = document.getElementById('edit-payer').value;
+                item.startMonth = document.getElementById('edit-start').value;
+                item.endMonth = document.getElementById('edit-end').value;
+            } else if (editingType === 'variable') {
+                const item = getCurrentMonthData().variableExpenses.find(i => i.id === editingId);
+                item.date = document.getElementById('edit-date').value;
+                item.name = document.getElementById('edit-name').value;
+                item.memo = document.getElementById('edit-memo').value;
+                item.amount = Number(document.getElementById('edit-amount').value);
+                item.category = document.getElementById('edit-payer').value;
+            }
+            window.closeModal('edit-entry-modal');
+            window.saveData();
+        };
+        // --- 編集機能 終わり ---
+
+        // モーダルやカテゴリ追加周りは省略せず記述
+        let categoryTypeForModal = 'variable';
         window.openCategoryModal = function(type) {
-            editingCategoryType = type;
+            categoryTypeForModal = type;
             let titleText = type === 'fixed' ? '固定費' : (type === 'variable' ? '変動費' : '収入');
             document.getElementById('modal-title').innerHTML = `<span class="material-icons">settings</span> ${titleText}の項目リスト編集`;
             renderCategoryModal(); document.getElementById('category-modal').classList.add('show');
         };
         function renderCategoryModal() {
             const listEl = document.getElementById('modal-category-list'); listEl.innerHTML = '';
-            let categories = editingCategoryType === 'fixed' ? appData.fixedCategories : (editingCategoryType === 'variable' ? appData.variableCategories : appData.incomeCategories);
+            let categories = categoryTypeForModal === 'fixed' ? appData.fixedCategories : (categoryTypeForModal === 'variable' ? appData.variableCategories : appData.incomeCategories);
             categories.forEach((cat, index) => { listEl.innerHTML += `<li class="category-item"><span>${cat}</span><button type="button" onclick="deleteCategory(${index})">削除</button></li>`; });
         }
         window.deleteCategory = function(index) {
-            if (editingCategoryType === 'fixed') appData.fixedCategories.splice(index, 1);
-            else if (editingCategoryType === 'variable') appData.variableCategories.splice(index, 1);
-            else if (editingCategoryType === 'income') appData.incomeCategories.splice(index, 1);
+            if (categoryTypeForModal === 'fixed') appData.fixedCategories.splice(index, 1);
+            else if (categoryTypeForModal === 'variable') appData.variableCategories.splice(index, 1);
+            else if (categoryTypeForModal === 'income') appData.incomeCategories.splice(index, 1);
             renderCategoryModal(); window.saveData();
         };
         window.addCategory = function() {
             const val = document.getElementById('new-category-name').value.trim(); if (!val) return;
-            if (editingCategoryType === 'fixed') appData.fixedCategories.push(val);
-            else if (editingCategoryType === 'variable') appData.variableCategories.push(val);
-            else if (editingCategoryType === 'income') appData.incomeCategories.push(val);
+            if (categoryTypeForModal === 'fixed') appData.fixedCategories.push(val);
+            else if (categoryTypeForModal === 'variable') appData.variableCategories.push(val);
+            else if (categoryTypeForModal === 'income') appData.incomeCategories.push(val);
             document.getElementById('new-category-name').value = ''; renderCategoryModal(); window.saveData();
         };
 
@@ -648,7 +728,7 @@
         };
 
         function render() {
-            if(!appData) return; // データロード前は描画しない
+            if(!appData) return;
             const md = getCurrentMonthData(); const [y, m] = currentMonthStr.split('-'); displayMonth.textContent = `${y}年${Number(m)}月`;
 
             let totalHistorySavings = 0;
@@ -677,21 +757,30 @@
             document.getElementById('fixed-name').innerHTML = ''; appData.fixedCategories.forEach(cat => document.getElementById('fixed-name').appendChild(new Option(cat, cat)));
 
             let kazumaTotalIncome = 0, kanakoTotalIncome = 0;
-            document.getElementById('kazuma-income-list').innerHTML = ''; md.incomes.kazuma.forEach(item => { kazumaTotalIncome += item.amount; document.getElementById('kazuma-income-list').innerHTML += `<tr><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteIncome('kazuma', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`; });
-            document.getElementById('kanako-income-list').innerHTML = ''; md.incomes.kanako.forEach(item => { kanakoTotalIncome += item.amount; document.getElementById('kanako-income-list').innerHTML += `<tr><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteIncome('kanako', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`; });
+            // 編集用onclickイベントを追加
+            document.getElementById('kazuma-income-list').innerHTML = ''; 
+            md.incomes.kazuma.forEach(item => { 
+                kazumaTotalIncome += item.amount; 
+                document.getElementById('kazuma-income-list').innerHTML += `<tr class="clickable-row" onclick="openEditModal('income', ${item.id}, 'kazuma')"><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon btn-icon-danger" onclick="event.stopPropagation(); deleteIncome('kazuma', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`; 
+            });
+            document.getElementById('kanako-income-list').innerHTML = ''; 
+            md.incomes.kanako.forEach(item => { 
+                kanakoTotalIncome += item.amount; 
+                document.getElementById('kanako-income-list').innerHTML += `<tr class="clickable-row" onclick="openEditModal('income', ${item.id}, 'kanako')"><td style="padding: 0.25rem 0;">${item.category}</td><td class="text-right" style="padding: 0.25rem 0;">${formatCurrency(item.amount)}</td><td class="text-right" style="padding: 0.25rem 0; width: 30px;"><button type="button" class="btn-icon btn-icon-danger" onclick="event.stopPropagation(); deleteIncome('kanako', ${item.id})"><span class="material-icons" style="font-size:18px;">close</span></button></td></tr>`; 
+            });
 
             document.getElementById('fixed-list').innerHTML = '';
             appData.fixedExpenses.forEach(item => {
                 const startStr = item.startMonth.replace('-', '年') + '月'; const endStr = item.endMonth ? (item.endMonth.replace('-', '年') + '月') : '継続中';
-                document.getElementById('fixed-list').innerHTML += `<tr><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td><span style="font-size:0.75rem; color:#757575;">${startStr}〜<br>${endStr}</span></td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
+                document.getElementById('fixed-list').innerHTML += `<tr class="clickable-row" onclick="openEditModal('fixed', ${item.id})"><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td><span style="font-size:0.75rem; color:#757575;">${startStr}〜<br>${endStr}</span></td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="event.stopPropagation(); deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
             document.getElementById('variable-list').innerHTML = '';
             let budgetSpent = {};
             const sortedVar = [...md.variableExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
             sortedVar.forEach(item => {
-                const memoHtml = item.memo ? `<br><span style="font-size:0.75rem; color:var(--md-text-secondary);"><span class="material-icons" style="font-size:0.75rem; vertical-align:middle;">notes</span> <span class="memo-preview" onclick="openMemoModal(${item.id})">${item.memo}</span></span>` : '';
-                document.getElementById('variable-list').innerHTML += `<tr><td>${item.date}</td><td>${item.name}${memoHtml}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
+                const memoHtml = item.memo ? `<br><span style="font-size:0.75rem; color:var(--md-text-secondary);"><span class="material-icons" style="font-size:0.75rem; vertical-align:middle;">notes</span> <span class="memo-preview" onclick="event.stopPropagation(); openMemoModal(${item.id})">${item.memo}</span></span>` : '';
+                document.getElementById('variable-list').innerHTML += `<tr class="clickable-row" onclick="openEditModal('variable', ${item.id})"><td>${item.date}</td><td>${item.name}${memoHtml}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="event.stopPropagation(); deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
             let kazumaPersonal = 0, kanakoPersonal = 0, kazumaPaidShared = 0, kanakoPaidShared = 0, splitShared = 0;
@@ -731,14 +820,13 @@
             if (kazumaPaidShared === 0 && kanakoPaidShared === 0) { alertBox.style.display = 'none'; } else { alertBox.style.display = 'flex'; if (diffX > 0) alertText.innerHTML = `今月の共通費精算：<br><strong>かずま</strong> が <strong>かなこ</strong> に <strong>${formatCurrency(diffX)}</strong> ペイする`; else if (diffX < 0) alertText.innerHTML = `今月の共通費精算：<br><strong>かなこ</strong> が <strong>かずま</strong> に <strong>${formatCurrency(Math.abs(diffX))}</strong> ペイする`; else alertText.innerHTML = `今月の共通費精算：ピッタリ折半されています！`; }
         }
 
-        // 初期化処理（UIイベントの登録など）
         function init() {
             const now = new Date(); const yyyy = now.getFullYear(); const mm = String(now.getMonth() + 1).padStart(2, '0');
             currentMonthStr = `${yyyy}-${mm}`;
             monthInput.value = currentMonthStr; document.getElementById('var-date').valueAsDate = now; document.getElementById('fixed-start').value = currentMonthStr;
 
             monthInput.addEventListener('change', (e) => { if(e.target.value) { currentMonthStr = e.target.value; document.getElementById('fixed-start').value = currentMonthStr; render(); } });
-            document.getElementById('graph-start-month').addEventListener('change', window.renderGraphs); document.getElementById('graph-end-month').addEventListener('change', window.renderGraphs);
+            document.getElementById('graph-start-month').addEventListener('change', renderGraphs); document.getElementById('graph-end-month').addEventListener('change', renderGraphs);
 
             document.getElementById('form-kazuma-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kazuma.push({ id: Date.now(), category: document.getElementById('kazuma-inc-category').value, amount: Number(document.getElementById('kazuma-inc-amount').value) }); document.getElementById('kazuma-inc-amount').value = ''; window.saveData(); });
             document.getElementById('form-kanako-income').addEventListener('submit', (e) => { e.preventDefault(); getCurrentMonthData().incomes.kanako.push({ id: Date.now(), category: document.getElementById('kanako-inc-category').value, amount: Number(document.getElementById('kanako-inc-amount').value) }); document.getElementById('kanako-inc-amount').value = ''; window.saveData(); });
@@ -758,7 +846,6 @@
                 window.saveData(); 
             });
 
-            // 背景クリックでモーダルを閉じる
             window.onclick = function(event) { if (event.target.classList.contains('modal')) window.closeModal(event.target.id); };
         }
         window.onload = init;
