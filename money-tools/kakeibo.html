@@ -39,6 +39,38 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .card { background-color: var(--md-surface); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); padding: 1.5rem; margin-bottom: 1.5rem; }
         .section-title { margin-top: 0; font-size: 1.1rem; color: var(--md-primary); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--md-primary-light); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        
+        /* === 目標セクションの表とデザイン（新設） === */
+        .goal-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+        .goal-box { padding: 1rem; border-radius: 8px; border: 1px solid var(--md-border); background: #FFFFFF; }
+        .goal-box h3 { margin: 0 0 10px 0; font-size: 1.05rem; display: flex; align-items: center; gap: 6px; border-bottom: 2px solid; padding-bottom: 0.5rem; }
+        .goal-table { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; font-size: 0.9rem; }
+        .goal-table th, .goal-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #EEEEEE; text-align: left; }
+        .goal-table th { width: 35%; color: var(--md-text-secondary); font-weight: 500; background-color: rgba(0,0,0,0.02); }
+        .goal-table td { font-weight: 500; }
+        .goal-table .current-amt { font-size: 1.1rem; font-weight: 700; }
+        .goal-percent { text-align: right; font-size: 0.9rem; font-weight: bold; margin-top: 6px;}
+
+        /* 各個人のカラーテーマ適用 */
+        .goal-household { border-color: var(--md-primary-light); box-shadow: 0 2px 8px rgba(0, 121, 107, 0.08); }
+        .goal-household h3 { color: var(--md-primary); border-color: var(--md-primary-light); }
+        .goal-household .progress-bar { background: var(--md-primary); }
+        .goal-household .current-amt { color: var(--md-primary); }
+        .goal-household .goal-percent { color: var(--md-primary); }
+
+        .goal-kazuma { border-color: #BBDEFB; box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08); background: #FAFAFA; }
+        .goal-kazuma h3 { color: var(--kazuma-color); border-color: #BBDEFB; }
+        .goal-kazuma .progress-bar { background: var(--kazuma-color); }
+        .goal-kazuma .current-amt { color: var(--kazuma-color); }
+        .goal-kazuma .goal-percent { color: var(--kazuma-color); }
+
+        .goal-kanako { border-color: #F8BBD0; box-shadow: 0 2px 8px rgba(194, 24, 91, 0.08); background: #FAFAFA; }
+        .goal-kanako h3 { color: var(--kanako-color); border-color: #F8BBD0; }
+        .goal-kanako .progress-bar { background: var(--kanako-color); }
+        .goal-kanako .current-amt { color: var(--kanako-color); }
+        .goal-kanako .goal-percent { color: var(--kanako-color); }
+
+        /* === 既存のダッシュボード・フォーム等 === */
         .dash-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
         .dash-box { padding: 1.25rem; border-radius: 8px; border: 1px solid var(--md-border); text-align: center; background: #FAFAFA; }
         .dash-box h3 { margin: 0 0 10px 0; font-size: 0.95rem; color: var(--md-text-secondary); display: flex; justify-content: center; align-items: center; gap: 4px; }
@@ -57,7 +89,7 @@
         .alert-budget-warn { background-color: #FFFDE7; border-left: 4px solid #FBC02D; color: #F57F17; font-size: 0.9rem; padding: 0.75rem;}
         .alert-budget-danger { background-color: #FFEBEE; border-left: 4px solid #F44336; color: #C62828; font-size: 0.9rem; padding: 0.75rem;}
         .progress-wrap { background: #EEEEEE; border-radius: 10px; height: 16px; width: 100%; overflow: hidden; margin: 8px 0; }
-        .progress-bar { background: var(--md-primary); height: 100%; width: 0%; transition: width 0.8s ease; }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease; }
         .form-row { display: flex; gap: 1rem; flex-wrap: wrap; background: #FAFAFA; padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border); }
         .form-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
         .form-group label { font-size: 0.8rem; color: var(--md-text-secondary); margin-bottom: 0.25rem; }
@@ -80,15 +112,12 @@
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
         .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .action-bar h2 { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        
-        /* モーダル */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .modal.show { display: flex; }
         .modal-content { background-color: #fff; border-radius: 8px; width: 90%; max-width: 450px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
         .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--md-border); display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { margin: 0; font-size: 1.1rem; color: var(--md-text); display: flex; align-items: center; gap: 8px; }
         .modal-body { padding: 1.5rem; overflow-y: auto; background: #FAFAFA; border-radius: 0 0 8px 8px;}
-        
         .category-list { list-style: none; padding: 0; margin: 0 0 1.5rem 0; background: white; border: 1px solid var(--md-border); border-radius: 4px; }
         .category-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #EEEEEE; }
         .category-item:last-child { border-bottom: none; }
@@ -98,16 +127,14 @@
         .category-add-form input { flex: 1; padding: 0.75rem; border: 1px solid #BDBDBD; border-radius: 4px; background-color: white; font-size: 0.95rem;}
         .memo-preview { display: inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; color: var(--md-primary); cursor: pointer; text-decoration: underline; font-weight: 500; }
         .memo-preview:hover { color: #004D40; }
-        
-        /* 編集可能な行のスタイル */
         .clickable-row { cursor: pointer; transition: background-color 0.1s; }
-        .clickable-row:active { background-color: #E0F2F1; } /* タップ時のフィードバック */
-
+        .clickable-row:active { background-color: #E0F2F1; }
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
+            .goal-container { grid-template-columns: 1fr; }
             .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem;}
             .tabs { margin: 0 auto; width: 100%; justify-content: center; }
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -146,19 +173,52 @@
 
     <main class="container">
         <div id="sheet-input" class="sheet active">
+            
             <section class="card" style="padding-bottom: 1rem;">
-                <div class="action-bar" style="margin-bottom: 0.5rem;">
-                    <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">flag</span> ふたりの目標</h2>
+                <div class="action-bar" style="margin-bottom: 1rem;">
+                    <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">flag</span> 目標達成状況</h2>
                     <button type="button" class="btn btn-outline" style="padding: 4px 12px;" onclick="openGoalModal()">
                         <span class="material-icons" style="font-size:1rem;">edit</span> 設定
                     </button>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                    <strong id="goal-name-display" style="font-size: 1.1rem;">目標未設定</strong>
-                    <span id="goal-amount-display" style="font-weight: 500; color: var(--md-primary);">¥0 / ¥0</span>
+                
+                <div class="goal-container">
+                    <div class="goal-box goal-household">
+                        <h3><span class="material-icons">favorite</span> ふたりの目標</h3>
+                        <table class="goal-table">
+                            <tr><th>目標名</th><td id="goal-name-display">未設定</td></tr>
+                            <tr><th>開始月</th><td id="goal-start-display">-</td></tr>
+                            <tr><th>目標額</th><td id="goal-target-display">¥0</td></tr>
+                            <tr><th>現在額</th><td id="goal-current-display" class="current-amt">¥0</td></tr>
+                        </table>
+                        <div class="progress-wrap"><div class="progress-bar" id="goal-progress-bar"></div></div>
+                        <div class="goal-percent" id="goal-percent-display">0% 達成</div>
+                    </div>
+
+                    <div class="goal-box goal-kazuma">
+                        <h3><span class="material-icons">person</span> かずまの目標</h3>
+                        <table class="goal-table">
+                            <tr><th>目標名</th><td id="kazuma-goal-name-display">未設定</td></tr>
+                            <tr><th>開始月</th><td id="kazuma-goal-start-display">-</td></tr>
+                            <tr><th>目標額</th><td id="kazuma-goal-target-display">¥0</td></tr>
+                            <tr><th>現在額</th><td id="kazuma-goal-current-display" class="current-amt">¥0</td></tr>
+                        </table>
+                        <div class="progress-wrap"><div class="progress-bar" id="kazuma-goal-progress-bar"></div></div>
+                        <div class="goal-percent" id="kazuma-goal-percent-display">0% 達成</div>
+                    </div>
+
+                    <div class="goal-box goal-kanako">
+                        <h3><span class="material-icons">person_3</span> かなこの目標</h3>
+                        <table class="goal-table">
+                            <tr><th>目標名</th><td id="kanako-goal-name-display">未設定</td></tr>
+                            <tr><th>開始月</th><td id="kanako-goal-start-display">-</td></tr>
+                            <tr><th>目標額</th><td id="kanako-goal-target-display">¥0</td></tr>
+                            <tr><th>現在額</th><td id="kanako-goal-current-display" class="current-amt">¥0</td></tr>
+                        </table>
+                        <div class="progress-wrap"><div class="progress-bar" id="kanako-goal-progress-bar"></div></div>
+                        <div class="goal-percent" id="kanako-goal-percent-display">0% 達成</div>
+                    </div>
                 </div>
-                <div class="progress-wrap"><div class="progress-bar" id="goal-progress-bar"></div></div>
-                <div style="text-align: right; font-size: 0.85rem; color: var(--md-text-secondary);" id="goal-percent-display">0% 達成</div>
             </section>
 
             <section class="card">
@@ -335,16 +395,39 @@
             </div>
         </div>
     </div>
+
     <div id="goal-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3><span class="material-icons">flag</span> 目標の設定</h3><button class="btn-icon" onclick="closeModal('goal-modal')"><span class="material-icons">close</span></button></div>
             <div class="modal-body">
+                <h4 style="color: var(--md-primary); margin: 0 0 0.5rem 0;">ふたりの目標</h4>
                 <div class="form-group" style="margin-bottom: 1rem;"><label>目標の名前（例: ハワイ旅行）</label><input type="text" id="goal-name-input"></div>
-                <div class="form-group" style="margin-bottom: 1rem;"><label>目標金額 (円)</label><input type="number" id="goal-amount-input" min="0"></div>
+                <div style="display:flex; gap:0.5rem; margin-bottom: 1rem;">
+                    <div class="form-group" style="flex:1;"><label>目標金額 (円)</label><input type="number" id="goal-amount-input" min="0"></div>
+                    <div class="form-group" style="flex:1;"><label>開始年月</label><input type="month" id="goal-start-month-input"></div>
+                </div>
+
+                <hr style="border: none; border-top: 1px dashed var(--md-border); margin: 1.5rem 0;">
+                <h4 style="color: var(--kazuma-color); margin: 0 0 0.5rem 0;">かずまの目標</h4>
+                <div class="form-group" style="margin-bottom: 1rem;"><label>目標の名前（例: 新しいPC）</label><input type="text" id="kazuma-goal-name-input"></div>
+                <div style="display:flex; gap:0.5rem; margin-bottom: 1rem;">
+                    <div class="form-group" style="flex:1;"><label>目標金額 (円)</label><input type="number" id="kazuma-goal-amount-input" min="0"></div>
+                    <div class="form-group" style="flex:1;"><label>開始年月</label><input type="month" id="kazuma-goal-start-month-input"></div>
+                </div>
+
+                <hr style="border: none; border-top: 1px dashed var(--md-border); margin: 1.5rem 0;">
+                <h4 style="color: var(--kanako-color); margin: 0 0 0.5rem 0;">かなこの目標</h4>
+                <div class="form-group" style="margin-bottom: 1rem;"><label>目標の名前（例: 美容・エステ）</label><input type="text" id="kanako-goal-name-input"></div>
+                <div style="display:flex; gap:0.5rem; margin-bottom: 1.5rem;">
+                    <div class="form-group" style="flex:1;"><label>目標金額 (円)</label><input type="number" id="kanako-goal-amount-input" min="0"></div>
+                    <div class="form-group" style="flex:1;"><label>開始年月</label><input type="month" id="kanako-goal-start-month-input"></div>
+                </div>
+
                 <button class="btn" style="width: 100%; justify-content: center;" onclick="saveGoal()">保存して閉じる</button>
             </div>
         </div>
     </div>
+
     <div id="budget-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3><span class="material-icons">account_balance</span> 予算の設定</h3><button class="btn-icon" onclick="closeModal('budget-modal')"><span class="material-icons">close</span></button></div>
@@ -363,7 +446,6 @@
             </div>
         </div>
     </div>
-
     <div id="edit-entry-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -383,7 +465,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        // ★ update をインポートして既存データを保護します
+        import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAemMGQNlk6FvGpJZpt3QQtHbZYCbbfgdk",
@@ -403,7 +486,6 @@
         let currentMonthStr = "";
         let charts = {};
         
-        // 編集用の一時保存変数
         let editingId = null;
         let editingType = null;
         let editingPerson = null;
@@ -442,7 +524,9 @@
                 if (!data.months[m].incomes.kazuma) data.months[m].incomes.kazuma = [];
                 if (!data.months[m].incomes.kanako) data.months[m].incomes.kanako = [];
             });
-            if (!data.goal) data.goal = { name: '', amount: 0 };
+            if (!data.goal) data.goal = { name: '', amount: 0, startMonth: '' };
+            if (!data.kazumaGoal) data.kazumaGoal = { name: '', amount: 0, startMonth: '' };
+            if (!data.kanakoGoal) data.kanakoGoal = { name: '', amount: 0, startMonth: '' };
             if (!data.budgets) data.budgets = {};
             return data;
         }
@@ -509,22 +593,12 @@
             if (targetMemo) { document.getElementById('memo-full-text').textContent = targetMemo; document.getElementById('memo-modal').classList.add('show'); }
         };
 
-        // --- 編集機能 (ここから追加) ---
-        function createOptionsHtml(list, selectedValue) {
-            return list.map(val => `<option value="${val}" ${val === selectedValue ? 'selected' : ''}>${val}</option>`).join('');
-        }
+        function createOptionsHtml(list, selectedValue) { return list.map(val => `<option value="${val}" ${val === selectedValue ? 'selected' : ''}>${val}</option>`).join(''); }
 
         window.openEditModal = function(type, id, person = null) {
-            editingId = id;
-            editingType = type;
-            editingPerson = person;
-            
-            const formContent = document.getElementById('edit-form-content');
-            formContent.innerHTML = ''; // クリア
-            
-            let item;
-            let html = '';
-
+            editingId = id; editingType = type; editingPerson = person;
+            const formContent = document.getElementById('edit-form-content'); formContent.innerHTML = '';
+            let item; let html = '';
             if (type === 'income') {
                 item = getCurrentMonthData().incomes[person].find(i => i.id === id);
                 html += `<div class="form-group" style="margin-bottom:1rem;"><label>項目名</label><select id="edit-category" style="width:100%; box-sizing:border-box;">${createOptionsHtml(appData.incomeCategories, item.category)}</select></div>`;
@@ -543,37 +617,25 @@
                 html += `<div class="form-group" style="margin-bottom:1rem;"><label>金額</label><input type="number" id="edit-amount" value="${item.amount}" style="width:100%; box-sizing:border-box;"></div>`;
                 html += `<div class="form-group"><label>負担者</label><select id="edit-payer" style="width:100%; box-sizing:border-box;">${createOptionsHtml(payerOptions, item.category)}</select></div>`;
             }
-
-            formContent.innerHTML = html;
-            document.getElementById('edit-entry-modal').classList.add('show');
+            formContent.innerHTML = html; document.getElementById('edit-entry-modal').classList.add('show');
         };
 
         window.updateEntry = function() {
             if (editingType === 'income') {
                 const item = getCurrentMonthData().incomes[editingPerson].find(i => i.id === editingId);
-                item.category = document.getElementById('edit-category').value;
-                item.amount = Number(document.getElementById('edit-amount').value);
+                item.category = document.getElementById('edit-category').value; item.amount = Number(document.getElementById('edit-amount').value);
             } else if (editingType === 'fixed') {
                 const item = appData.fixedExpenses.find(i => i.id === editingId);
-                item.name = document.getElementById('edit-name').value;
-                item.amount = Number(document.getElementById('edit-amount').value);
-                item.category = document.getElementById('edit-payer').value;
-                item.startMonth = document.getElementById('edit-start').value;
-                item.endMonth = document.getElementById('edit-end').value;
+                item.name = document.getElementById('edit-name').value; item.amount = Number(document.getElementById('edit-amount').value);
+                item.category = document.getElementById('edit-payer').value; item.startMonth = document.getElementById('edit-start').value; item.endMonth = document.getElementById('edit-end').value;
             } else if (editingType === 'variable') {
                 const item = getCurrentMonthData().variableExpenses.find(i => i.id === editingId);
-                item.date = document.getElementById('edit-date').value;
-                item.name = document.getElementById('edit-name').value;
-                item.memo = document.getElementById('edit-memo').value;
-                item.amount = Number(document.getElementById('edit-amount').value);
-                item.category = document.getElementById('edit-payer').value;
+                item.date = document.getElementById('edit-date').value; item.name = document.getElementById('edit-name').value;
+                item.memo = document.getElementById('edit-memo').value; item.amount = Number(document.getElementById('edit-amount').value); item.category = document.getElementById('edit-payer').value;
             }
-            window.closeModal('edit-entry-modal');
-            window.saveData();
+            window.closeModal('edit-entry-modal'); window.saveData();
         };
-        // --- 編集機能 終わり ---
 
-        // モーダルやカテゴリ追加周りは省略せず記述
         let categoryTypeForModal = 'variable';
         window.openCategoryModal = function(type) {
             categoryTypeForModal = type;
@@ -600,8 +662,46 @@
             document.getElementById('new-category-name').value = ''; renderCategoryModal(); window.saveData();
         };
 
-        window.openGoalModal = function() { document.getElementById('goal-name-input').value = appData.goal.name || ''; document.getElementById('goal-amount-input').value = appData.goal.amount || ''; document.getElementById('goal-modal').classList.add('show'); };
-        window.saveGoal = function() { appData.goal.name = document.getElementById('goal-name-input').value; appData.goal.amount = Number(document.getElementById('goal-amount-input').value) || 0; window.closeModal('goal-modal'); window.saveData(); };
+        window.openGoalModal = function() { 
+            document.getElementById('goal-name-input').value = appData.goal.name || ''; 
+            document.getElementById('goal-amount-input').value = appData.goal.amount || ''; 
+            document.getElementById('goal-start-month-input').value = appData.goal.startMonth || '';
+            document.getElementById('kazuma-goal-name-input').value = appData.kazumaGoal.name || ''; 
+            document.getElementById('kazuma-goal-amount-input').value = appData.kazumaGoal.amount || ''; 
+            document.getElementById('kazuma-goal-start-month-input').value = appData.kazumaGoal.startMonth || '';
+            document.getElementById('kanako-goal-name-input').value = appData.kanakoGoal.name || ''; 
+            document.getElementById('kanako-goal-amount-input').value = appData.kanakoGoal.amount || ''; 
+            document.getElementById('kanako-goal-start-month-input').value = appData.kanakoGoal.startMonth || '';
+            document.getElementById('goal-modal').classList.add('show'); 
+        };
+
+        // ★既存データを保護する「update」処理
+        window.saveGoal = function() { 
+            const updates = {
+                '/goal': {
+                    name: document.getElementById('goal-name-input').value,
+                    amount: Number(document.getElementById('goal-amount-input').value) || 0,
+                    startMonth: document.getElementById('goal-start-month-input').value
+                },
+                '/kazumaGoal': {
+                    name: document.getElementById('kazuma-goal-name-input').value,
+                    amount: Number(document.getElementById('kazuma-goal-amount-input').value) || 0,
+                    startMonth: document.getElementById('kazuma-goal-start-month-input').value
+                },
+                '/kanakoGoal': {
+                    name: document.getElementById('kanako-goal-name-input').value,
+                    amount: Number(document.getElementById('kanako-goal-amount-input').value) || 0,
+                    startMonth: document.getElementById('kanako-goal-start-month-input').value
+                }
+            };
+            
+            update(dbRef, updates).then(() => {
+                window.closeModal('goal-modal');
+            }).catch(error => {
+                console.error("保存エラー:", error);
+                alert("目標の保存に失敗しました。");
+            });
+        };
 
         window.openBudgetModal = function() {
             const listEl = document.getElementById('budget-input-list'); listEl.innerHTML = '';
@@ -650,9 +750,7 @@
                 appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) tsv += `${mKey}\t固定費\t${i.name}\t\t${i.amount}\t${i.category}\n`; });
             });
             navigator.clipboard.writeText(tsv).then(() => {
-                if (confirm("データをコピーしました！\nすぐにGoogleスプレッドシートを開いて貼り付け（ペースト）しますか？")) {
-                    window.open('https://sheet.new/', '_blank');
-                }
+                if (confirm("データをコピーしました！\nすぐにGoogleスプレッドシートを開いて貼り付け（ペースト）しますか？")) { window.open('https://sheet.new/', '_blank'); }
             }).catch(err => { alert("コピーに失敗しました。お使いの端末が対応していない可能性があります。"); });
         };
 
@@ -731,25 +829,67 @@
             if(!appData) return;
             const md = getCurrentMonthData(); const [y, m] = currentMonthStr.split('-'); displayMonth.textContent = `${y}年${Number(m)}月`;
 
-            let totalHistorySavings = 0;
+            // ★ 目標計算ロジック
+            let houseSavings = 0, kazumaSavings = 0, kanakoSavings = 0;
+            
             Object.keys(appData.months).forEach(mKey => {
-                let mInc = 0, mExp = 0;
-                appData.months[mKey].incomes.kazuma.forEach(i => mInc += i.amount); appData.months[mKey].incomes.kanako.forEach(i => mInc += i.amount);
-                appData.months[mKey].variableExpenses.forEach(i => mExp += i.amount);
-                appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) mExp += i.amount; });
-                totalHistorySavings += (mInc - mExp);
+                if (mKey > currentMonthStr) return;
+
+                const isHouseValid = !appData.goal.startMonth || mKey >= appData.goal.startMonth;
+                const isKazumaValid = !appData.kazumaGoal.startMonth || mKey >= appData.kazumaGoal.startMonth;
+                const isKanakoValid = !appData.kanakoGoal.startMonth || mKey >= appData.kanakoGoal.startMonth;
+
+                let hInc = 0, kInc = 0, kanaInc = 0;
+                appData.months[mKey].incomes.kazuma.forEach(i => { kInc += i.amount; hInc += i.amount; });
+                appData.months[mKey].incomes.kanako.forEach(i => { kanaInc += i.amount; hInc += i.amount; });
+                
+                let hExp = 0, kExp = 0, kanaExp = 0;
+                const processExp = (item) => {
+                    hExp += item.amount;
+                    if (item.category.startsWith('共通')) { kExp += item.amount / 2; kanaExp += item.amount / 2; }
+                    else if (item.category === 'かずま') { kExp += item.amount; }
+                    else if (item.category === 'かなこ') { kanaExp += item.amount; }
+                };
+
+                appData.months[mKey].variableExpenses.forEach(processExp);
+                appData.fixedExpenses.forEach(i => { if(isFixedExpenseActive(i, mKey)) processExp(i); });
+
+                if (isHouseValid) houseSavings += (hInc - hExp);
+                if (isKazumaValid) kazumaSavings += (kInc - kExp);
+                if (isKanakoValid) kanakoSavings += (kanaInc - kanaExp);
             });
-            const goalNameEl = document.getElementById('goal-name-display'); const goalAmtEl = document.getElementById('goal-amount-display');
-            const goalBarEl = document.getElementById('goal-progress-bar'); const goalPctEl = document.getElementById('goal-percent-display');
-            if (appData.goal && appData.goal.amount > 0) {
-                goalNameEl.textContent = appData.goal.name || '無題の目標';
-                let pct = Math.floor((totalHistorySavings / appData.goal.amount) * 100);
-                if (pct < 0) pct = 0; if (pct > 100) pct = 100;
-                goalAmtEl.textContent = `${formatCurrency(totalHistorySavings)} / ${formatCurrency(appData.goal.amount)}`;
-                goalBarEl.style.width = `${pct}%`; goalPctEl.textContent = `現在 ${pct}% 達成！`;
-            } else {
-                goalNameEl.textContent = '目標未設定'; goalAmtEl.textContent = '¥0 / ¥0'; goalBarEl.style.width = '0%'; goalPctEl.textContent = '目標を設定して貯金を見える化しよう';
-            }
+
+            const updateGoalUI = (prefix, goalObj, savings) => {
+                const nameEl = document.getElementById(`${prefix}goal-name-display`);
+                const startEl = document.getElementById(`${prefix}goal-start-display`);
+                const targetEl = document.getElementById(`${prefix}goal-target-display`);
+                const currentEl = document.getElementById(`${prefix}goal-current-display`);
+                const barEl = document.getElementById(`${prefix}goal-progress-bar`);
+                const pctEl = document.getElementById(`${prefix}goal-percent-display`);
+                
+                if (goalObj && goalObj.amount > 0) {
+                    nameEl.textContent = goalObj.name || '無題の目標';
+                    startEl.textContent = goalObj.startMonth ? goalObj.startMonth.replace('-', '年') + '月' : '設定なし';
+                    targetEl.textContent = formatCurrency(goalObj.amount);
+                    currentEl.textContent = formatCurrency(savings);
+                    
+                    let pct = Math.floor((savings / goalObj.amount) * 100);
+                    if (pct < 0) pct = 0; if (pct > 100) pct = 100;
+                    barEl.style.width = `${pct}%`;
+                    pctEl.textContent = `${pct}% 達成！`;
+                } else {
+                    nameEl.textContent = '未設定';
+                    startEl.textContent = '-';
+                    targetEl.textContent = '¥0';
+                    currentEl.textContent = '¥0';
+                    barEl.style.width = '0%';
+                    pctEl.textContent = '0%';
+                }
+            };
+
+            updateGoalUI('', appData.goal, houseSavings);
+            updateGoalUI('kazuma-', appData.kazumaGoal, kazumaSavings);
+            updateGoalUI('kanako-', appData.kanakoGoal, kanakoSavings);
 
             document.getElementById('kazuma-inc-category').innerHTML = ''; document.getElementById('kanako-inc-category').innerHTML = '';
             appData.incomeCategories.forEach(cat => { document.getElementById('kazuma-inc-category').appendChild(new Option(cat, cat)); document.getElementById('kanako-inc-category').appendChild(new Option(cat, cat)); });
@@ -757,7 +897,6 @@
             document.getElementById('fixed-name').innerHTML = ''; appData.fixedCategories.forEach(cat => document.getElementById('fixed-name').appendChild(new Option(cat, cat)));
 
             let kazumaTotalIncome = 0, kanakoTotalIncome = 0;
-            // 編集用onclickイベントを追加
             document.getElementById('kazuma-income-list').innerHTML = ''; 
             md.incomes.kazuma.forEach(item => { 
                 kazumaTotalIncome += item.amount; 
