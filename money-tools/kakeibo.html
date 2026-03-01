@@ -30,7 +30,10 @@
         .month-selector input { background: transparent; border: none; color: white; font-size: 1rem; font-weight: 700; outline: none; font-family: inherit; cursor: pointer; }
         .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         .container { max-width: 1000px; margin: 0 auto 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
-        .tabs { display: flex; justify-content: center; gap: 1rem; padding: 0; margin-left: auto; margin-right: 1.5rem; }
+        
+        /* ★タブのスタイル調整（3つに増えたので折り返し対応） */
+        .tabs { display: flex; justify-content: center; gap: 1rem; padding: 0; margin-left: auto; margin-right: 1.5rem; flex-wrap: wrap; }
+        
         .tab-btn { padding: 0.5rem 1.5rem; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
         .tab-btn:hover { background: rgba(255, 255, 255, 0.25); }
         .tab-btn.active { background: white; color: var(--md-primary); border-color: white; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
@@ -108,7 +111,6 @@
         .text-right { text-align: right; }
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
         
-        /* ソート可能なヘッダーのスタイル */
         .sortable-th { cursor: pointer; transition: background-color 0.2s; user-select: none; }
         .sortable-th:hover { background-color: rgba(0,0,0,0.04); }
 
@@ -163,10 +165,13 @@
                 <button class="btn-icon" onclick="copyForSpreadsheet()" title="スプレッドシートにコピー"><span class="material-icons">table_chart</span></button>
             </div>
         </div>
+        
         <div class="tabs">
             <button id="tab-input" class="tab-btn active" onclick="switchSheet('input')"><span class="material-icons">edit_note</span> 入力シート</button>
             <button id="tab-graph" class="tab-btn" onclick="switchSheet('graph')"><span class="material-icons">insights</span> グラフシート</button>
+            <button id="tab-assets" class="tab-btn" onclick="switchSheet('assets')"><span class="material-icons">account_balance</span> 資産シート</button>
         </div>
+        
         <div class="month-selector">
             <span class="material-icons">calendar_month</span>
             <input type="month" id="month-input">
@@ -397,6 +402,86 @@
                 <h4 style="color: var(--kanako-color); margin-bottom: 0;">かなこ（個人出費）</h4><div style="position: relative; height: 300px; margin-bottom: 1rem;"><canvas id="combo-kanako"></canvas></div>
             </section>
         </div>
+
+        <div id="sheet-assets" class="sheet">
+            
+            <section class="card">
+                <div class="action-bar" style="margin-bottom: 0.5rem;">
+                    <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">savings</span> 現在の資産総額</h2>
+                </div>
+                <div class="dash-container">
+                    <div class="dash-box dash-kazuma">
+                        <h3><span class="material-icons">person</span> かずまの資産</h3>
+                        <p class="dash-main-value" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">¥0</p>
+                    </div>
+                    <div class="dash-box dash-kanako">
+                        <h3><span class="material-icons">person_3</span> かなこの資産</h3>
+                        <p class="dash-main-value" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">¥0</p>
+                    </div>
+                    <div class="dash-box dash-household">
+                        <h3><span class="material-icons">account_balance</span> 世帯全体の総資産</h3>
+                        <p class="dash-main-value" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">¥0</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="action-bar">
+                    <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">trending_up</span> 資産推移グラフ</h2>
+                </div>
+                <div style="position: relative; height: 300px; background: #FAFAFA; border: 1px dashed var(--md-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--md-text-secondary); margin-bottom: 1rem;">
+                    <p>※ここに資産が右肩上がりに増えていくグラフが表示されます（準備中）</p>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="action-bar">
+                    <h2 class="section-title"><span class="material-icons">edit_document</span> 資産残高の記録・更新</h2>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--md-text-secondary); margin-top: 0;">月末などに各口座・証券の「現在の残高」を入力して、資産額を最新にアップデートしましょう。</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>更新日</th>
+                            <th>口座・資産名</th>
+                            <th>名義</th>
+                            <th class="text-right">残高(評価額)</th>
+                            <th class="text-right">削除</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5" style="text-align: center; color: var(--md-text-secondary); padding: 1rem;">まだ登録されていません</td></tr>
+                    </tbody>
+                </table>
+                
+                <form class="form-row" onsubmit="event.preventDefault(); alert('※現在はUIの確認モードです。まだ保存機能は連携されていません。');">
+                    <div class="form-group" style="flex: 0.5;">
+                        <label>更新日 (年月)</label>
+                        <input type="month" required>
+                    </div>
+                    <div class="form-group">
+                        <label>口座・資産名</label>
+                        <input type="text" placeholder="例: SBI証券(NISA), 〇〇銀行" required>
+                    </div>
+                    <div class="form-group">
+                        <label>名義</label>
+                        <select>
+                            <option value="かずま">かずま</option>
+                            <option value="かなこ">かなこ</option>
+                            <option value="共通">共通</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>現在の残高 (円)</label>
+                        <input type="number" required min="0">
+                    </div>
+                    <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;">
+                        <button type="submit" class="btn"><span class="material-icons">save</span> 記録する</button>
+                    </div>
+                </form>
+            </section>
+        </div>
     </main>
 
     <div id="category-modal" class="modal">
@@ -508,14 +593,12 @@
         let editingType = null;
         let editingPerson = null;
 
-        // ★ ソート用の変数
         let currentSortKey = 'date';
         let currentSortOrder = 'desc';
 
         const defaultIncomeCategories = ["給与", "賞与", "臨時収入", "副業収入"];
         const defaultFixedCategories = ["家賃", "ネット代", "保険", "水道光熱費", "サブスク費"];
         const defaultVariableCategories = ["携帯代", "サブスク費", "食費", "外食費", "交通費", "健康・医療費", "日用品費", "交際費", "衣服・美容代", "趣味・娯楽", "デート代", "旅行費", "金融投資", "自己投資", "奨学金返済", "特別な支出"];
-        // ★ 立替の選択肢を追加
         const payerOptions = ['共通・かずま', '共通・かなこ', '共通', 'かずま', 'かなこ', '立替・かずま', '立替・かなこ'];
 
         const chartColorMap = {
@@ -587,20 +670,18 @@
                 case '共通': return `<span class="badge" style="background:#E8F5E9; color:#388E3C;">共通(折半済)</span>`;
                 case 'かずま': return `<span class="badge" style="background:#EEEEEE; color:#616161;">かずま個人</span>`;
                 case 'かなこ': return `<span class="badge" style="background:#EEEEEE; color:#616161;">かなこ個人</span>`;
-                // ★立替のバッジを追加
                 case '立替・かずま': return `<span class="badge" style="background:#E3F2FD; color:#0D47A1; border: 1px solid #0D47A1;">立替・かずま</span>`;
                 case '立替・かなこ': return `<span class="badge" style="background:#FCE4EC; color:#880E4F; border: 1px solid #880E4F;">立替・かなこ</span>`;
                 default: return `<span class="badge" style="background:#EEEEEE; color:#616161;">${cat}</span>`;
             }
         }
 
-        // ★ ソート機能の実行
         window.toggleSort = function(key) {
             if (currentSortKey === key) {
                 currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
             } else {
                 currentSortKey = key;
-                currentSortOrder = 'desc'; // キー変更時は最初は降順
+                currentSortOrder = 'desc'; 
             }
             render();
         };
@@ -815,14 +896,13 @@
             const comboKazuma = { inc: [], exp: [], bal: [] };
             const comboKanako = { inc: [], exp: [], bal: [] };
 
-            // ★ グラフ集計時にも立替を最終負担者の出費として扱う
             monthKeys.forEach((mKey, index) => {
                 let monthKazInc = 0, monthKanaInc = 0; let monthShareExp = 0, monthKazExp = 0, monthKanaExp = 0;
                 
                 const processGraphExp = (item) => {
                     const isHouse = item.category.startsWith('共通'); 
-                    const isKazuma = item.category === 'かずま' || item.category === '立替・かなこ'; // かなこが立替＝かずまが払うべき
-                    const isKanako = item.category === 'かなこ' || item.category === '立替・かずま'; // かずまが立替＝かなこが払うべき
+                    const isKazuma = item.category === 'かずま' || item.category === '立替・かなこ';
+                    const isKanako = item.category === 'かなこ' || item.category === '立替・かずま';
                     
                     if (isHouse) { if (!houseData[item.name]) houseData[item.name] = new Array(monthKeys.length).fill(0); houseData[item.name][index] += item.amount; housePie[item.name] = (housePie[item.name] || 0) + item.amount; monthShareExp += item.amount; }
                     else if (isKazuma) { if (!kazumaData[item.name]) kazumaData[item.name] = new Array(monthKeys.length).fill(0); kazumaData[item.name][index] += item.amount; kazumaPie[item.name] = (kazumaPie[item.name] || 0) + item.amount; monthKazExp += item.amount; }
@@ -874,12 +954,10 @@
 
             updateDateInputRange();
 
-            // --- ソートアイコンの表示更新 ---
             document.getElementById('sort-icon-date').textContent = currentSortKey === 'date' ? (currentSortOrder === 'asc' ? '▲' : '▼') : '';
             document.getElementById('sort-icon-payer').textContent = currentSortKey === 'payer' ? (currentSortOrder === 'asc' ? '▲' : '▼') : '';
             document.getElementById('sort-icon-amount').textContent = currentSortKey === 'amount' ? (currentSortOrder === 'asc' ? '▲' : '▼') : '';
 
-            // ★ 目標計算ロジック（立替を反映）
             let houseSavings = 0, kazumaSavings = 0, kanakoSavings = 0;
             Object.keys(appData.months).forEach(mKey => {
                 if (mKey > currentMonthStr) return;
@@ -897,8 +975,8 @@
                     if (item.category.startsWith('共通')) { kExp += item.amount / 2; kanaExp += item.amount / 2; }
                     else if (item.category === 'かずま') { kExp += item.amount; }
                     else if (item.category === 'かなこ') { kanaExp += item.amount; }
-                    else if (item.category === '立替・かずま') { kanaExp += item.amount; } // かずまが立て替えた＝かなこの負担
-                    else if (item.category === '立替・かなこ') { kExp += item.amount; }   // かなこが立て替えた＝かずまの負担
+                    else if (item.category === '立替・かずま') { kanaExp += item.amount; } 
+                    else if (item.category === '立替・かなこ') { kExp += item.amount; }   
                 };
 
                 appData.months[mKey].variableExpenses.forEach(processExp);
@@ -964,7 +1042,6 @@
                 document.getElementById('fixed-list').innerHTML += `<tr class="clickable-row" onclick="openEditModal('fixed', ${item.id})"><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td><span style="font-size:0.75rem; color:#757575;">${startStr}〜<br>${endStr}</span></td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="event.stopPropagation(); deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
-            // ★ 変動費のソート処理
             document.getElementById('variable-list').innerHTML = '';
             let budgetSpent = {};
             
@@ -977,7 +1054,7 @@
                 
                 if (valA < valB) return currentSortOrder === 'asc' ? -1 : 1;
                 if (valA > valB) return currentSortOrder === 'asc' ? 1 : -1;
-                return 0; // 同じ場合は元の順序
+                return 0; 
             });
 
             sortedVar.forEach(item => {
@@ -985,7 +1062,6 @@
                 document.getElementById('variable-list').innerHTML += `<tr class="clickable-row" onclick="openEditModal('variable', ${item.id})"><td>${item.date}</td><td>${item.name}${memoHtml}</td><td>${getCategoryBadge(item.category)}</td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="event.stopPropagation(); deleteVariable(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
-            // ★ ダッシュボード＆精算の集計ロジック
             let kazumaPersonal = 0, kanakoPersonal = 0, kazumaPaidShared = 0, kanakoPaidShared = 0, splitShared = 0;
             let tategaeKazuma = 0, tategaeKanako = 0;
 
@@ -997,7 +1073,6 @@
                 else if (item.category === '共通') splitShared += item.amount; 
                 else if (item.category === 'かずま') kazumaPersonal += item.amount; 
                 else if (item.category === 'かなこ') kanakoPersonal += item.amount;
-                // 立替分を最終負担者の個人出費として加算
                 else if (item.category === '立替・かずま') { tategaeKazuma += item.amount; kanakoPersonal += item.amount; }
                 else if (item.category === '立替・かなこ') { tategaeKanako += item.amount; kazumaPersonal += item.amount; }
             };
@@ -1025,8 +1100,6 @@
             document.getElementById('dash-kanako-inc').textContent = formatCurrency(kanakoTotalIncome); document.getElementById('dash-kanako-exp').textContent = formatCurrency(kanakoPersonal); document.getElementById('dash-kanako-share').textContent = formatCurrency(sharedHalf); document.getElementById('dash-kanako-save').textContent = formatCurrency(kanakoTotalIncome - kanakoPersonal - sharedHalf);
             document.getElementById('dash-total-inc').textContent = formatCurrency(householdIncome); document.getElementById('dash-total-exp').textContent = formatCurrency(householdExpense); document.getElementById('dash-total-save').textContent = formatCurrency(householdIncome - householdExpense);
 
-            // ★ 新しい精算の計算式を適用
-            // （共通かずま - 共通かなこ）÷ 2 ＋ 立替かずま － 立替かなこ
             const settlementValue = ((kazumaPaidShared - kanakoPaidShared) / 2) + tategaeKazuma - tategaeKanako;
 
             const alertBox = document.getElementById('settlement-alert'); 
