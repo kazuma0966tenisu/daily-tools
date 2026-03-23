@@ -258,7 +258,7 @@
                     <div class="dash-box dash-kanako">
                         <h3><span class="material-icons">person_3</span> かなこ</h3>
                         <div class="dash-row"><span>収入</span><span id="dash-kanako-inc">¥0</span></div>
-                        <div class="dash-row"><span>個人出費</span><span id="dash-kazuma-exp" id="dash-kanako-exp">¥0</span></div>
+                        <div class="dash-row"><span>個人出費</span><span id="dash-kanako-exp">¥0</span></div>
                         <div class="dash-row"><span>共通費用の負担(半額)</span><span id="dash-kanako-share">¥0</span></div>
                         <p class="dash-main-value" title="収入 - 個人出費 - 共通費用の半額"><span style="font-size:0.8rem; color:#757575; display:block; font-weight:normal;">個人推定貯蓄可能額</span><span id="dash-kanako-save">¥0</span></p>
                     </div>
@@ -555,7 +555,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-        // ★アップデート：認証機能（Auth）の追加インポート
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -571,8 +570,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const dbRef = ref(db, 'kakeiboData');
-        
-        // ★アップデート：認証機能のセットアップ
         const auth = getAuth(app);
 
         let appData = null;
@@ -626,46 +623,27 @@
             return data;
         }
 
-        // ==========================================
-        // ★ アップデート：ログイン・ログアウトの処理 ★
-        // ==========================================
-        
-        // ログインボタンが押された時の処理
+        // ログイン処理
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
-            // Firebaseにログイン依頼を投げる
             signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    document.getElementById('login-error').style.display = 'none';
-                    // ログイン成功時は自動的に下の onAuthStateChanged が発動します
-                })
-                .catch((error) => {
-                    console.error("ログインエラー:", error);
-                    document.getElementById('login-error').style.display = 'block';
-                });
+                .then(() => document.getElementById('login-error').style.display = 'none')
+                .catch((error) => document.getElementById('login-error').style.display = 'block');
         });
 
-        // ログアウトボタンが押された時の処理（HTMLから呼べるようにwindowに紐付け）
+        // ログアウト処理
         window.logoutAccount = function() {
             if(confirm('ログアウトしますか？')) {
-                signOut(auth).then(() => {
-                    location.reload(); // 画面を再読み込みして完全にリセット
-                }).catch((error) => {
-                    alert("ログアウトに失敗しました");
-                });
+                signOut(auth).then(() => location.reload()).catch(() => alert("ログアウトに失敗しました"));
             }
         };
 
-        // ログイン状態の監視（常にここが見張っている）
+        // 認証状態の監視
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // ログイン成功！壁（ログイン画面）を非表示にする
                 document.getElementById('login-screen').style.display = 'none';
-                
-                // ログイン成功した時だけ、データベースとの通信を開始する
                 onValue(dbRef, (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
@@ -673,18 +651,15 @@
                         render();
                         if(document.getElementById('sheet-graph').classList.contains('active')) renderGraphs();
                     } else {
-                        // 万が一データが空の場合
                         const local = localStorage.getItem('kakeibo_kazuma_kanako_v7');
                         appData = sanitizeData(local ? JSON.parse(local) : {});
                         window.saveData();
                     }
                 });
             } else {
-                // ログインしていない場合、壁を表示したままにする
                 document.getElementById('login-screen').style.display = 'flex';
             }
         });
-        // ==========================================
 
         window.saveData = function() {
             set(dbRef, appData).catch(error => { console.error("保存エラー:", error); alert("データの保存に失敗しました。通信環境を確認してください。"); });
@@ -1141,18 +1116,18 @@
             const alertBox = document.getElementById('settlement-alert'); 
             const alertText = document.getElementById('settlement-text');
             
+            // ★バグ修正：入力がない場合も「ピッタリ精算（¥0）」と常に表示させるように変更
+            alertBox.style.display = 'flex'; 
+            
             if (settlementValue > 0) { 
-                alertBox.style.display = 'flex'; 
                 alertText.innerHTML = `今月の共通費・立替精算：<br><strong>かなこ</strong> が <strong>かずま</strong> に <strong>${formatCurrency(settlementValue)}</strong> ペイする`; 
             } else if (settlementValue < 0) { 
-                alertBox.style.display = 'flex'; 
                 alertText.innerHTML = `今月の共通費・立替精算：<br><strong>かずま</strong> が <strong>かなこ</strong> に <strong>${formatCurrency(Math.abs(settlementValue))}</strong> ペイする`; 
             } else { 
                 if(kazumaPaidShared === 0 && kanakoPaidShared === 0 && tategaeKazuma === 0 && tategaeKanako === 0) {
-                    alertBox.style.display = 'none';
+                    alertText.innerHTML = `今月の共通費・立替精算：<br><span style="color: #F57F17; font-weight: normal;">※まだ今月の共通出費・立替はありません（¥0）</span>`; 
                 } else {
-                    alertBox.style.display = 'flex'; 
-                    alertText.innerHTML = `今月の共通費・立替精算：ピッタリ精算されています！`; 
+                    alertText.innerHTML = `今月の共通費・立替精算：<br><strong>ピッタリ精算されています！（¥0）</strong>`; 
                 }
             }
         }
