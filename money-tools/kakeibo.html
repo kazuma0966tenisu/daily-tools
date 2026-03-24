@@ -29,11 +29,10 @@
         .month-selector { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
         .month-selector input { background: transparent; border: none; color: white; font-size: 1rem; font-weight: 700; outline: none; font-family: inherit; cursor: pointer; }
         .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
-        .container { max-width: 1000px; margin: 0 auto 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
-        .tabs { display: flex; justify-content: center; gap: 1rem; padding: 0; margin-left: auto; margin-right: 1.5rem; flex-wrap: wrap; }
-        .tab-btn { padding: 0.5rem 1.5rem; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-        .tab-btn:hover { background: rgba(255, 255, 255, 0.25); }
-        .tab-btn.active { background: white; color: var(--md-primary); border-color: white; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        
+        /* ★ コンテナの下部にボトムナビゲーション分の余白を追加 */
+        .container { max-width: 1000px; margin: 0 auto; padding: 1rem 1rem 80px 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        
         .sheet { display: none; animation: fadeIn 0.3s ease; }
         .sheet.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -87,7 +86,7 @@
         .alert-budget-danger { background-color: #FFEBEE; border-left: 4px solid #F44336; color: #C62828; font-size: 0.9rem; padding: 0.75rem;}
         .progress-wrap { background: #EEEEEE; border-radius: 10px; height: 16px; width: 100%; overflow: hidden; margin: 8px 0; }
         .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease; }
-        .form-row { display: flex; gap: 1rem; flex-wrap: wrap; background: #FAFAFA; padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border); }
+        .form-row { display: flex; gap: 1rem; flex-wrap: wrap; background: #FAFAFA; padding: 1rem; border-radius: 4px; border: 1px dashed var(--md-border); margin-bottom: 1rem;}
         .form-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
         .form-group label { font-size: 0.8rem; color: var(--md-text-secondary); margin-bottom: 0.25rem; }
         .form-group input, .form-group select { padding: 0.5rem; font-size: 0.95rem; border: none; border-bottom: 1px solid var(--md-border); background-color: transparent; font-family: inherit; }
@@ -102,8 +101,16 @@
         .app-bar-left .btn-icon:hover { opacity: 1; background-color: rgba(255,255,255,0.2);}
         .modal-header .btn-icon:hover { background-color: #E0F2F1; color: var(--md-primary); }
         .btn-icon-danger:hover { background-color: #FFEBEE; color: var(--md-error); }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem;}
-        th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem;}
+        
+        /* ★ テーブルの横スクロール対応（案A） */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1rem;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; } /* スマホでも縮まずスクロールさせる */
+        th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem; white-space: nowrap; } /* 改行防止 */
         th { color: var(--md-text-secondary); font-weight: 500; font-size: 0.85rem; }
         .text-right { text-align: right; }
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
@@ -133,11 +140,44 @@
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
+        /* ★ ボトムナビゲーションのスタイル */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--md-surface);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            z-index: 1000;
+        }
+        .bottom-nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--md-text-secondary);
+            font-size: 0.7rem;
+            cursor: pointer;
+            flex: 1;
+            padding: 4px 0;
+        }
+        .bottom-nav-btn .material-icons {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        .bottom-nav-btn.active {
+            color: var(--md-primary);
+            font-weight: 700;
+        }
+
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
             .goal-container { grid-template-columns: 1fr; }
             .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem;}
-            .tabs { margin: 0 auto; width: 100%; justify-content: center; }
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
         }
         @media (max-width: 600px) and (orientation: portrait) {
@@ -178,13 +218,6 @@
                 <button class="btn-icon" onclick="copyForSpreadsheet()" title="スプレッドシートにコピー"><span class="material-icons">table_chart</span></button>
             </div>
         </div>
-        
-        <div class="tabs">
-            <button id="tab-input" class="tab-btn active" onclick="switchSheet('input')"><span class="material-icons">edit_note</span> 入力シート</button>
-            <button id="tab-graph" class="tab-btn" onclick="switchSheet('graph')"><span class="material-icons">insights</span> グラフシート</button>
-            <button id="tab-assets" class="tab-btn" onclick="switchSheet('assets')"><span class="material-icons">account_balance</span> 資産シート</button>
-        </div>
-        
         <div class="month-selector">
             <span class="material-icons">calendar_month</span>
             <input type="month" id="month-input">
@@ -284,7 +317,6 @@
                 <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 300px;">
                         <h3 style="font-size: 1rem; color: var(--kazuma-color); margin-top: 0;">かずまの収入</h3>
-                        <table><tbody id="kazuma-income-list"></tbody></table>
                         <form id="form-kazuma-income" class="form-row">
                             <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
                                 <div class="form-group"><label>項目名</label><select id="kazuma-inc-category" required></select></div>
@@ -292,10 +324,12 @@
                             </div>
                             <div style="width: 100%; display: flex; justify-content: flex-end; margin-top: 0.5rem;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
                         </form>
+                        <div class="table-responsive">
+                            <table><tbody id="kazuma-income-list"></tbody></table>
+                        </div>
                     </div>
                     <div style="flex: 1; min-width: 300px;">
                         <h3 style="font-size: 1rem; color: var(--kanako-color); margin-top: 0;">かなこの収入</h3>
-                        <table><tbody id="kanako-income-list"></tbody></table>
                         <form id="form-kanako-income" class="form-row">
                             <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
                                 <div class="form-group"><label>項目名</label><select id="kanako-inc-category" required></select></div>
@@ -303,6 +337,9 @@
                             </div>
                             <div style="width: 100%; display: flex; justify-content: flex-end; margin-top: 0.5rem;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
                         </form>
+                        <div class="table-responsive">
+                            <table><tbody id="kanako-income-list"></tbody></table>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -312,10 +349,6 @@
                     <h2 class="section-title"><span class="material-icons">event_repeat</span> 固定費（毎月自動適用）</h2>
                     <button type="button" class="btn btn-outline" onclick="openCategoryModal('fixed')"><span class="material-icons">settings</span> 項目リストの編集</button>
                 </div>
-                <table>
-                    <thead><tr><th>項目</th><th>負担者</th><th>適用期間</th><th class="text-right">金額</th><th class="text-right">削除</th></tr></thead>
-                    <tbody id="fixed-list"></tbody>
-                </table>
                 <form id="form-fixed" class="form-row">
                     <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
                         <div class="form-group"><label>項目名</label><select id="fixed-name" required></select></div>
@@ -340,6 +373,13 @@
                         <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
                     </div>
                 </form>
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>項目</th><th>負担者</th><th>適用期間</th><th class="text-right">金額</th><th class="text-right">削除</th></tr></thead>
+                        <tbody id="fixed-list"></tbody>
+                    </table>
+                </div>
             </section>
 
             <section class="card">
@@ -347,18 +387,6 @@
                     <h2 class="section-title"><span class="material-icons">shopping_cart</span> 変動費（今月分）</h2>
                     <button type="button" class="btn btn-outline" onclick="openCategoryModal('variable')"><span class="material-icons">settings</span> 項目リストの編集</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th onclick="toggleSort('date')" class="sortable-th" title="クリックで並び替え">日付 <span id="sort-icon-date" style="font-size:0.7rem;">▼</span></th>
-                            <th>項目</th>
-                            <th onclick="toggleSort('payer')" class="sortable-th" title="クリックで並び替え">負担者 <span id="sort-icon-payer" style="font-size:0.7rem;"></span></th>
-                            <th onclick="toggleSort('amount')" class="text-right sortable-th" title="クリックで並び替え">金額 <span id="sort-icon-amount" style="font-size:0.7rem;"></span></th>
-                            <th class="text-right">削除</th>
-                        </tr>
-                    </thead>
-                    <tbody id="variable-list"></tbody>
-                </table>
                 <form id="form-variable" class="form-row">
                     <div class="form-group" style="flex: 0.5;">
                         <label>日付</label>
@@ -381,6 +409,21 @@
                     </div>
                     <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
                 </form>
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="toggleSort('date')" class="sortable-th" title="クリックで並び替え">日付 <span id="sort-icon-date" style="font-size:0.7rem;">▼</span></th>
+                                <th>項目</th>
+                                <th onclick="toggleSort('payer')" class="sortable-th" title="クリックで並び替え">負担者 <span id="sort-icon-payer" style="font-size:0.7rem;"></span></th>
+                                <th onclick="toggleSort('amount')" class="text-right sortable-th" title="クリックで並び替え">金額 <span id="sort-icon-amount" style="font-size:0.7rem;"></span></th>
+                                <th class="text-right">削除</th>
+                            </tr>
+                        </thead>
+                        <tbody id="variable-list"></tbody>
+                    </table>
+                </div>
             </section>
         </div>
 
@@ -428,7 +471,7 @@
                         <p class="dash-main-value" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">¥0</p>
                     </div>
                     <div class="dash-box dash-kanako">
-                        <h3><span class="material-icons">person_3</span> かなこの資産</h3>
+                        <h3><span class="material-icons">person_3</span> かかなこの資産</h3>
                         <p class="dash-main-value" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">¥0</p>
                     </div>
                     <div class="dash-box dash-household">
@@ -450,24 +493,43 @@
                     <h2 class="section-title"><span class="material-icons">edit_document</span> 資産残高の記録・更新</h2>
                 </div>
                 <p style="font-size: 0.85rem; color: var(--md-text-secondary); margin-top: 0;">月末などに各口座・証券の「現在の残高」を入力して、資産額を最新にアップデートしましょう。</p>
-                <table>
-                    <thead>
-                        <tr><th>更新日</th><th>口座・資産名</th><th>名義</th><th class="text-right">残高(評価額)</th><th class="text-right">削除</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td colspan="5" style="text-align: center; color: var(--md-text-secondary); padding: 1rem;">まだ登録されていません</td></tr>
-                    </tbody>
-                </table>
-                <form class="form-row" onsubmit="event.preventDefault(); alert('※現在はUIの確認モードです。まだ保存機能は連携されていません。');">
+                
+                <form class="form-row" onsubmit="event.preventDefault(); alert('※現在はUIの確認モードです。まだ保存機能は連携されていません。');" style="margin-bottom: 1rem;">
                     <div class="form-group" style="flex: 0.5;"><label>更新日 (年月)</label><input type="month" required></div>
                     <div class="form-group"><label>口座・資産名</label><input type="text" placeholder="例: SBI証券(NISA), 〇〇銀行" required></div>
                     <div class="form-group"><label>名義</label><select><option value="かずま">かずま</option><option value="かなこ">かなこ</option><option value="共通">共通</option></select></div>
                     <div class="form-group"><label>現在の残高 (円)</label><input type="number" required min="0"></div>
                     <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">save</span> 記録する</button></div>
                 </form>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>更新日</th><th>口座・資産名</th><th>名義</th><th class="text-right">残高(評価額)</th><th class="text-right">削除</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="5" style="text-align: center; color: var(--md-text-secondary); padding: 1rem;">まだ登録されていません</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </div>
     </main>
+
+    <nav class="bottom-nav">
+        <button id="tab-input" class="bottom-nav-btn active" onclick="switchSheet('input')">
+            <span class="material-icons">edit_note</span>
+            <span>入力シート</span>
+        </button>
+        <button id="tab-graph" class="bottom-nav-btn" onclick="switchSheet('graph')">
+            <span class="material-icons">insights</span>
+            <span>グラフシート</span>
+        </button>
+        <button id="tab-assets" class="bottom-nav-btn" onclick="switchSheet('assets')">
+            <span class="material-icons">account_balance</span>
+            <span>資産シート</span>
+        </button>
+    </nav>
 
     <div id="category-modal" class="modal">
         <div class="modal-content">
@@ -623,7 +685,6 @@
             return data;
         }
 
-        // ログイン処理
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -633,14 +694,12 @@
                 .catch((error) => document.getElementById('login-error').style.display = 'block');
         });
 
-        // ログアウト処理
         window.logoutAccount = function() {
             if(confirm('ログアウトしますか？')) {
                 signOut(auth).then(() => location.reload()).catch(() => alert("ログアウトに失敗しました"));
             }
         };
 
-        // 認証状態の監視
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
@@ -724,11 +783,16 @@
         window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); window.saveData(); } };
         window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); window.saveData(); } };
 
+        // ★ ボトムナビゲーション用のシート切り替え
         window.switchSheet = function(sheetId) {
             document.querySelectorAll('.sheet').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(`sheet-${sheetId}`).classList.add('active');
             document.getElementById(`tab-${sheetId}`).classList.add('active');
+            
+            // 画面の一番上にスクロールを戻す
+            window.scrollTo(0, 0);
+
             if (sheetId === 'graph') {
                 const now = new Date(); const yyyy = now.getFullYear();
                 if(!document.getElementById('graph-start-month').value) { document.getElementById('graph-start-month').value = `${yyyy}-01`; document.getElementById('graph-end-month').value = `${yyyy}-12`; }
@@ -1049,8 +1113,16 @@
 
             document.getElementById('fixed-list').innerHTML = '';
             appData.fixedExpenses.forEach(item => {
-                const startStr = item.startMonth.replace('-', '年') + '月'; const endStr = item.endMonth ? (item.endMonth.replace('-', '年') + '月') : '継続中';
-                document.getElementById('fixed-list').innerHTML += `<tr class="clickable-row" onclick="openEditModal('fixed', ${item.id})"><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td><span style="font-size:0.75rem; color:#757575;">${startStr}〜<br>${endStr}</span></td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="event.stopPropagation(); deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
+                // ★ バグ修正：適用期間の文字数を短くする
+                const startParts = item.startMonth.split('-');
+                const startStr = startParts[0].slice(-2) + '/' + startParts[1];
+                let endStr = '継続中';
+                if (item.endMonth) {
+                    const endParts = item.endMonth.split('-');
+                    endStr = endParts[0].slice(-2) + '/' + endParts[1];
+                }
+                
+                document.getElementById('fixed-list').innerHTML += `<tr class="clickable-row" onclick="openEditModal('fixed', ${item.id})"><td>${item.name}</td><td>${getCategoryBadge(item.category)}</td><td><span style="font-size:0.8rem; color:#757575;">${startStr}〜<br>${endStr}</span></td><td class="text-right">${formatCurrency(item.amount)}</td><td class="text-right"><button type="button" class="btn-icon btn-icon-danger" onclick="event.stopPropagation(); deleteFixed(${item.id})"><span class="material-icons">delete</span></button></td></tr>`;
             });
 
             document.getElementById('variable-list').innerHTML = '';
@@ -1116,7 +1188,6 @@
             const alertBox = document.getElementById('settlement-alert'); 
             const alertText = document.getElementById('settlement-text');
             
-            // ★バグ修正：入力がない場合も「ピッタリ精算（¥0）」と常に表示させるように変更
             alertBox.style.display = 'flex'; 
             
             if (settlementValue > 0) { 
