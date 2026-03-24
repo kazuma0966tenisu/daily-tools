@@ -8,6 +8,11 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* ★バグ修正：画面全体の幅を厳格に管理し、横スクロール（はみ出し）を絶対に防ぐ */
+        html { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: inherit; }
+        body { margin: 0; padding: 0; font-family: 'Noto Sans JP', sans-serif; background-color: var(--md-bg); color: var(--md-text); overflow-x: hidden; width: 100%; }
+
         :root {
             --md-primary: #00796B; 
             --md-primary-light: #B2DFDB;
@@ -22,28 +27,39 @@
             --kanako-color: #C2185B;
         }
 
-        body { margin: 0; font-family: 'Noto Sans JP', sans-serif; background-color: var(--md-bg); color: var(--md-text); }
-        .app-bar { background-color: var(--md-primary); color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; }
+        .app-bar { background-color: var(--md-primary); color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .app-bar-left { display: flex; align-items: center; gap: 10px; }
         .app-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 500; }
         .month-selector { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
         .month-selector input { background: transparent; border: none; color: white; font-size: 1rem; font-weight: 700; outline: none; font-family: inherit; cursor: pointer; }
         .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         
-        /* ★ コンテナの下部にボトムナビゲーション分の余白を追加 */
-        .container { max-width: 1000px; margin: 0 auto; padding: 1rem 1rem 80px 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 1rem 1rem 2rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
         
+        /* ★ PC用のタブスタイル（スマホでは消す） */
+        .tabs { display: flex; justify-content: center; gap: 1rem; padding: 0; margin-left: auto; margin-right: 1.5rem; flex-wrap: wrap; }
+        .tab-btn { padding: 0.5rem 1.5rem; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.25); }
+        .tab-btn.active { background: white; color: var(--md-primary); border-color: white; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        
+        /* ★ スマホ用のボトムナビゲーション（PCでは消す） */
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--md-surface); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); justify-content: space-around; padding: 0.5rem 0; z-index: 1000; padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); }
+        .bottom-nav-btn { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: var(--md-text-secondary); font-size: 0.7rem; cursor: pointer; flex: 1; padding: 4px 0; }
+        .bottom-nav-btn .material-icons { font-size: 1.5rem; margin-bottom: 4px; }
+        .bottom-nav-btn.active { color: var(--md-primary); font-weight: 700; }
+
         .sheet { display: none; animation: fadeIn 0.3s ease; }
         .sheet.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .card { background-color: var(--md-surface); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); padding: 1.5rem; margin-bottom: 1.5rem; }
         .section-title { margin-top: 0; font-size: 1.1rem; color: var(--md-primary); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--md-primary-light); padding-bottom: 0.5rem; margin-bottom: 1rem; }
         
+        /* 目標パネルのデザイン（はみ出し修正済） */
         .goal-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
         .goal-box { padding: 1rem; border-radius: 8px; border: 1px solid var(--md-border); background: #FFFFFF; }
         .goal-box h3 { margin: 0 0 10px 0; font-size: 1.05rem; display: flex; align-items: center; gap: 6px; border-bottom: 2px solid; padding-bottom: 0.5rem; }
         .goal-table { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; font-size: 0.9rem; }
-        .goal-table th, .goal-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #EEEEEE; text-align: left; }
+        .goal-table th, .goal-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #EEEEEE; text-align: left; white-space: normal; word-break: break-all; } /* 修正：ここで改行を許可 */
         .goal-table th { width: 35%; color: var(--md-text-secondary); font-weight: 500; background-color: rgba(0,0,0,0.02); }
         .goal-table td { font-weight: 500; }
         .goal-table .current-amt { font-size: 1.1rem; font-weight: 700; }
@@ -102,15 +118,13 @@
         .modal-header .btn-icon:hover { background-color: #E0F2F1; color: var(--md-primary); }
         .btn-icon-danger:hover { background-color: #FFEBEE; color: var(--md-error); }
         
-        /* ★ テーブルの横スクロール対応（案A） */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-bottom: 1rem;
-        }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; } /* スマホでも縮まずスクロールさせる */
-        th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem; white-space: nowrap; } /* 改行防止 */
+        /* ★ テーブルの横スクロール対応（改行禁止をここだけに限定） */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem; }
+        .table-responsive table { min-width: 600px; } /* スマホでも縮まずスクロールさせる */
+        .table-responsive th, .table-responsive td { white-space: nowrap; } /* スクロール表のみ改行禁止 */
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem; }
+        th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem; }
         th { color: var(--md-text-secondary); font-weight: 500; font-size: 0.85rem; }
         .text-right { text-align: right; }
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; display: inline-block; white-space: nowrap;}
@@ -140,45 +154,17 @@
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
-        /* ★ ボトムナビゲーションのスタイル */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: var(--md-surface);
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-around;
-            padding: 0.5rem 0;
-            z-index: 1000;
-        }
-        .bottom-nav-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: none;
-            border: none;
-            color: var(--md-text-secondary);
-            font-size: 0.7rem;
-            cursor: pointer;
-            flex: 1;
-            padding: 4px 0;
-        }
-        .bottom-nav-btn .material-icons {
-            font-size: 1.5rem;
-            margin-bottom: 4px;
-        }
-        .bottom-nav-btn.active {
-            color: var(--md-primary);
-            font-weight: 700;
-        }
-
+        /* ★ スマホ用のメディアクエリ（表示切り替え） */
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
             .goal-container { grid-template-columns: 1fr; }
             .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem;}
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+            
+            /* スマホでは上部タブを消して、下部タブを表示 */
+            .tabs { display: none !important; }
+            .bottom-nav { display: flex; }
+            .container { padding-bottom: 90px; } /* 下部タブに被らないように余白追加 */
         }
         @media (max-width: 600px) and (orientation: portrait) {
             .category-add-form input { min-width: 0; }
@@ -194,7 +180,7 @@
 </head>
 <body>
 
-    <div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--md-bg); z-index:9999; display:flex; align-items:center; justify-content:center;">
+    <div id="login-screen" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--md-bg); z-index:9999; display:flex; align-items:center; justify-content:center; box-sizing:border-box;">
         <div class="card" style="width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
             <h2 style="color:var(--md-primary); margin-top:0; display:flex; align-items:center; justify-content:center; gap:8px;">
                 <span class="material-icons" style="font-size:2rem;">lock</span> ログイン
@@ -218,6 +204,13 @@
                 <button class="btn-icon" onclick="copyForSpreadsheet()" title="スプレッドシートにコピー"><span class="material-icons">table_chart</span></button>
             </div>
         </div>
+        
+        <div class="tabs">
+            <button class="tab-btn nav-target-input active" onclick="switchSheet('input')"><span class="material-icons">edit_note</span> 入力シート</button>
+            <button class="tab-btn nav-target-graph" onclick="switchSheet('graph')"><span class="material-icons">insights</span> グラフシート</button>
+            <button class="tab-btn nav-target-assets" onclick="switchSheet('assets')"><span class="material-icons">account_balance</span> 資産シート</button>
+        </div>
+        
         <div class="month-selector">
             <span class="material-icons">calendar_month</span>
             <input type="month" id="month-input">
@@ -471,7 +464,7 @@
                         <p class="dash-main-value" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">¥0</p>
                     </div>
                     <div class="dash-box dash-kanako">
-                        <h3><span class="material-icons">person_3</span> かかなこの資産</h3>
+                        <h3><span class="material-icons">person_3</span> かなこの資産</h3>
                         <p class="dash-main-value" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">¥0</p>
                     </div>
                     <div class="dash-box dash-household">
@@ -517,15 +510,15 @@
     </main>
 
     <nav class="bottom-nav">
-        <button id="tab-input" class="bottom-nav-btn active" onclick="switchSheet('input')">
+        <button class="bottom-nav-btn nav-target-input active" onclick="switchSheet('input')">
             <span class="material-icons">edit_note</span>
             <span>入力シート</span>
         </button>
-        <button id="tab-graph" class="bottom-nav-btn" onclick="switchSheet('graph')">
+        <button class="bottom-nav-btn nav-target-graph" onclick="switchSheet('graph')">
             <span class="material-icons">insights</span>
             <span>グラフシート</span>
         </button>
-        <button id="tab-assets" class="bottom-nav-btn" onclick="switchSheet('assets')">
+        <button class="bottom-nav-btn nav-target-assets" onclick="switchSheet('assets')">
             <span class="material-icons">account_balance</span>
             <span>資産シート</span>
         </button>
@@ -783,14 +776,17 @@
         window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); window.saveData(); } };
         window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); window.saveData(); } };
 
-        // ★ ボトムナビゲーション用のシート切り替え
+        // ★バグ修正：PC用・スマホ用の両方のタブを連動させる
         window.switchSheet = function(sheetId) {
             document.querySelectorAll('.sheet').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.bottom-nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(`sheet-${sheetId}`).classList.add('active');
-            document.getElementById(`tab-${sheetId}`).classList.add('active');
+            // IDではなく、nav-target-xxx クラスを使って対象のタブのアクティブ状態を外す
+            document.querySelectorAll('.tab-btn, .bottom-nav-btn').forEach(el => el.classList.remove('active'));
             
-            // 画面の一番上にスクロールを戻す
+            document.getElementById(`sheet-${sheetId}`).classList.add('active');
+            
+            // クラスを使って、クリックされたシートに対応するボタン（PC・スマホ両方）をアクティブにする
+            document.querySelectorAll(`.nav-target-${sheetId}`).forEach(el => el.classList.add('active'));
+            
             window.scrollTo(0, 0);
 
             if (sheetId === 'graph') {
@@ -1113,7 +1109,6 @@
 
             document.getElementById('fixed-list').innerHTML = '';
             appData.fixedExpenses.forEach(item => {
-                // ★ バグ修正：適用期間の文字数を短くする
                 const startParts = item.startMonth.split('-');
                 const startStr = startParts[0].slice(-2) + '/' + startParts[1];
                 let endStr = '継続中';
