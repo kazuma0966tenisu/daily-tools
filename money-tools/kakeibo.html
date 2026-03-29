@@ -8,8 +8,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ★バグ修正：画面全体の幅を厳格に管理し、横スクロール（はみ出し）を絶対に防ぐ */
-        html { box-sizing: border-box; }
+        html { box-sizing: border-box; scroll-behavior: smooth; }
         *, *::before, *::after { box-sizing: inherit; }
         body { margin: 0; padding: 0; font-family: 'Noto Sans JP', sans-serif; background-color: var(--md-bg); color: var(--md-text); overflow-x: hidden; width: 100%; }
 
@@ -27,22 +26,21 @@
             --kanako-color: #C2185B;
         }
 
-        .app-bar { background-color: var(--md-primary); color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; width: 100%; }
-        .app-bar-left { display: flex; align-items: center; gap: 10px; }
-        .app-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 500; }
-        .month-selector { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
+        .app-bar { background-color: var(--md-primary); color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; width: 100%; z-index: 100;}
+        .app-bar-left { display: flex; align-items: center; gap: 10px; flex-shrink: 1;}
+        .app-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 500; white-space: nowrap;}
+        
+        .month-selector { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;}
         .month-selector input { background: transparent; border: none; color: white; font-size: 1rem; font-weight: 700; outline: none; font-family: inherit; cursor: pointer; }
         .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         
         .container { max-width: 1000px; margin: 0 auto; padding: 1rem 1rem 2rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
         
-        /* ★ PC用のタブスタイル（スマホでは消す） */
         .tabs { display: flex; justify-content: center; gap: 1rem; padding: 0; margin-left: auto; margin-right: 1.5rem; flex-wrap: wrap; }
         .tab-btn { padding: 0.5rem 1.5rem; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
         .tab-btn:hover { background: rgba(255, 255, 255, 0.25); }
         .tab-btn.active { background: white; color: var(--md-primary); border-color: white; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         
-        /* ★ スマホ用のボトムナビゲーション（PCでは消す） */
         .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--md-surface); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); justify-content: space-around; padding: 0.5rem 0; z-index: 1000; padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); }
         .bottom-nav-btn { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: var(--md-text-secondary); font-size: 0.7rem; cursor: pointer; flex: 1; padding: 4px 0; }
         .bottom-nav-btn .material-icons { font-size: 1.5rem; margin-bottom: 4px; }
@@ -54,12 +52,11 @@
         .card { background-color: var(--md-surface); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); padding: 1.5rem; margin-bottom: 1.5rem; }
         .section-title { margin-top: 0; font-size: 1.1rem; color: var(--md-primary); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--md-primary-light); padding-bottom: 0.5rem; margin-bottom: 1rem; }
         
-        /* 目標パネルのデザイン（はみ出し修正済） */
         .goal-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
         .goal-box { padding: 1rem; border-radius: 8px; border: 1px solid var(--md-border); background: #FFFFFF; }
         .goal-box h3 { margin: 0 0 10px 0; font-size: 1.05rem; display: flex; align-items: center; gap: 6px; border-bottom: 2px solid; padding-bottom: 0.5rem; }
         .goal-table { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; font-size: 0.9rem; }
-        .goal-table th, .goal-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #EEEEEE; text-align: left; white-space: normal; word-break: break-all; } /* 修正：ここで改行を許可 */
+        .goal-table th, .goal-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #EEEEEE; text-align: left; white-space: normal; word-break: break-all; }
         .goal-table th { width: 35%; color: var(--md-text-secondary); font-weight: 500; background-color: rgba(0,0,0,0.02); }
         .goal-table td { font-weight: 500; }
         .goal-table .current-amt { font-size: 1.1rem; font-weight: 700; }
@@ -118,10 +115,9 @@
         .modal-header .btn-icon:hover { background-color: #E0F2F1; color: var(--md-primary); }
         .btn-icon-danger:hover { background-color: #FFEBEE; color: var(--md-error); }
         
-        /* ★ テーブルの横スクロール対応（改行禁止をここだけに限定） */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem; }
-        .table-responsive table { min-width: 600px; } /* スマホでも縮まずスクロールさせる */
-        .table-responsive th, .table-responsive td { white-space: nowrap; } /* スクロール表のみ改行禁止 */
+        .table-responsive table { min-width: 600px; } 
+        .table-responsive th, .table-responsive td { white-space: nowrap; } 
         
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem; }
         th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem; }
@@ -154,18 +150,47 @@
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
-        /* ★ スマホ用のメディアクエリ（表示切り替え） */
+        /* ★ 表示切り替え用クラス（PCのみ表示 / スマホのみ表示） */
+        .mobile-only { display: none !important; }
+        
+        /* ★ サイドメニュー（ハンバーガーメニュー内）のデザイン */
+        .side-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: none; opacity: 0; transition: opacity 0.3s; }
+        .side-menu-overlay.open { display: block; opacity: 1; }
+        .side-menu { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--md-surface); z-index: 10001; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .side-menu.open { right: 0; }
+        .side-menu-header { padding: 1rem; border-bottom: 1px solid var(--md-border); display: flex; justify-content: space-between; align-items: center; }
+        .side-menu-header h3 { margin: 0; font-size: 1.1rem; color: var(--md-primary); display: flex; align-items: center; gap: 8px;}
+        .side-menu-content { padding: 1rem; overflow-y: auto; flex: 1; }
+        .side-menu-content h4 { font-size: 0.85rem; color: var(--md-text-secondary); margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 4px; }
+        .jump-list { list-style: none; padding: 0; margin: 0 0 1.5rem 0; }
+        .jump-list li { padding: 0.85rem 0.5rem; border-radius: 4px; display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: background 0.2s; }
+        .jump-list li:active { background: var(--md-bg); }
+        .jump-list li .material-icons { font-size: 1.3rem; color: var(--md-text-secondary); }
+
+        /* スマホ時のデザイン（ヘッダー1行化など） */
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
             .goal-container { grid-template-columns: 1fr; }
-            .app-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem;}
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
             
-            /* スマホでは上部タブを消して、下部タブを表示 */
+            /* ヘッダーの1行化調整 */
+            .app-bar { padding: 0.5rem 1rem; flex-direction: row; flex-wrap: nowrap; justify-content: space-between; gap: 4px; }
+            .app-bar-left { gap: 4px; min-width: 0; }
+            .app-bar h1 { font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; }
+            
+            .desktop-only { display: none !important; } /* スマホでは隠す要素 */
+            .mobile-only { display: flex !important; }  /* スマホでのみ表示する要素 */
+            
+            /* 年月選択をコンパクトに */
+            .month-selector { padding: 4px 8px; gap: 2px; }
+            .month-selector input { font-size: 0.95rem; max-width: 110px; }
+            
+            /* タブ切り替え */
             .tabs { display: none !important; }
             .bottom-nav { display: flex; }
-            .container { padding-bottom: 90px; } /* 下部タブに被らないように余白追加 */
+            .container { padding-bottom: 90px; }
         }
+        
         @media (max-width: 600px) and (orientation: portrait) {
             .category-add-form input { min-width: 0; }
             .category-add-form button { padding: 0.5rem 1rem !important; flex-shrink: 0; }
@@ -195,17 +220,42 @@
         </div>
     </div>
 
+    <div id="side-menu-overlay" class="side-menu-overlay" onclick="toggleMenu()"></div>
+    <div id="side-menu" class="side-menu">
+        <div class="side-menu-header">
+            <h3><span class="material-icons">menu</span> メニュー</h3>
+            <button class="btn-icon" onclick="toggleMenu()"><span class="material-icons">close</span></button>
+        </div>
+        <div class="side-menu-content">
+            <h4><span class="material-icons">shortcut</span> 入力シートへジャンプ</h4>
+            <ul class="jump-list">
+                <li onclick="jumpTo('section-goals')"><span class="material-icons">flag</span> 目標達成状況</li>
+                <li onclick="jumpTo('section-dashboard')"><span class="material-icons">analytics</span> ダッシュボード</li>
+                <li onclick="jumpTo('section-income')"><span class="material-icons">account_balance_wallet</span> 収入設定</li>
+                <li onclick="jumpTo('section-fixed')"><span class="material-icons">event_repeat</span> 固定費の設定</li>
+                <li onclick="jumpTo('section-variable')"><span class="material-icons">shopping_cart</span> 変動費の入力</li>
+            </ul>
+            <hr style="border: none; border-top: 1px dashed var(--md-border); margin: 1.5rem 0;">
+            <h4><span class="material-icons">build</span> 操作・出力</h4>
+            <ul class="jump-list">
+                <li onclick="exportCSV(); toggleMenu();"><span class="material-icons">download</span> CSVダウンロード</li>
+                <li onclick="copyForSpreadsheet(); toggleMenu();"><span class="material-icons">table_chart</span> スプレッドシートへ出力</li>
+                <li onclick="logoutAccount()" style="color: var(--md-error);"><span class="material-icons" style="color: var(--md-error);">logout</span> ログアウト</li>
+            </ul>
+        </div>
+    </div>
+
     <header class="app-bar">
         <div class="app-bar-left">
             <span class="material-icons">favorite</span>
             <h1>ふたりの家計簿</h1>
-            <div style="margin-left: 1rem; display: flex; gap: 0.2rem;">
+            <div class="desktop-only" style="margin-left: 1rem; display: flex; gap: 0.2rem;">
                 <button class="btn-icon" onclick="exportCSV()" title="CSVでダウンロード"><span class="material-icons">download</span></button>
                 <button class="btn-icon" onclick="copyForSpreadsheet()" title="スプレッドシートにコピー"><span class="material-icons">table_chart</span></button>
             </div>
         </div>
         
-        <div class="tabs">
+        <div class="tabs desktop-only">
             <button class="tab-btn nav-target-input active" onclick="switchSheet('input')"><span class="material-icons">edit_note</span> 入力シート</button>
             <button class="tab-btn nav-target-graph" onclick="switchSheet('graph')"><span class="material-icons">insights</span> グラフシート</button>
             <button class="tab-btn nav-target-assets" onclick="switchSheet('assets')"><span class="material-icons">account_balance</span> 資産シート</button>
@@ -214,14 +264,15 @@
         <div class="month-selector">
             <span class="material-icons">calendar_month</span>
             <input type="month" id="month-input">
-            <button class="btn-icon" onclick="logoutAccount()" title="ログアウト" style="margin-left: 8px;"><span class="material-icons">logout</span></button>
+            <button class="btn-icon desktop-only" onclick="logoutAccount()" title="ログアウト" style="margin-left: 8px;"><span class="material-icons">logout</span></button>
+            <button class="btn-icon mobile-only" onclick="toggleMenu()" title="メニュー" style="margin-left: 4px;"><span class="material-icons" style="color: white; opacity: 1;">menu</span></button>
         </div>
     </header>
 
     <main class="container">
         <div id="sheet-input" class="sheet active">
             
-            <section class="card" style="padding-bottom: 1rem;">
+            <section id="section-goals" class="card" style="padding-bottom: 1rem;">
                 <div class="action-bar" style="margin-bottom: 1rem;">
                     <h2 class="section-title" style="border:none; margin:0; padding:0;"><span class="material-icons">flag</span> 目標達成状況</h2>
                     <button type="button" class="btn btn-outline" style="padding: 4px 12px;" onclick="openGoalModal()">
@@ -268,7 +319,7 @@
                 </div>
             </section>
 
-            <section class="card">
+            <section id="section-dashboard" class="card">
                 <div class="action-bar">
                     <h2 class="section-title" style="margin: 0; border: none; padding: 0;"><span class="material-icons">analytics</span> <span id="display-month"></span> のダッシュボード</h2>
                     <button type="button" class="btn btn-outline" onclick="openBudgetModal()"><span class="material-icons">account_balance</span> 予算設定</button>
@@ -302,7 +353,7 @@
                 </div>
             </section>
 
-            <section class="card">
+            <section id="section-income" class="card">
                 <div class="action-bar">
                     <h2 class="section-title" style="margin: 0; border: none; padding: 0;"><span class="material-icons">account_balance_wallet</span> 今月の収入設定</h2>
                     <button type="button" class="btn btn-outline" onclick="openCategoryModal('income')"><span class="material-icons">settings</span> 項目リストの編集</button>
@@ -337,7 +388,7 @@
                 </div>
             </section>
 
-            <section class="card">
+            <section id="section-fixed" class="card">
                 <div class="action-bar">
                     <h2 class="section-title"><span class="material-icons">event_repeat</span> 固定費（毎月自動適用）</h2>
                     <button type="button" class="btn btn-outline" onclick="openCategoryModal('fixed')"><span class="material-icons">settings</span> 項目リストの編集</button>
@@ -375,7 +426,7 @@
                 </div>
             </section>
 
-            <section class="card">
+            <section id="section-variable" class="card">
                 <div class="action-bar">
                     <h2 class="section-title"><span class="material-icons">shopping_cart</span> 変動費（今月分）</h2>
                     <button type="button" class="btn btn-outline" onclick="openCategoryModal('variable')"><span class="material-icons">settings</span> 項目リストの編集</button>
@@ -739,6 +790,32 @@
             }
         }
 
+        // ★ メニューの開閉処理
+        window.toggleMenu = function() {
+            const menu = document.getElementById('side-menu');
+            const overlay = document.getElementById('side-menu-overlay');
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                overlay.classList.remove('open');
+                setTimeout(() => { overlay.style.display = 'none'; }, 300);
+            } else {
+                overlay.style.display = 'block';
+                setTimeout(() => { overlay.classList.add('open'); menu.classList.add('open'); }, 10);
+            }
+        };
+
+        // ★ 指定セクションへのジャンプ処理
+        window.jumpTo = function(sectionId) {
+            toggleMenu(); // メニューを閉じる
+            switchSheet('input'); // 確実に「入力シート」に切り替える
+            setTimeout(() => {
+                const targetEl = document.getElementById(sectionId);
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100); // 画面切り替えのラグを考慮
+        };
+
         window.toggleSort = function(key) {
             if (currentSortKey === key) {
                 currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
@@ -776,15 +853,11 @@
         window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); window.saveData(); } };
         window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); window.saveData(); } };
 
-        // ★バグ修正：PC用・スマホ用の両方のタブを連動させる
         window.switchSheet = function(sheetId) {
             document.querySelectorAll('.sheet').forEach(el => el.classList.remove('active'));
-            // IDではなく、nav-target-xxx クラスを使って対象のタブのアクティブ状態を外す
             document.querySelectorAll('.tab-btn, .bottom-nav-btn').forEach(el => el.classList.remove('active'));
             
             document.getElementById(`sheet-${sheetId}`).classList.add('active');
-            
-            // クラスを使って、クリックされたシートに対応するボタン（PC・スマホ両方）をアクティブにする
             document.querySelectorAll(`.nav-target-${sheetId}`).forEach(el => el.classList.add('active'));
             
             window.scrollTo(0, 0);
@@ -797,7 +870,12 @@
         };
 
         window.closeModal = function(modalId) { document.getElementById(modalId).classList.remove('show'); };
-        window.onclick = function(event) { if (event.target.classList.contains('modal')) window.closeModal(event.target.id); };
+        
+        // オーバーレイのクリック判定を追加（メニューの背景クリック用）
+        window.onclick = function(event) { 
+            if (event.target.classList.contains('modal')) window.closeModal(event.target.id); 
+            if (event.target.classList.contains('side-menu-overlay')) window.toggleMenu();
+        };
 
         window.openMemoModal = function(id) {
             let targetMemo = '';
@@ -1233,7 +1311,6 @@
                 window.saveData(); 
             });
 
-            window.onclick = function(event) { if (event.target.classList.contains('modal')) window.closeModal(event.target.id); };
         }
         window.onload = init;
     </script>
