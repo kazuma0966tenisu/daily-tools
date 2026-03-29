@@ -30,10 +30,22 @@
         .app-bar-left { display: flex; align-items: center; gap: 10px; flex-shrink: 1;}
         .app-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 500; white-space: nowrap;}
         
-        .month-selector { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;}
+        /* ★ 右側の要素をまとめるコンテナを追加 */
+        .app-bar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        /* ★ 月選択カプセル（他のボタンを追い出し独立させました） */
+        .month-selector { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
         .month-selector input { background: transparent; border: none; color: white; font-size: 1rem; font-weight: 700; outline: none; font-family: inherit; cursor: pointer; }
         .month-selector input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         
+        /* ★ アニメーションするハンバーガーメニューのスタイル */
+        .hamburger-btn { width: 28px; height: 20px; position: relative; background: transparent; border: none; cursor: pointer; padding: 0; margin-left: 8px; display: flex; flex-direction: column; justify-content: space-between; }
+        .hamburger-btn span { width: 100%; height: 3px; background-color: white; border-radius: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center; }
+        /* 開いた時（×になる）のアニメーション */
+        .hamburger-btn.open span:nth-child(1) { transform: translateY(8.5px) rotate(45deg); }
+        .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+        .hamburger-btn.open span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
+
         .container { max-width: 1000px; margin: 0 auto; padding: 1rem 1rem 2rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
         
         .tabs { display: flex; justify-content: center; gap: 1rem; padding: 0; margin-left: auto; margin-right: 1.5rem; flex-wrap: wrap; }
@@ -150,10 +162,8 @@
         canvas { width: 100%; }
         .graph-title { font-size: 1.1rem; border-bottom: 2px solid; padding-bottom: 5px; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;}
 
-        /* ★ 表示切り替え用クラス（PCのみ表示 / スマホのみ表示） */
         .mobile-only { display: none !important; }
         
-        /* ★ サイドメニュー（ハンバーガーメニュー内）のデザイン */
         .side-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: none; opacity: 0; transition: opacity 0.3s; }
         .side-menu-overlay.open { display: block; opacity: 1; }
         .side-menu { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--md-surface); z-index: 10001; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
@@ -167,25 +177,21 @@
         .jump-list li:active { background: var(--md-bg); }
         .jump-list li .material-icons { font-size: 1.3rem; color: var(--md-text-secondary); }
 
-        /* スマホ時のデザイン（ヘッダー1行化など） */
         @media (max-width: 768px) {
             .dash-container { grid-template-columns: 1fr; }
             .goal-container { grid-template-columns: 1fr; }
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
             
-            /* ヘッダーの1行化調整 */
             .app-bar { padding: 0.5rem 1rem; flex-direction: row; flex-wrap: nowrap; justify-content: space-between; gap: 4px; }
             .app-bar-left { gap: 4px; min-width: 0; }
             .app-bar h1 { font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; }
             
-            .desktop-only { display: none !important; } /* スマホでは隠す要素 */
-            .mobile-only { display: flex !important; }  /* スマホでのみ表示する要素 */
+            .desktop-only { display: none !important; } 
+            .mobile-only { display: flex !important; }  
             
-            /* 年月選択をコンパクトに */
             .month-selector { padding: 4px 8px; gap: 2px; }
             .month-selector input { font-size: 0.95rem; max-width: 110px; }
             
-            /* タブ切り替え */
             .tabs { display: none !important; }
             .bottom-nav { display: flex; }
             .container { padding-bottom: 90px; }
@@ -261,11 +267,19 @@
             <button class="tab-btn nav-target-assets" onclick="switchSheet('assets')"><span class="material-icons">account_balance</span> 資産シート</button>
         </div>
         
-        <div class="month-selector">
-            <span class="material-icons">calendar_month</span>
-            <input type="month" id="month-input">
-            <button class="btn-icon desktop-only" onclick="logoutAccount()" title="ログアウト" style="margin-left: 8px;"><span class="material-icons">logout</span></button>
-            <button class="btn-icon mobile-only" onclick="toggleMenu()" title="メニュー" style="margin-left: 4px;"><span class="material-icons" style="color: white; opacity: 1;">menu</span></button>
+        <div class="app-bar-right">
+            <div class="month-selector">
+                <span class="material-icons">calendar_month</span>
+                <input type="month" id="month-input">
+            </div>
+            
+            <button class="btn-icon desktop-only" onclick="logoutAccount()" title="ログアウト" style="margin-left: 8px; color: white;"><span class="material-icons">logout</span></button>
+            
+            <button id="hamburger-menu" class="hamburger-btn mobile-only" onclick="toggleMenu()" title="メニュー">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </header>
 
@@ -790,30 +804,36 @@
             }
         }
 
-        // ★ メニューの開閉処理
+        // ★ メニューの開閉処理（アイコンのアニメーションも連動）
         window.toggleMenu = function() {
             const menu = document.getElementById('side-menu');
             const overlay = document.getElementById('side-menu-overlay');
+            const hamburger = document.getElementById('hamburger-menu');
+            
             if (menu.classList.contains('open')) {
                 menu.classList.remove('open');
                 overlay.classList.remove('open');
+                hamburger.classList.remove('open');
                 setTimeout(() => { overlay.style.display = 'none'; }, 300);
             } else {
                 overlay.style.display = 'block';
-                setTimeout(() => { overlay.classList.add('open'); menu.classList.add('open'); }, 10);
+                setTimeout(() => { 
+                    overlay.classList.add('open'); 
+                    menu.classList.add('open'); 
+                    hamburger.classList.add('open');
+                }, 10);
             }
         };
 
-        // ★ 指定セクションへのジャンプ処理
         window.jumpTo = function(sectionId) {
-            toggleMenu(); // メニューを閉じる
-            switchSheet('input'); // 確実に「入力シート」に切り替える
+            toggleMenu(); 
+            switchSheet('input'); 
             setTimeout(() => {
                 const targetEl = document.getElementById(sectionId);
                 if (targetEl) {
                     targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-            }, 100); // 画面切り替えのラグを考慮
+            }, 100); 
         };
 
         window.toggleSort = function(key) {
@@ -871,7 +891,6 @@
 
         window.closeModal = function(modalId) { document.getElementById(modalId).classList.remove('show'); };
         
-        // オーバーレイのクリック判定を追加（メニューの背景クリック用）
         window.onclick = function(event) { 
             if (event.target.classList.contains('modal')) window.closeModal(event.target.id); 
             if (event.target.classList.contains('side-menu-overlay')) window.toggleMenu();
