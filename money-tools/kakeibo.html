@@ -26,26 +26,22 @@
             --kanako-color: #C2185B;
         }
 
-        /* ★ ヘッダーの固定（追従）とレイアウト */
         .app-bar { position: sticky; top: 0; background-color: var(--md-primary); color: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; width: 100%; z-index: 10002; }
         .app-bar-left { display: flex; align-items: center; gap: 8px; flex-shrink: 1; }
         .app-bar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; white-space: nowrap; }
         .app-bar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 
-        /* ★ 新・月選択カプセル（コンパクト化） */
         .month-selector { position: relative; background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; overflow: hidden; transition: background 0.2s; }
         .month-selector:active { background: rgba(255,255,255,0.3); }
         .month-selector-text { color: white; font-size: 1rem; font-weight: 700; pointer-events: none; }
         .month-selector input[type="month"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         
-        /* ★ クルッと回るハンバーガーメニュー */
         .hamburger-btn { position: relative; width: 24px; height: 18px; background: transparent; border: none; cursor: pointer; padding: 0; display: block; z-index: 10003; }
         .hamburger-btn span { position: absolute; left: 0; width: 100%; height: 2px; background-color: white; border-radius: 2px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; }
         .hamburger-btn span:nth-child(1) { top: 0; }
         .hamburger-btn span:nth-child(2) { top: 8px; }
         .hamburger-btn span:nth-child(3) { bottom: 0; }
         
-        /* メニューが開いた時（×になる） */
         .hamburger-btn.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
         .hamburger-btn.open span:nth-child(2) { opacity: 0; }
         .hamburger-btn.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
@@ -131,11 +127,16 @@
         .modal-header .btn-icon:hover { background-color: #E0F2F1; color: var(--md-primary); }
         .btn-icon-danger:hover { background-color: #FFEBEE; color: var(--md-error); }
         
+        /* ★ 今回の修正：表のレスポンシブ管理を最適化 */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem; }
-        .table-responsive table { min-width: 600px; } 
+        /* 項目が多い表（固定費・変動費）のみ最低幅を確保してスクロールさせる */
+        .table-responsive.wide-table table { min-width: 600px; } 
+        /* 項目が少ない表（収入）は100%幅に収めてスクロールさせない */
+        .table-responsive table { min-width: 100%; width: 100%; } 
+        
         .table-responsive th, .table-responsive td { white-space: nowrap; } 
         
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem; }
+        table { border-collapse: collapse; margin-top: 1rem; margin-bottom: 1rem; }
         th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--md-border); text-align: left; font-size: 0.9rem; }
         th { color: var(--md-text-secondary); font-weight: 500; font-size: 0.85rem; }
         .text-right { text-align: right; }
@@ -168,10 +169,9 @@
 
         .mobile-only { display: none !important; }
         
-        /* ★ サイドメニュー（メニューが開いた時、ヘッダーの下に潜り込むように配置） */
         .side-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: none; opacity: 0; transition: opacity 0.3s; }
         .side-menu-overlay.open { display: block; opacity: 1; }
-        .side-menu { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--md-surface); z-index: 10001; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; padding-top: 60px; /* ヘッダー分空ける */ }
+        .side-menu { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--md-surface); z-index: 10001; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; padding-top: 60px; }
         .side-menu.open { right: 0; }
         .side-menu-content { padding: 1rem; overflow-y: auto; flex: 1; }
         .side-menu-content h4 { font-size: 0.85rem; color: var(--md-text-secondary); margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 4px; }
@@ -185,7 +185,6 @@
             .goal-container { grid-template-columns: 1fr; }
             .action-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
             
-            /* スマホ用ヘッダー微調整 */
             .app-bar { padding: 0.6rem 1rem; }
             .app-bar h1 { font-size: 1.05rem; }
             
@@ -431,7 +430,7 @@
                     </div>
                 </form>
                 
-                <div class="table-responsive">
+                <div class="table-responsive wide-table">
                     <table>
                         <thead><tr><th>項目</th><th>負担者</th><th>適用期間</th><th class="text-right">金額</th><th class="text-right">削除</th></tr></thead>
                         <tbody id="fixed-list"></tbody>
@@ -467,7 +466,7 @@
                     <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">add</span> 追加</button></div>
                 </form>
                 
-                <div class="table-responsive">
+                <div class="table-responsive wide-table">
                     <table>
                         <thead>
                             <tr>
@@ -559,7 +558,7 @@
                     <div class="form-group" style="justify-content: flex-end; flex: 0 0 auto;"><button type="submit" class="btn"><span class="material-icons">save</span> 記録する</button></div>
                 </form>
 
-                <div class="table-responsive">
+                <div class="table-responsive wide-table">
                     <table>
                         <thead>
                             <tr><th>更新日</th><th>口座・資産名</th><th>名義</th><th class="text-right">残高(評価額)</th><th class="text-right">削除</th></tr>
@@ -829,7 +828,9 @@
             setTimeout(() => {
                 const targetEl = document.getElementById(sectionId);
                 if (targetEl) {
-                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const offset = 80;
+                    const elementPosition = targetEl.getBoundingClientRect().top + window.pageYOffset;
+                    window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
                 }
             }, 100); 
         };
@@ -867,7 +868,6 @@
             return { firstDay, lastDayStr };
         }
         
-        // ★ ヘッダーの文字をコンパクトに（例： 26/03）書き換える関数
         function updateHeaderMonth() {
             if (!currentMonthStr) return;
             const [y, m] = currentMonthStr.split('-');
@@ -875,7 +875,12 @@
             document.getElementById('header-month-text').textContent = shortStr;
         }
 
-        window.deleteIncome = function(person, id) { getCurrentMonthData().incomes[person] = getCurrentMonthData().incomes[person].filter(i => i.id !== id); window.saveData(); };
+        window.deleteIncome = function(person, id) { 
+            if(confirm('この収入を削除しますか？')) {
+                getCurrentMonthData().incomes[person] = getCurrentMonthData().incomes[person].filter(i => i.id !== id); 
+                window.saveData(); 
+            }
+        };
         window.deleteFixed = function(id) { if(confirm('固定費を削除しますか？')) { appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id); window.saveData(); } };
         window.deleteVariable = function(id) { if(confirm('出費を削除しますか？')) { getCurrentMonthData().variableExpenses = getCurrentMonthData().variableExpenses.filter(i => i.id !== id); window.saveData(); } };
 
@@ -1126,7 +1131,6 @@
             if(!appData) return;
             const md = getCurrentMonthData(); 
             
-            // ★月の表示を更新（ヘッダー用とダッシュボード用）
             updateHeaderMonth();
             const [y, m] = currentMonthStr.split('-'); displayMonth.textContent = `${y}年${Number(m)}月`;
 
